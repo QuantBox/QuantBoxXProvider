@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5FEB5600-7C98-4A76-A885-C21E6A99223E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>QuantBox</RootNamespace>
+    <AssemblyName>QuantBox.OQ</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>c:\Program Files\SmartQuant Ltd\OpenQuant 2014\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>c:\Program Files\SmartQuant Ltd\OpenQuant 2014\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.4.12\lib\net45\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="SmartQuant, Version=1.2.0.1, Culture=neutral, PublicKeyToken=023ca4f8a69375d5, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\SmartQuant.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AccountPosition.cs" />
+    <Compile Include="EventPipe.cs" />
+    <Compile Include="ConnectionInfo.cs" />
+    <Compile Include="Design\ApiSettingsConverter.cs" />
+    <Compile Include="Design\ApiTypeSelectorEditor.cs" />
+    <Compile Include="Design\ComboBoxItemTypeConverter.cs" />
+    <Compile Include="Design\DisplayNamePropertyDescriptor.cs" />
+    <Compile Include="Design\InstrumentProviderConverter.cs" />
+    <Compile Include="Design\ProviderTypeConverter.cs" />
+    <Compile Include="Design\ServerInfoConverter.cs" />
+    <Compile Include="Design\ServerSelectorConverter.cs" />
+    <Compile Include="Design\UserInfoConverter.cs" />
+    <Compile Include="Design\UserSelectorConverter.cs" />
+    <Compile Include="Design\XApiSettingsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Design\XApiSettingsDialog.Designer.cs">
+      <DependentUpon>XApiSettingsDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Design\XApiSettingsTypeEditor.cs" />
+    <Compile Include="QBHelper.cs" />
+    <Compile Include="MarketDataClient.cs" />
+    <Compile Include="NoTypeConverterJsonConverter.cs" />
+    <Compile Include="OnAutoReconnect.cs" />
+    <Compile Include="OnClientConnected.cs" />
+    <Compile Include="OnClientDisconnected.cs" />
+    <Compile Include="OrderExtensions.cs" />
+    <Compile Include="OrderMap.cs" />
+    <Compile Include="OrderRecord.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QuoteExtensions.cs" />
+    <Compile Include="QuantBoxConst.cs" />
+    <Compile Include="QuantBoxOrderInfo.cs" />
+    <Compile Include="ServerInfo.cs" />
+    <Compile Include="TraderClient.cs" />
+    <Compile Include="UserInfo.cs" />
+    <Compile Include="XApiClient.cs" />
+    <Compile Include="XApiEventType.cs" />
+    <Compile Include="XProvider.ConnectManager.cs" />
+    <Compile Include="XProvider.Convertor.cs" />
+    <Compile Include="XProvider.cs" />
+    <Compile Include="XProvider.EventEmitter.cs" />
+    <Compile Include="XProvider.TradingProcessor.cs" />
+    <Compile Include="XProvider.TimedTask.cs" />
+    <Compile Include="XProviderSettings.cs" />
+    <Compile Include="XEventType.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\XApiSharp\XApiSharp.csproj">
+      <Project>{ba6da3bd-c80f-49f5-953f-34e12967d166}</Project>
+      <Name>XApiSharp</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Design\XApiSettingsDialog.resx">
+      <DependentUpon>XApiSettingsDialog.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BA6DA3BD-C80F-49F5-953F-34E12967D166}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>QuantBox.XApi</RootNamespace>
+    <AssemblyName>QuantBox.XApiSharp</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AccountField.cs" />
+    <Compile Include="ApiType.cs" />
+    <Compile Include="BarType.cs" />
+    <Compile Include="BusinessType.cs" />
+    <Compile Include="ConnectionStatus.cs" />
+    <Compile Include="ErrorField.cs" />
+    <Compile Include="IXApi.cs" />
+    <Compile Include="IXSpi.cs" />
+    <Compile Include="LogField.cs" />
+    <Compile Include="ManagedManager.cs" />
+    <Compile Include="Nactive\UnmanagedOrders.cs" />
+    <Compile Include="InternalSettlementInfoField.cs" />
+    <Compile Include="Nactive\PInvokeUtility.cs" />
+    <Compile Include="Nactive\ResponseData.cs" />
+    <Compile Include="Nactive\SubscribedList.cs" />
+    <Compile Include="Nactive\UnmanagedPtr.cs" />
+    <Compile Include="DataObjetType.cs" />
+    <Compile Include="DepthField.cs" />
+    <Compile Include="DepthLevelType.cs" />
+    <Compile Include="InternalErrorField.cs" />
+    <Compile Include="ExchangeType.cs" />
+    <Compile Include="ExecType.cs" />
+    <Compile Include="HedgeFlagType.cs" />
+    <Compile Include="XApiHelper.cs" />
+    <Compile Include="IdCardType.cs" />
+    <Compile Include="InstLifePhaseType.cs" />
+    <Compile Include="InstrumentField.cs" />
+    <Compile Include="InstrumentType.cs" />
+    <Compile Include="InternalDepthMarketDataField.cs" />
+    <Compile Include="InvestorField.cs" />
+    <Compile Include="InternalLogField.cs" />
+    <Compile Include="LogLevel.cs" />
+    <Compile Include="Nactive\XApi.cs" />
+    <Compile Include="OpenCloseType.cs" />
+    <Compile Include="OptimizedEnum.cs" />
+    <Compile Include="OrderField.cs" />
+    <Compile Include="OrderIDType.cs" />
+    <Compile Include="OrderSide.cs" />
+    <Compile Include="OrderStatus.cs" />
+    <Compile Include="OrderType.cs" />
+    <Compile Include="PositionField.cs" />
+    <Compile Include="PositionSide.cs" />
+    <Compile Include="PutCall.cs" />
+    <Compile Include="QueryType.cs" />
+    <Compile Include="ReqQueryField.cs" />
+    <Compile Include="RequestType.cs" />
+    <Compile Include="ResponseType.cs" />
+    <Compile Include="ResumeType.cs" />
+    <Compile Include="RspUserLoginField.cs" />
+    <Compile Include="ServerInfoField.cs" />
+    <Compile Include="SettlementInfoField.cs" />
+    <Compile Include="TimeInForce.cs" />
+    <Compile Include="TradeField.cs" />
+    <Compile Include="TradingPhaseType.cs" />
+    <Compile Include="Nactive\UnixInvoke.cs" />
+    <Compile Include="Nactive\XApiInvoke.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Nactive\WindowsInvoke.cs" />
+    <Compile Include="Nactive\XApiInvokeProxy.cs" />
+    <Compile Include="UserInfoField.cs" />
+    <Compile Include="DepthMarketDataField.cs" />
+    <Compile Include="XTradingApi.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
