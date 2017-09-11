@@ -21,6 +21,9 @@ namespace QuantBox
                         ConnectClient();
                         break;
                     case EventType.OnDisconnect:
+                        if (_provider.Status != ProviderStatus.Connected) {
+                            return;
+                        }
                         _provider.Status = ProviderStatus.Disconnecting;
                         _manualDisconnecting = true;
                         DisconnectClient();
