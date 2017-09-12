@@ -151,6 +151,7 @@ namespace QuantBox
             {
                 _exit = true;
                 _thread?.Join();
+                _thread = null;
             }
         }
     }
