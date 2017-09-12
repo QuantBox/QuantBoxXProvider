@@ -38,14 +38,19 @@ namespace QuantBox
 
         private void SendInstrumentDefinition(InstrumentDefinitionRequest request, Instrument[] insts)
         {
-            var data = QBHelper.FilterInstrument(request, insts);
-            var definition = new InstrumentDefinition();
-            definition.Instruments = data;
-            definition.ProviderId = Id;
-            definition.RequestId = request.Id;
-            definition.TotalNum = data.Length;
-            EmitInstrumentDefinition(definition);
-            EmitInstrumentDefinitionEnd(request.Id, RequestResult.Completed, string.Empty);
+            try {
+                var data = QBHelper.FilterInstrument(request, insts);
+                var definition = new InstrumentDefinition();
+                definition.Instruments = data;
+                definition.ProviderId = Id;
+                definition.RequestId = request.Id;
+                definition.TotalNum = data.Length;
+                EmitInstrumentDefinition(definition);
+                EmitInstrumentDefinitionEnd(request.Id, RequestResult.Completed, string.Empty);
+            }
+            catch (Exception ex) {
+                CancelInstrumentRequest(request, ex.Message);
+            }
         }
 
         private void InitQuery()
