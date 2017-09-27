@@ -96,21 +96,33 @@ namespace QuantBox.XApi
 
         internal static string Text(this InternalErrorField field)
         {
+            if (field == null) {
+                return string.Empty;
+            }
             return PInvokeUtility.ReadString(field.Text);
         }
 
         internal static string Text(this InternalLogField field)
         {
+            if (field == null) {
+                return string.Empty;
+            }
             return PInvokeUtility.ReadString(field.Message);
         }
 
         public static string Text(this RspUserLoginField field)
         {
+            if (field == null) {
+                return string.Empty;
+            }
             return PInvokeUtility.ReadString(field.Text);
         }
 
         public static string Text(this OrderField field)
         {
+            if (field == null) {
+                return string.Empty;
+            }
             return PInvokeUtility.ReadString(field.Text);
         }
 
@@ -121,21 +133,33 @@ namespace QuantBox.XApi
 
         public static string Name(this RspUserLoginField field)
         {
+            if (field == null) {
+                return string.Empty;
+            }
             return PInvokeUtility.ReadString(field.InvestorName);
         }
 
         public static string Name(this InstrumentField field)
         {
+            if (field == null) {
+                return string.Empty;
+            }
             return PInvokeUtility.ReadString(field.InstrumentName);
         }
 
         public static string Name(this PositionField field)
         {
+            if (field == null) {
+                return string.Empty;
+            }
             return PInvokeUtility.ReadString(field.InstrumentName);
         }
 
         public static string Name(this InvestorField field)
         {
+            if (field == null) {
+                return string.Empty;
+            }
             return PInvokeUtility.ReadString(field.InvestorName);
         }
 
@@ -145,6 +169,23 @@ namespace QuantBox.XApi
 
         public static DateTime TradingDay(this RspUserLoginField field)
         {
+            if (field == null || field.TradingDay == 0) {
+                return DateTime.MaxValue;
+            }
+            if (field.TradingDay > 0) {
+                var year = field.TradingDay / 10000;
+                var month = field.TradingDay % 10000 / 100;
+                var day = field.TradingDay % 100;
+                return new DateTime(year, month, day);
+            }
+            return DateTime.Today;
+        }
+
+        public static DateTime TradingDay(this DepthMarketDataField field)
+        {
+            if (field == null || field.TradingDay == 0) {
+                return DateTime.MaxValue;
+            }
             if (field.TradingDay > 0) {
                 var year = field.TradingDay / 10000;
                 var month = field.TradingDay % 10000 / 100;
@@ -156,6 +197,9 @@ namespace QuantBox.XApi
 
         public static DateTime ExchangeDateTime(this DepthMarketDataField field)
         {
+            if (field == null || field.UpdateTime <= 0) {
+                return DateTime.MaxValue;
+            }
             var hh = field.UpdateTime / 10000;
             var mm = field.UpdateTime % 10000 / 100;
             var ss = field.UpdateTime % 100;
@@ -168,6 +212,9 @@ namespace QuantBox.XApi
 
         public static DateTime UpdateTime(this TradeField field)
         {
+            if (field == null || field.Time == 0) {
+                return DateTime.MaxValue;
+            }
             var hh = field.Time / 10000;
             var mm = field.Time % 10000 / 100;
             var ss = field.Time % 100;
@@ -182,6 +229,9 @@ namespace QuantBox.XApi
 
         public static DateTime UpdateTime(this OrderField field)
         {
+            if (field == null || field.Time == 0) {
+                return DateTime.MaxValue;
+            }
             var hh = field.Time / 10000;
             var mm = field.Time % 10000 / 100;
             var ss = field.Time % 100;
@@ -194,7 +244,7 @@ namespace QuantBox.XApi
 
         public static DateTime ExpireDate(this InstrumentField field)
         {
-            if (field.ExpireDate > 0) {
+            if (field != null && field.ExpireDate > 0) {
                 var year = field.ExpireDate / 10000;
                 var month = field.ExpireDate % 10000 / 100;
                 var day = field.ExpireDate % 100;
@@ -209,31 +259,49 @@ namespace QuantBox.XApi
 
         public static string RawErrorMsg(this RspUserLoginField field)
         {
+            if (field == null) {
+                return string.Empty;
+            }
             return $"[XErrorID={field.XErrorID},RawErrorID={field.RawErrorID},Message={field.Text()}]";
         }
 
         public static string DebugInfo(this OrderField field)
         {
+            if (field == null) {
+                return string.Empty;
+            }
             return $"[InstrumentID={field.InstrumentID};ExchangeID={field.ExchangeID};Side={field.Side};Qty={field.Qty};LeavesQty={field.LeavesQty};Price={field.Price};OpenClose={field.OpenClose};HedgeFlag={field.HedgeFlag};LocalID={field.LocalID};ID={field.ID};OrderID={field.OrderID};Date={field.Date};Time={field.Time};Type={field.Type};TimeInForce={field.TimeInForce};Status={field.Status};ExecType={field.ExecType};XErrorID={field.XErrorID};RawErrorID={field.RawErrorID};Text={field.Text()}]";
         }
 
         public static string DebugInfo(this TradeField field)
         {
+            if (field == null) {
+                return string.Empty;
+            }
             return $"[InstrumentID={field.InstrumentID};ExchangeID={field.ExchangeID};Side={field.Side};Qty={field.Qty};Price={field.Price};OpenClose={field.OpenClose};HedgeFlag={field.HedgeFlag};ID={field.ID};TradeID={field.TradeID};Date={field.Date};Time={field.Time};Commission={field.Commission}]";
         }
 
         public static string DebugInfo(this RspUserLoginField field)
         {
+            if (field == null) {
+                return string.Empty;
+            }
             return $"[TradingDay={field.TradingDay},LoginTime={field.LoginTime},InvestorName={field.Name()},XErrorID={field.XErrorID},Message={field.Text()}]";
         }
 
         public static string DebugInfo(this AccountField field)
         {
+            if (field == null) {
+                return string.Empty;
+            }
             return $"[AccountID={field.AccountID};CurrencyID={field.CurrencyID};Balance={field.Balance};Available={field.Available}]";
         }
 
         public static string DebugInfo(this PositionField field)
         {
+            if (field == null) {
+                return string.Empty;
+            }
             return $"[{field.InstrumentID};{field.ExchangeID};{Enum<HedgeFlagType>.ToString(field.HedgeFlag)};{Enum<PositionSide>.ToString(field.Side)};Position={field.Position};TodayPosition={field.TodayPosition};HistoryPosition={field.HistoryPosition};ID={field.ID}]";
         }
 
@@ -241,6 +309,9 @@ namespace QuantBox.XApi
 
         public static bool OrderIsDone(this OrderField filed)
         {
+            if (filed == null) {
+                return false;
+            }
             switch (filed.Status) {
                 case OrderStatus.Cancelled:
                 case OrderStatus.Expired:

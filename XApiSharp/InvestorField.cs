@@ -3,7 +3,7 @@
 namespace QuantBox.XApi
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
-    public struct InvestorField
+    public class InvestorField
     {
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
         public string InvestorID;

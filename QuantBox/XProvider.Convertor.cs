@@ -109,11 +109,8 @@ namespace QuantBox
                 var last = _marketData[inst.Id]?.Volume ?? 0;
                 _marketData[inst.Id] = field;
                 var datetime = DateTime.Now;
-                var exchageTime = DateTime.Now;
-                try {
-                    exchageTime = field.ExchangeDateTime();
-                }
-                catch {
+                var exchageTime = field.ExchangeDateTime();
+                if(exchageTime == DateTime.MaxValue) {
                     _provider._logger.Warn($"交易所时间解析错误，{field.ActionDay}.{field.UpdateTime}.{field.UpdateMillisec}");
                 }
                 if (field.Asks.Length > 0) {

@@ -5,6 +5,7 @@ using System.Drawing.Design;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 using NLog;
 using QuantBox.XApi;
 using SmartQuant;
@@ -92,7 +93,11 @@ namespace QuantBox
 
         protected internal virtual string GetApiPath(string path)
         {
-            return QBHelper.MakeAbsolutePath(path);
+            var dllPath = QBHelper.MakeAbsolutePath(path);
+            if (!File.Exists(dllPath)) {
+                dllPath = QBHelper.MakeAbsolutePath(path, GetSmartQuantPath());
+            }
+            return dllPath;
         }
 
         protected internal virtual XTradingApi CreateXApi(string path)
@@ -267,8 +272,10 @@ namespace QuantBox
 
         internal void OnMessage(PositionField data, bool completed)
         {
-            _convertor.ProcessPosition(data);
-            _logger.Info(data.DebugInfo());
+            if (data != null) {
+                _convertor.ProcessPosition(data);
+                _logger.Info(data.DebugInfo());
+            }
             if (completed) {
                 _timer.EnableQueryAccount = true;
             }
@@ -311,9 +318,27 @@ namespace QuantBox
         #endregion
 
         #region Static Member
+        private static string GetSmartQuantPath()
+        {
+            var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{C224DA18-4901-433D-BD94-82D28B640B2C}");
+            if (key != null) {
+                var names = new List<string>(key.GetSubKeyNames());
+                names.Sort();
+                return key.GetValue("InstallLocation").ToString();
+            }
+            return Directory.GetParent(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).FullName;
+        }
+
         static XProvider()
         {
-            LogManager.Configuration = new NLog.Config.XmlLoggingConfiguration(Path.Combine(QBHelper.BasePath, "NLog.config"), true);
+            const string nlogConfig = "NLog.config";
+            var configFile = Path.Combine(QBHelper.BasePath, nlogConfig);
+            if (!File.Exists(configFile)) {
+                configFile = Path.Combine(GetSmartQuantPath(), nlogConfig);
+            }
+            if (File.Exists(configFile)) {
+                LogManager.Configuration = new NLog.Config.XmlLoggingConfiguration(configFile, true);
+            }
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
         }
 
