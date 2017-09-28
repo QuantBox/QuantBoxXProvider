@@ -92,6 +92,7 @@
     <Compile Include="OrderMap.cs" />
     <Compile Include="OrderRecord.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QBTrade.cs" />
     <Compile Include="QuoteExtensions.cs" />
     <Compile Include="QuantBoxConst.cs" />
     <Compile Include="QuantBoxOrderInfo.cs" />

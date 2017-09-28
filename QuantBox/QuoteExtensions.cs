@@ -6,7 +6,7 @@ namespace QuantBox
 {
     public static class QuoteExtensions
     {
-        public static DepthMarketDataField GetMarketData(this Instrument inst)
+        private static DepthMarketDataField GetMarketData(this Instrument inst)
         {
             return (DepthMarketDataField)inst.Fields[QuantBoxConst.ExtensionsOffset];
         }
@@ -36,6 +36,7 @@ namespace QuantBox
             return GetMarketData(inst)?.PreClosePrice ?? double.NaN;
         }
 
+        [Obsolete("持仓量不再储存在合约中，请从QBTrade中获取", true)]
         public static double GetOpenInterest(this Instrument inst)
         {
             return GetMarketData(inst)?.OpenInterest ?? double.NaN;
@@ -46,11 +47,13 @@ namespace QuantBox
             return GetMarketData(inst)?.PreOpenInterest ?? double.NaN;
         }
 
+        [Obsolete("成交金额不再储存在合约中，请从QBTrade中获取", true)]
         public static double GetTurnover(this Instrument inst)
         {
             return GetMarketData(inst)?.Turnover ?? double.NaN;
         }
 
+        [Obsolete("成交均价不再储存在合约中，请从QBTrade中获取", true)]
         public static double GetAveragePrice(this Instrument inst)
         {
             return GetMarketData(inst)?.AveragePrice ?? double.NaN;

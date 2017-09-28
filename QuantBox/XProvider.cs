@@ -86,8 +86,8 @@ namespace QuantBox
         }
 
         private bool IsDataProvider => (_providerCapacity & ApiType.MarketData) == ApiType.MarketData;
-        private bool IsExecutionProvider => (_providerCapacity & ApiType.Trade) == ApiType.Trade;
-        private bool IsInstrumentProvider => (_providerCapacity & ApiType.Instrument) == ApiType.Instrument;
+        private bool IsExecutionProvider => !OnlyMarketData && (_providerCapacity & ApiType.Trade) == ApiType.Trade;
+        private bool IsInstrumentProvider => !OnlyMarketData && (_providerCapacity & ApiType.Instrument) == ApiType.Instrument;
 
         #region Derived Override Method
 
@@ -451,6 +451,10 @@ namespace QuantBox
         [Description("指定使用的合约附加信息")]
         [TypeConverter(typeof(Design.InstrumentProviderConverter))]
         public int InstrumentAltId { get; set; } = -1;
+
+        [Category(CategoryTrade)]
+        [Description("是否只连接行情服务")]
+        public bool OnlyMarketData { get; set; } = false;
 
         #endregion
     }

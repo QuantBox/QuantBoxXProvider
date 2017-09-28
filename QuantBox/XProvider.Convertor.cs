@@ -16,6 +16,7 @@ namespace QuantBox
             private readonly XProvider _provider;
             private readonly Dictionary<string, AccountPosition> _positions = new Dictionary<string, AccountPosition>();
             private readonly IdArray<DepthMarketDataField> _marketData = new IdArray<DepthMarketDataField>();
+            private readonly IdArray<bool> _instInitFlag = new IdArray<bool>();
 
             static Convertor()
             {
@@ -105,12 +106,17 @@ namespace QuantBox
             public void ProcessMarketData(DepthMarketDataField field)
             {
                 var inst = _provider.framework.InstrumentManager.Get(field.InstrumentID);
-                inst.SetMarketData(field);
+                if (!_instInitFlag[inst.Id]) {
+                    if (field.OpenPrice > 0) {
+                        inst.SetMarketData(field);
+                        _instInitFlag[inst.Id] = true;
+                    }
+                }
                 var last = _marketData[inst.Id]?.Volume ?? 0;
                 _marketData[inst.Id] = field;
                 var datetime = DateTime.Now;
                 var exchageTime = field.ExchangeDateTime();
-                if(exchageTime == DateTime.MaxValue) {
+                if (exchageTime == DateTime.MaxValue) {
                     _provider._logger.Warn($"交易所时间解析错误，{field.ActionDay}.{field.UpdateTime}.{field.UpdateMillisec}");
                 }
                 if (field.Asks.Length > 0) {
@@ -121,7 +127,8 @@ namespace QuantBox
                     var bid = new Bid(datetime, exchageTime, _provider.id, inst.Id, field.Bids[0].Price, field.Bids[0].Size);
                     _provider._emitter.EmitData(bid);
                 }
-                var trade = new Trade(datetime, exchageTime, _provider.id, inst.Id, field.LastPrice, (int)(field.Volume - last));
+                var trade = new QBTrade(datetime, exchageTime, _provider.id, inst.Id, field.LastPrice, (int)(field.Volume - last));
+                trade.Field = field;
                 _provider._emitter.EmitData(trade);
             }
         }
