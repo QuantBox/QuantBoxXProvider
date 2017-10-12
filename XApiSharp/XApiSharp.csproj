@@ -62,6 +62,7 @@
     <Compile Include="ExchangeType.cs" />
     <Compile Include="ExecType.cs" />
     <Compile Include="HedgeFlagType.cs" />
+    <Compile Include="InternalRspUserLoginField.cs" />
     <Compile Include="XApiHelper.cs" />
     <Compile Include="IdCardType.cs" />
     <Compile Include="InstLifePhaseType.cs" />

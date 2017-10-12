@@ -74,11 +74,20 @@ namespace QuantBox
                 _provider.ConnectDone();
             }
 
+            private void DisconnectDone()
+            {
+                _provider.DisconnectDone();
+                _manualDisconnecting = false;
+                _provider.Status = ProviderStatus.Disconnected;
+            }
+
             private void DisconnectClient()
             {
                 _provider._md?.Disconnect();
                 _provider._trader?.Disconnect();
-                _provider.DisconnectDone();
+                if (_manualDisconnecting) {
+                    DisconnectDone();
+                }
             }
 
             private void ConnectClient()

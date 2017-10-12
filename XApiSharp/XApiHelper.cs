@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using Ideafixxxer.Generics;
 using QuantBox.XApi.Nactive;
 
@@ -110,7 +109,7 @@ namespace QuantBox.XApi
             return PInvokeUtility.ReadString(field.Message);
         }
 
-        public static string Text(this RspUserLoginField field)
+        internal static string Text(this InternalRspUserLoginField field)
         {
             if (field == null) {
                 return string.Empty;
@@ -131,7 +130,7 @@ namespace QuantBox.XApi
             field.Text = PInvokeUtility.Gb2312.GetBytes(text);
         }
 
-        public static string Name(this RspUserLoginField field)
+        internal static string Name(this InternalRspUserLoginField field)
         {
             if (field == null) {
                 return string.Empty;
@@ -145,6 +144,11 @@ namespace QuantBox.XApi
                 return string.Empty;
             }
             return PInvokeUtility.ReadString(field.InstrumentName);
+        }
+
+        public static void SetName(this InstrumentField field, string name)
+        {
+            field.InstrumentName = PInvokeUtility.Gb2312.GetBytes(name);
         }
 
         public static string Name(this PositionField field)
@@ -262,7 +266,7 @@ namespace QuantBox.XApi
             if (field == null) {
                 return string.Empty;
             }
-            return $"[XErrorID={field.XErrorID},RawErrorID={field.RawErrorID},Message={field.Text()}]";
+            return $"[XErrorID={field.XErrorID},RawErrorID={field.RawErrorID},Message={field.Text}]";
         }
 
         public static string DebugInfo(this OrderField field)
@@ -286,7 +290,7 @@ namespace QuantBox.XApi
             if (field == null) {
                 return string.Empty;
             }
-            return $"[TradingDay={field.TradingDay},LoginTime={field.LoginTime},InvestorName={field.Name()},XErrorID={field.XErrorID},Message={field.Text()}]";
+            return $"[TradingDay={field.TradingDay},LoginTime={field.LoginTime},InvestorName={field.InvestorName},XErrorID={field.XErrorID},Message={field.Text}]";
         }
 
         public static string DebugInfo(this AccountField field)

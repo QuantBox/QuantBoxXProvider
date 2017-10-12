@@ -95,14 +95,14 @@ namespace QuantBox
         {
             var dllPath = QBHelper.MakeAbsolutePath(path);
             if (!File.Exists(dllPath)) {
-                dllPath = QBHelper.MakeAbsolutePath(path, GetSmartQuantPath());
+                dllPath = QBHelper.MakeAbsolutePath(path, Installation.ConfigDir.FullName);
             }
             return dllPath;
         }
 
         protected internal virtual XTradingApi CreateXApi(string path)
         {
-            return new XTradingApi(path);
+            return new XTradingApi(GetApiPath(path));
         }
 
         protected internal virtual ServerInfoField GetServerInfo(int index)
@@ -221,7 +221,6 @@ namespace QuantBox
             ClearAccoutQueue();
             _md = null;
             _trader = null;
-            Status = ProviderStatus.Disconnected;
         }
 
         internal void OnProviderError(int errorId, string errorMsg)

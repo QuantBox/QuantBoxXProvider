@@ -45,9 +45,10 @@ namespace QuantBox
 
             private readonly XProvider _provider;
             private readonly OrderMap _map = new OrderMap();
-
             private ActionBlock<TradingEvent> _orderBlock;
-
+            private delegate void OrderReturnHandler(OrderField field);
+            private readonly IdArray<OrderReturnHandler> _orderHandlers = new IdArray<OrderReturnHandler>(byte.MaxValue);
+            
             private OrderField CreateOrderField(Order order)
             {
                 var field = new OrderField();
@@ -66,7 +67,6 @@ namespace QuantBox
                 field.StopPx = order.StopPx;
                 return field;
             }
-
             private static ExecutionReport CreateReport(OrderRecord record, OrderStatus ordStatus, ExecType execType, string text = "")
             {
                 var report = new ExecutionReport();
@@ -89,12 +89,7 @@ namespace QuantBox
             }
 
             #region ProcessOrderReturn
-
-            private delegate void OrderReturnHandler(OrderField field);
-
-            private readonly IdArray<OrderReturnHandler> _orderHandlers =
-                new IdArray<OrderReturnHandler>(byte.MaxValue);
-
+            
             private void InitHandler()
             {
                 void DefaultHandler(OrderField field)
@@ -119,10 +114,10 @@ namespace QuantBox
 
             private void ProcessExecCancelled(OrderField field)
             {
-                if (_map.TryPickCancelled(field.ID, out OrderRecord record)) {
+                if (_map.TryPickCancelled(field.ID, out var record)) {
                     _provider.OnMessage(CreateReport(record, (OrderStatus)field.Status, ExecType.ExecCancelled));
                 }
-                else if (_map.TryPickLocal(field.LocalID, out Order order)) {
+                else if (_map.TryPickLocal(field.LocalID, out var order)) {
                     _provider.OnMessage(CreateReport(new OrderRecord(order), (OrderStatus)field.Status,
                         ExecType.ExecCancelled, field.Text()));
                 }
@@ -138,11 +133,11 @@ namespace QuantBox
 
             private void ProcessExecRejected(OrderField field)
             {
-                if (_map.TryPickLocal(field.LocalID, out Order order)) {
+                if (_map.TryPickLocal(field.LocalID, out var order)) {
                     _provider.OnMessage(CreateReport(new OrderRecord(order), (OrderStatus)field.Status,
                         ExecType.ExecRejected, field.Text()));
                 }
-                else if (_map.TryPickRejected(field.ID, out OrderRecord record)) {
+                else if (_map.TryPickRejected(field.ID, out var record)) {
                     //出现超出涨跌停时，会先收到 ProcessExecNew
                     _provider.OnMessage(CreateReport(record, (OrderStatus)field.Status, ExecType.ExecRejected,
                         field.Text()));
@@ -151,14 +146,14 @@ namespace QuantBox
 
             private void ProcessExecPendingCancel(OrderField field)
             {
-                if (_map.TryPickCancelling(field.ID, out OrderRecord record)) {
+                if (_map.TryPickCancelling(field.ID, out var record)) {
                     _provider.OnMessage(CreateReport(record, (OrderStatus)field.Status, ExecType.ExecPendingCancel));
                 }
             }
 
             private void ProcessExecCancelReject(OrderField field)
             {
-                if (_map.TryPickPendingCancel(field.LocalID, out OrderRecord record)) {
+                if (_map.TryPickPendingCancel(field.LocalID, out var record)) {
                     _provider.OnMessage(CreateReport(record, (OrderStatus)field.Status, ExecType.ExecCancelReject,
                         field.Text()));
                 }
@@ -166,7 +161,7 @@ namespace QuantBox
 
             private void ProcessTrade(TradeField trade)
             {
-                _map.TryPeek(trade.ID, out OrderRecord record);
+                _map.TryPeek(trade.ID, out var record);
                 if (record != null) {
                     record.AddFill(trade.Price, trade.Qty);
                     var status = (record.LeavesQty > 0) ? OrderStatus.PartiallyFilled : OrderStatus.Filled;
@@ -211,7 +206,7 @@ namespace QuantBox
             private void ProcessCancel(Order order)
             {
                 string error;
-                if (_map.TryGetOrderId(order, out string id)) {
+                if (_map.TryGetOrderId(order, out var id)) {
                     error = _provider._trader.CancelOrder(id);
                     if (string.IsNullOrEmpty(error) || error == "0") {
                         _map.AddCancelPending(order);

@@ -26,7 +26,7 @@ namespace QuantBox.XApi
 
         private static Type GetApiType(string path)
         {
-            Loaded.TryGetValue(path, out Type exist);
+            Loaded.TryGetValue(path, out var exist);
             if (exist == null) {
                 var asm = GetAssembly(path);
                 foreach (var type in asm.ExportedTypes) {

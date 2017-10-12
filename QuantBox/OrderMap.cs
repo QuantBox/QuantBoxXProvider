@@ -18,7 +18,7 @@ namespace QuantBox
 
         public OrderRecord PendingToWorking(string localId, string orderId)
         {
-            if (_pendingNew.TryGetValue(localId, out Order order)) {
+            if (_pendingNew.TryGetValue(localId, out var order)) {
                 _pendingNew.Remove(localId);
                 var record = new OrderRecord(order);
                 _working.Add(orderId, record);
@@ -53,7 +53,7 @@ namespace QuantBox
         public void AddCancelPending(Order order)
         {
             var key = _orderIds[order.Id];
-            if (!_working.TryGetValue(key, out OrderRecord record)) {
+            if (!_working.TryGetValue(key, out var record)) {
                 record = new OrderRecord(order);
             }
             _pendingCancel[key] = record;

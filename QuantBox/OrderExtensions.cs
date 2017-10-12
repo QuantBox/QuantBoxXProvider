@@ -48,13 +48,13 @@ namespace QuantBox
 
         public static void Close(this Order order)
         {
-            order.SubSide = order.Side == SmartQuant.OrderSide.Buy ? SubSide.Undefined : SubSide.BuyCover;
+            order.SubSide = order.Side == SmartQuant.OrderSide.Sell ? SubSide.Undefined : SubSide.BuyCover;
             GetOrderInfo(order).OpenClose = OpenCloseType.Close;
         }
 
         public static void CloseToday(this Order order)
         {
-            order.SubSide = order.Side == SmartQuant.OrderSide.Buy ? SubSide.Undefined : SubSide.BuyCover;
+            order.SubSide = order.Side == SmartQuant.OrderSide.Sell ? SubSide.Undefined : SubSide.BuyCover;
             GetOrderInfo(order).OpenClose = OpenCloseType.CloseToday;
         }        
     }

@@ -60,5 +60,10 @@ namespace QuantBox.XApi
         public string PortfolioID3;
 
         public BusinessType Business;
+
+        public OrderField Clone()
+        {
+            return (OrderField)MemberwiseClone();
+        }
     }
 }

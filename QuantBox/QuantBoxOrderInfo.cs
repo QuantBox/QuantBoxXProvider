@@ -7,7 +7,7 @@ namespace QuantBox
     public class QuantBoxOrderInfo
     {
         public OpenCloseType OpenClose = OpenCloseType.Open;
-        public HedgeFlagType HedgeFlag = HedgeFlagType.Undefined;
-        public QuantBox.XApi.OrderSide Side = QuantBox.XApi.OrderSide.Undefined;    
+        public HedgeFlagType HedgeFlag = HedgeFlagType.Speculation;
+        public OrderSide Side = OrderSide.Undefined;    
     }
 }
