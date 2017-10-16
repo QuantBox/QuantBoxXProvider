@@ -28,7 +28,7 @@ namespace QuantBox
         private EventQueue _accountQueue;
 
         private Logger _logger;
-        private readonly ConnectManager _manager;
+        private readonly ConnectManager _connectManager;
         private readonly TradingProcessor _processor;
         private readonly Convertor _convertor;
         private readonly TimedTask _timer;
@@ -172,12 +172,12 @@ namespace QuantBox
             _emitter.Open();
             _processor.Open();
             _timer.Start();
-            _manager.Post(new OnConnect());
+            _connectManager.Post(new OnConnect());
         }
 
         protected override void OnDisconnect()
         {
-            _manager.Post(new OnDisconnect());
+            _connectManager.Post(new OnDisconnect());
         }
 
         private new void EmitAccountData(AccountData data)
@@ -254,12 +254,12 @@ namespace QuantBox
 
         internal void OnClientConnected()
         {
-            _manager.Post(new OnClientConnected());
+            _connectManager.Post(new OnClientConnected());
         }
 
         internal void OnClientDisconnected()
         {
-            _manager.Post(new OnClientDisconnected());
+            _connectManager.Post(new OnClientDisconnected());
         }
 
         internal void OnMessage(ExecutionReport report)
@@ -377,7 +377,7 @@ namespace QuantBox
         public XProvider(Framework framework)
             : base(framework)
         {
-            _manager = new ConnectManager(this);
+            _connectManager = new ConnectManager(this);
             _processor = new TradingProcessor(this);
             _convertor = new Convertor(this);
             _timer = new TimedTask(this);

@@ -49,8 +49,19 @@ namespace QuantBox
 
             private void AutoConnect()
             {
-                if (InTradingSession() && !_provider.IsConnected) {
-                    _provider._manager.Post(new OnAutoReconnect());
+                if (_provider.SessionTimes.Count == 0) {
+                    return;
+                }
+
+                if (InTradingSession()) {
+                    if (!_provider.IsConnected) {
+                        _provider._connectManager.Post(new OnAutoReconnect());
+                    }
+                }
+                else {
+                    if (_provider.IsConnected) {
+                        _provider._connectManager.Post(new OnAutoDisconnect());
+                    }
                 }
             }
 

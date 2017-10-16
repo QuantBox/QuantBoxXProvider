@@ -50,6 +50,15 @@ namespace QuantBox
                             ConnectClient();
                         }
                         break;
+                    case XEventType.OnAutoDisconnect:
+                        if (!_manualDisconnecting) {
+                            _provider._logger.Info("非交易时段内自动断开");
+                            if (_provider.Status == ProviderStatus.Connected) {
+                                _provider.Status = ProviderStatus.Connecting;
+                            }
+                            DisconnectClient();
+                        }
+                        break;
                 }
             }
 
@@ -132,10 +141,9 @@ namespace QuantBox
                     return;
                 }
 
-                if (_provider._md == null) {
-                    _provider._md = new MarketDataClient(_provider, connection);
-                    _provider._md.Connect();
-                }
+                _provider._md?.Disconnect();
+                _provider._md = new MarketDataClient(_provider, connection);
+                _provider._md.Connect();
             }
 
             private void ConnectTrader()
@@ -147,10 +155,9 @@ namespace QuantBox
                     return;
                 }
 
-                if (_provider._trader == null) {
-                    _provider._trader = new TraderClient(_provider, connection);
-                    _provider._trader.Connect();
-                }
+                _provider._trader?.Disconnect();
+                _provider._trader = new TraderClient(_provider, connection);
+                _provider._trader.Connect();
             }
 
             public ConnectManager(XProvider provider)
