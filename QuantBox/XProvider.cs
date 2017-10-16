@@ -20,6 +20,8 @@ namespace QuantBox
         private bool _qryInstrumentCompleted;
         private readonly List<Instrument> _instruments = new List<Instrument>();
         private int _tradingDataQueryInterval = 60;
+        private int _connectTimeout = 2;
+
         private TraderClient _trader;
         private MarketDataClient _md;
         private ApiType _providerCapacity;
@@ -64,12 +66,33 @@ namespace QuantBox
         {
             GetCapacity();
             Settings = LoadSettings();
+            LoadSessionTimes();
             _logger = LogManager.GetLogger(Settings.Name);
             id = Settings.Id;
             name = Settings.Name;
             description = Settings.Description;
             url = Settings.Url;
             _logger.Info("Provider Initialized.");
+        }
+
+        private void LoadSessionTimes()
+        {
+            SessionTimes = new BindingList<TimeRange>();
+            SessionTimes.RaiseListChangedEvents = false;
+            foreach (var range in Settings.SessionTimes) {
+                SessionTimes.Add(range);
+            }
+            SessionTimes.RaiseListChangedEvents = true;
+            SessionTimes.ListChanged += SessionTimesOnListChanged;
+        }
+
+        private void SessionTimesOnListChanged(object sender, ListChangedEventArgs args)
+        {
+            Settings.SessionTimes.Clear();
+            foreach (var range in SessionTimes) {
+                Settings.SessionTimes.Add(range);
+            }
+            SaveSettings();
         }
 
         private void GetCapacity()
@@ -128,7 +151,7 @@ namespace QuantBox
 
         protected internal virtual void SaveSettings()
         {
-            Settings.Save(QBHelper.GetConfigPath(Settings.Name));
+            Settings?.Save(QBHelper.GetConfigPath(Settings.Name));
         }
 
         protected internal virtual IDictionary<string, string> GetUserPropertyMap()
@@ -148,6 +171,7 @@ namespace QuantBox
             InitAccoutQueue();
             _emitter.Open();
             _processor.Open();
+            _timer.Start();
             _manager.Post(new OnConnect());
         }
 
@@ -197,9 +221,7 @@ namespace QuantBox
 
         private void StartTimerTask()
         {
-            if (IsExecutionProvider) {
-                _timer.Start();
-            }
+            _timer.Start();
         }
 
         private void ConnectDone()
@@ -216,6 +238,7 @@ namespace QuantBox
 
         private void DisconnectDone()
         {
+            _timer.Stop();
             _processor.Close();
             _emitter.Close();
             ClearAccoutQueue();
@@ -236,7 +259,6 @@ namespace QuantBox
 
         internal void OnClientDisconnected()
         {
-            _timer.Stop();
             _manager.Post(new OnClientDisconnected());
         }
 
@@ -367,6 +389,11 @@ namespace QuantBox
             ProviderInit();
         }
 
+        ~XProvider()
+        {
+            SaveSettings();
+        }
+
         public override void Send(ExecutionCommand command)
         {
             if (!IsExecutionProvider || !IsConnected) {
@@ -429,13 +456,29 @@ namespace QuantBox
         [Editor(typeof(Design.XApiSettingsTypeEditor), typeof(UITypeEditor))]
         public string Configuration { get; set; }
 
+        [Category(CategorySettings)]
+        [Description("交易时段列表，当前时间在这些列表中将启用重连机制，不在此列表中将主动断开，列表为空将不处理")]
+        public BindingList<TimeRange> SessionTimes { get; set; }
+
+        [Category(CategorySettings)]
+        [Description("自动重连时的连接超时设置(分钟)")]
+        public int ConnectTimeout {
+            get => _connectTimeout;
+            set {
+                if (value < 2) {
+                    value = 2;
+                }
+                _connectTimeout = value;
+            }
+        }
+
         private const string CategoryTrade = "Settings - Trade";
         [Category(CategoryTrade)]
         [Description("默认的投机保值设置")]
         public HedgeFlagType DefaultHedgeFlag { get; set; }
 
         [Category(CategoryTrade)]
-        [Description("交易数据(资金持仓)查询间隔")]
+        [Description("资金持仓查询间隔(秒)")]
         public int TradingDataQueryInterval {
             get => _tradingDataQueryInterval;
             set {

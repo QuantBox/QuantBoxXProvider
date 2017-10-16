@@ -15,10 +15,21 @@ namespace QuantBox
             private int _validQutryCount;
             private int _inTimer;
 
+            private bool InTradingSession()
+            {
+                var time = DateTime.Now.TimeOfDay;
+                foreach (var range in _provider.SessionTimes) {
+                    if (time >= range.Begin && time <= range.End) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             public TimedTask(XProvider provider)
             {
                 _provider = provider;
-                _timer = new Timer(100);
+                _timer = new Timer(500);
                 _timer.Elapsed += TimerOnElapsed;
             }
 
@@ -28,30 +39,48 @@ namespace QuantBox
                     return;
                 }
                 try {
-                    if (_validQutryCount == 0) {
-                        if ((DateTime.Now - _lastTime).TotalSeconds > _provider.TradingDataQueryInterval) {
-                            _validQutryCount = 2;
-                            _lastTime = DateTime.Now;
-                        }
-                    }
-
-                    if (_validQutryCount < 1) {
-                        return;
-                    }
-
-                    if (EnableQueryPosition) {
-                        _provider._trader.QueryPositions();
-                        _validQutryCount -= 1;
-                        EnableQueryPosition = false;
-                    }
-                    if (EnableQueryAccount) {
-                        _provider._trader.QueryAccount();
-                        _validQutryCount -= 1;
-                        EnableQueryAccount = false;
-                    }
+                    DataQuery();
+                    AutoConnect();
                 }
                 finally {
                     Interlocked.Exchange(ref _inTimer, 0);
+                }
+            }
+
+            private void AutoConnect()
+            {
+                if (InTradingSession() && !_provider.IsConnected) {
+                    _provider._manager.Post(new OnAutoReconnect());
+                }
+            }
+
+            private void DataQuery()
+            {
+                if (!_provider.IsConnected ||
+                    _provider.IsInstrumentProvider && !_provider._qryInstrumentCompleted) {
+                    return;
+                }
+
+                if (_validQutryCount == 0) {
+                    if ((DateTime.Now - _lastTime).TotalSeconds > _provider.TradingDataQueryInterval) {
+                        _validQutryCount = 2;
+                        _lastTime = DateTime.Now;
+                    }
+                }
+
+                if (_validQutryCount < 1) {
+                    return;
+                }
+
+                if (EnableQueryPosition) {
+                    _provider._trader.QueryPositions();
+                    _validQutryCount -= 1;
+                    EnableQueryPosition = false;
+                }
+                if (EnableQueryAccount) {
+                    _provider._trader.QueryAccount();
+                    _validQutryCount -= 1;
+                    EnableQueryAccount = false;
                 }
             }
 
@@ -62,9 +91,15 @@ namespace QuantBox
             {
                 if (!_timer.Enabled) {
                     _lastTime = DateTime.Now;
-                    EnableQueryAccount = true;
-                    EnableQueryPosition = false;
                     _validQutryCount = 2;
+                    if (_provider.IsExecutionProvider) {
+                        EnableQueryAccount = true;
+                        EnableQueryPosition = false;
+                    }
+                    else {
+                        EnableQueryAccount = false;
+                        EnableQueryPosition = false;
+                    }
                     _timer.Start();
                 }
             }

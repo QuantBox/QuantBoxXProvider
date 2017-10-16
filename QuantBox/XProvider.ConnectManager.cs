@@ -12,6 +12,7 @@ namespace QuantBox
             private readonly XProvider _provider;
             private readonly ActionBlock<Event> _block;
             private bool _manualDisconnecting;
+            private DateTime _connectStart = DateTime.MaxValue;
 
             private void Process(Event @event)
             {
@@ -40,7 +41,11 @@ namespace QuantBox
                         }
                         break;
                     case XEventType.OnAutoReconnect:
-                        if (!_manualDisconnecting && !_provider.IsConnected) {
+                        if (!_manualDisconnecting
+                            && !_provider.IsConnected
+                            && _connectStart != DateTime.MaxValue
+                            && (DateTime.Now - _connectStart).TotalMinutes > _provider._connectTimeout) {
+                            _provider._logger.Info("交易时段内自动重连");
                             DisconnectClient();
                             ConnectClient();
                         }
@@ -93,6 +98,7 @@ namespace QuantBox
             private void ConnectClient()
             {
                 try {
+                    _connectStart = DateTime.Now;
                     if (_provider.IsExecutionProvider) {
                         ConnectTrader();
                     }

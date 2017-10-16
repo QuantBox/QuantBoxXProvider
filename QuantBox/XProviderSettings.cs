@@ -29,6 +29,8 @@ namespace QuantBox
 
         public List<ConnectionInfo> Connections { get; set; }
 
+        public List<TimeRange> SessionTimes { get; set; }
+
         private static void SaveItems<T>(T obj, string path, string name)
         {
             var file = Path.Combine(Path.GetDirectoryName(path), $"{Path.GetFileNameWithoutExtension(path)}.{name}.json");
@@ -41,6 +43,7 @@ namespace QuantBox
             SaveItems(Users, path, nameof(Users));
             SaveItems(Servers, path, nameof(Servers));
             SaveItems(Connections, path, nameof(Connections));
+            SaveItems(SessionTimes, path, nameof(SessionTimes));
         }
 
         private static List<T> LoadItems<T>(string path, string name)
@@ -59,6 +62,7 @@ namespace QuantBox
                 settings.Users = LoadItems<UserInfo>(path, nameof(Users));
                 settings.Servers = LoadItems<ServerInfo>(path, nameof(Servers));
                 settings.Connections = LoadItems<ConnectionInfo>(path, nameof(Connections));
+                settings.SessionTimes = LoadItems<TimeRange>(path, nameof(SessionTimes));
                 return settings;
             }
             return null;
