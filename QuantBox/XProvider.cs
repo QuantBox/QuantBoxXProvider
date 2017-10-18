@@ -256,9 +256,9 @@ namespace QuantBox
             EmitError(errorId, errorId, errorMsg);
         }
 
-        internal void OnClientConnected()
+        internal void OnClientConnected(XApiClient client)
         {
-            if (Market.Connected) {
+            if (client == Market) {
                 _subscribeManager.Resubscribe();
             }
             _connectManager.Post(new OnClientConnected());

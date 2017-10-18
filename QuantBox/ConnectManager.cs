@@ -62,6 +62,9 @@ namespace QuantBox
 
         private void CheckConnected()
         {
+            if (_provider.IsConnected) {
+                return;
+            }
             if (_provider.IsDataProvider && _provider.IsExecutionProvider) {
                 if (_provider.Trader?.Connected == true && _provider.Market?.Connected == true) {
                     ConnectDone();

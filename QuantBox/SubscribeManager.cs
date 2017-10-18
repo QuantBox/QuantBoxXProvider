@@ -34,7 +34,9 @@ namespace QuantBox
                 case EventType.OnUnsubscribe:
                     var unsub = (OnUnsubscribe)e;
                     _instruments.Remove(unsub.Instrument.Id);
-                    _provider.Market.Unsubscribe(unsub.Instrument);
+                    if (_provider.IsConnected) {
+                        _provider.Market.Unsubscribe(unsub.Instrument);
+                    }
                     break;
             }
         }

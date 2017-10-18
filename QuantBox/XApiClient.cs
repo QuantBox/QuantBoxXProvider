@@ -65,7 +65,7 @@ namespace QuantBox
 
         protected virtual void OnConnected()
         {
-            Provider.OnClientConnected();
+            Provider.OnClientConnected(this);
         }
 
         protected virtual void OnDisconnected()
