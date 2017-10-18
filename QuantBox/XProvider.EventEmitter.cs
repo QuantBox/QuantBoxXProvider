@@ -6,7 +6,7 @@ namespace QuantBox
     public partial class XProvider
     {
         #region Unimportance
-        private interface IEventEmitter
+        internal interface IEventEmitter
         {
             void EmitData(DataObject data, bool queued = true);
             void EmitExecutionReport(ExecutionReport report, bool queued = true);

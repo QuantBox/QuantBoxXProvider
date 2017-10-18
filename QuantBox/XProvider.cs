@@ -17,22 +17,24 @@ namespace QuantBox
     {
         private const string MsgProviderNotConnected = @"Provider is not connected.";
 
-        private bool _qryInstrumentCompleted;
+        internal bool QryInstrumentCompleted;
         private readonly List<Instrument> _instruments = new List<Instrument>();
         private int _tradingDataQueryInterval = 60;
         private int _connectTimeout = 2;
 
-        private TraderClient _trader;
-        private MarketDataClient _md;
         private ApiType _providerCapacity;
         private EventQueue _accountQueue;
 
-        private Logger _logger;
-        private readonly ConnectManager _connectManager;
-        private readonly TradingProcessor _processor;
+        private readonly DealProcessor _processor;
         private readonly Convertor _convertor;
         private readonly TimedTask _timer;
+        private readonly SubscribeManager _subscribeManager;
+        private readonly ConnectManager _connectManager;
         private readonly IEventEmitter _emitter;
+
+        internal Logger Logger;
+        internal TraderClient Trader;
+        internal MarketDataClient Market;
 
         private void CancelInstrumentRequest(InstrumentDefinitionRequest request, string text)
         {
@@ -58,7 +60,7 @@ namespace QuantBox
 
         private void InitQuery()
         {
-            _qryInstrumentCompleted = false;
+            QryInstrumentCompleted = false;
             _instruments.Clear();
         }
 
@@ -67,12 +69,12 @@ namespace QuantBox
             GetCapacity();
             Settings = LoadSettings();
             LoadSessionTimes();
-            _logger = LogManager.GetLogger(Settings.Name);
+            Logger = LogManager.GetLogger(Settings.Name);
             id = Settings.Id;
             name = Settings.Name;
             description = Settings.Description;
             url = Settings.Url;
-            _logger.Info("Provider Initialized.");
+            Logger.Info("Provider Initialized.");
         }
 
         private void LoadSessionTimes()
@@ -108,11 +110,12 @@ namespace QuantBox
             }
         }
 
-        private bool IsDataProvider => (_providerCapacity & ApiType.MarketData) == ApiType.MarketData;
-        private bool IsExecutionProvider => !OnlyMarketData && (_providerCapacity & ApiType.Trade) == ApiType.Trade;
-        private bool IsInstrumentProvider => !OnlyMarketData && (_providerCapacity & ApiType.Instrument) == ApiType.Instrument;
+        internal InstrumentManager InstrumentManager => framework.InstrumentManager;
+        internal bool IsDataProvider => (_providerCapacity & ApiType.MarketData) == ApiType.MarketData;
+        internal bool IsExecutionProvider => !OnlyMarketData && (_providerCapacity & ApiType.Trade) == ApiType.Trade;
+        internal bool IsInstrumentProvider => !OnlyMarketData && (_providerCapacity & ApiType.Instrument) == ApiType.Instrument;
 
-        #region Derived Override Method
+        #region Derived Override Methods
 
         protected internal virtual string GetApiPath(string path)
         {
@@ -164,7 +167,7 @@ namespace QuantBox
         }
         #endregion
 
-        #region Override Method
+        #region Override Methods
 
         protected override void OnConnect()
         {
@@ -200,7 +203,7 @@ namespace QuantBox
 
         #endregion
 
-        #region Message Handler
+        #region Message Handlers
 
         private void InitAccoutQueue()
         {
@@ -224,36 +227,40 @@ namespace QuantBox
             _timer.Start();
         }
 
-        private void ConnectDone()
+        internal void ConnectDone()
         {
             InitQuery();
             if (IsInstrumentProvider) {
-                _trader.QueryInstrument();
-                _logger.Info("开始查询合约......");
+                Trader.QueryInstrument();
+                Logger.Info("开始查询合约......");
             }
             else {
                 StartTimerTask();
             }
         }
 
-        private void DisconnectDone()
+        internal void DisconnectDone()
         {
-            _timer.Stop();
+            _subscribeManager.Clear();
+            _timer.Close();
             _processor.Close();
             _emitter.Close();
             ClearAccoutQueue();
-            _md = null;
-            _trader = null;
+            Market = null;
+            Trader = null;
         }
 
         internal void OnProviderError(int errorId, string errorMsg)
         {
-            _logger.Warn("id: {0}, msg: {1}", errorId, errorMsg);
+            Logger.Warn("id: {0}, msg: {1}", errorId, errorMsg);
             EmitError(errorId, errorId, errorMsg);
         }
 
         internal void OnClientConnected()
         {
+            if (Market.Connected) {
+                _subscribeManager.Resubscribe();
+            }
             _connectManager.Post(new OnClientConnected());
         }
 
@@ -269,7 +276,7 @@ namespace QuantBox
 
         internal void OnMessage(InstrumentField field, bool completed)
         {
-            if (_qryInstrumentCompleted) {
+            if (QryInstrumentCompleted) {
                 return;
             }
             if (field != null) {
@@ -285,8 +292,8 @@ namespace QuantBox
             }
             if (completed) {
                 _instruments.Sort((x, y) => string.Compare(x.Symbol, y.Symbol, StringComparison.Ordinal));
-                _qryInstrumentCompleted = true;
-                _logger.Info($"合约查询完毕，收到{_instruments.Count}个合约");
+                QryInstrumentCompleted = true;
+                Logger.Info($"合约查询完毕，收到{_instruments.Count}个合约");
                 StartTimerTask();
             }
         }
@@ -295,7 +302,7 @@ namespace QuantBox
         {
             if (data != null) {
                 _convertor.ProcessPosition(data);
-                _logger.Info(data.DebugInfo());
+                Logger.Info(data.DebugInfo());
             }
             if (completed) {
                 _timer.EnableQueryAccount = true;
@@ -305,7 +312,7 @@ namespace QuantBox
         internal void OnMessage(AccountField data)
         {
             _convertor.ProcessAccount(data);
-            _logger.Info(data.DebugInfo());
+            Logger.Info(data.DebugInfo());
             _timer.EnableQueryPosition = true;
         }
 
@@ -325,7 +332,28 @@ namespace QuantBox
         }
         #endregion
 
-        #region Custom Instrument Symbol       
+        #region Internal Methods 
+
+        internal void ProcessMarketData(DataObject data)
+        {
+            _emitter.EmitData(data);
+        }
+
+        internal void ProcessAccount(AccountData data)
+        {
+            _emitter.EmitAccountData(data);
+        }
+
+        internal void AutoConnect()
+        {
+            _connectManager.Post(new OnAutoConnect());
+        }
+
+        internal void AutoDisconnect()
+        {
+            _connectManager.Post(new OnAutoDisconnect());
+        }
+
         internal byte GetAltId()
         {
             return InstrumentAltId > 0 ? Id : (byte)InstrumentAltId;
@@ -335,6 +363,11 @@ namespace QuantBox
         {
             var altid = GetAltId();
             return (inst.GetSymbol(altid), inst.GetExchange(altid));
+        }
+
+        internal void SetStatus(ProviderStatus status)
+        {
+            Status = status;
         }
         #endregion
 
@@ -378,7 +411,8 @@ namespace QuantBox
             : base(framework)
         {
             _connectManager = new ConnectManager(this);
-            _processor = new TradingProcessor(this);
+            _subscribeManager = new SubscribeManager(this);
+            _processor = new DealProcessor(this);
             _convertor = new Convertor(this);
             _timer = new TimedTask(this);
 #if DEBUG
@@ -412,20 +446,16 @@ namespace QuantBox
 
         public override void Subscribe(Instrument instrument)
         {
-            if (!IsDataProvider || !IsConnected) {
-                EmitError(-1, -1, MsgProviderNotConnected);
-                return;
+            if (IsDataProvider) {
+                _subscribeManager.Subscribe(instrument);
             }
-            _md.Subscribe(instrument);
         }
 
         public override void Unsubscribe(Instrument instrument)
         {
-            if (!IsDataProvider || !IsConnected) {
-                EmitError(-1, -1, MsgProviderNotConnected);
-                return;
+            if (IsDataProvider) {
+                _subscribeManager.Unsubscribe(instrument);
             }
-            _md.Unsubscribe(instrument);
         }
 
         public override void Send(InstrumentDefinitionRequest request)
@@ -435,7 +465,7 @@ namespace QuantBox
                 return;
             }
             Task.Run(() => {
-                SendInstrumentDefinition(request, _qryInstrumentCompleted ? _instruments.ToArray() : new Instrument[0]);
+                SendInstrumentDefinition(request, QryInstrumentCompleted ? _instruments.ToArray() : new Instrument[0]);
             });
         }
 

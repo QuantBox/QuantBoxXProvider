@@ -7,6 +7,8 @@ namespace QuantBox
     public class QBTrade : Trade
     {
         public DepthMarketDataField Field;
+        public double OpenInterest = double.NaN;
+        public double Turnover = double.NaN;
 
         public QBTrade()
         {

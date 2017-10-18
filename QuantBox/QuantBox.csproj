@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>c:\Program Files\SmartQuant Ltd\OpenQuant 2014\</OutputPath>
+    <OutputPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>c:\Program Files\SmartQuant Ltd\OpenQuant 2014\</OutputPath>
+    <OutputPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="AccountPosition.cs" />
     <Compile Include="OnAutoDisconnect.cs" />
+    <Compile Include="SubscribeManager.cs" />
     <Compile Include="TimeRange.cs" />
     <Compile Include="EventPipe.cs" />
     <Compile Include="ConnectionInfo.cs" />
@@ -86,7 +87,7 @@
     <Compile Include="QBHelper.cs" />
     <Compile Include="MarketDataClient.cs" />
     <Compile Include="NoTypeConverterJsonConverter.cs" />
-    <Compile Include="OnAutoReconnect.cs" />
+    <Compile Include="OnAutoConnect.cs" />
     <Compile Include="OnClientConnected.cs" />
     <Compile Include="OnClientDisconnected.cs" />
     <Compile Include="OrderExtensions.cs" />
@@ -102,12 +103,12 @@
     <Compile Include="UserInfo.cs" />
     <Compile Include="XApiClient.cs" />
     <Compile Include="XApiEventType.cs" />
-    <Compile Include="XProvider.ConnectManager.cs" />
-    <Compile Include="XProvider.Convertor.cs" />
+    <Compile Include="ConnectManager.cs" />
+    <Compile Include="Convertor.cs" />
     <Compile Include="XProvider.cs" />
     <Compile Include="XProvider.EventEmitter.cs" />
-    <Compile Include="XProvider.TradingProcessor.cs" />
-    <Compile Include="XProvider.TimedTask.cs" />
+    <Compile Include="DealProcessor.cs" />
+    <Compile Include="TimedTask.cs" />
     <Compile Include="XProviderSettings.cs" />
     <Compile Include="XEventType.cs" />
   </ItemGroup>
