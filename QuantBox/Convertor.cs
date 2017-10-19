@@ -11,6 +11,8 @@ namespace QuantBox
     internal class Convertor
     {
         private static readonly List<FieldInfo> AccountFields = new List<FieldInfo>();
+        private static readonly DepthMarketDataField EmptyMarketData = new DepthMarketDataField();
+
         private readonly XProvider _provider;
         private readonly Dictionary<string, AccountPosition> _positions = new Dictionary<string, AccountPosition>();
         private readonly IdArray<DepthMarketDataField> _marketData = new IdArray<DepthMarketDataField>();
@@ -21,6 +23,9 @@ namespace QuantBox
             foreach (var field in typeof(AccountField).GetFields()) {
                 AccountFields.Add(field);
             }
+            EmptyMarketData.OpenInterest = 0;
+            EmptyMarketData.Turnover = 0;
+            EmptyMarketData.Volume = 0;
         }
 
         public Convertor(XProvider provider)
@@ -110,7 +115,7 @@ namespace QuantBox
                     _instInitFlag[inst.Id] = true;
                 }
             }
-            var last = _marketData[inst.Id]?.Volume ?? 0;
+            var last = _marketData[inst.Id] ?? EmptyMarketData;
             _marketData[inst.Id] = field;
             var datetime = DateTime.Now;
             var exchageTime = field.ExchangeDateTime();
@@ -125,7 +130,9 @@ namespace QuantBox
                 var bid = new Bid(datetime, exchageTime, _provider.Id, inst.Id, field.Bids[0].Price, field.Bids[0].Size);
                 _provider.ProcessMarketData(bid);
             }
-            var trade = new QBTrade(datetime, exchageTime, _provider.Id, inst.Id, field.LastPrice, (int)(field.Volume - last));
+            var trade = new QBTrade(datetime, exchageTime, _provider.Id, inst.Id, field.LastPrice, (int)(field.Volume - last.Volume));
+            trade.OpenInterest = field.OpenInterest - last.OpenInterest;
+            trade.Turnover = field.Turnover - last.Turnover;
             trade.Field = field;
             _provider.ProcessMarketData(trade);
         }

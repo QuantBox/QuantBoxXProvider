@@ -16,6 +16,7 @@ namespace QuantBox
         private bool InTradingSession()
         {
             var time = DateTime.Now.TimeOfDay;
+            time = time - TimeSpan.FromMilliseconds(time.Milliseconds);
             foreach (var range in _provider.SessionTimes) {
                 if (time >= range.Begin && time <= range.End) {
                     return true;
