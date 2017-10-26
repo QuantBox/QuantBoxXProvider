@@ -5,7 +5,7 @@ namespace QuantBox
 {
     public class QuantBoxCtp : XProvider, IExecutionProvider, IDataProvider, IInstrumentProvider
     {
-        private const string ProviderName = "QuantBoxCtp";
+        private const string ProviderName = "QuantBoxCTP";
         protected override XProviderSettings LoadSettings()
         {
             var settings = XProviderSettings.Load(QBHelper.GetConfigPath(ProviderName));
@@ -14,7 +14,7 @@ namespace QuantBox
                     Id = 51,
                     Name = ProviderName,
                     Url = "www.thanf.com",
-                    Description = " 天风期货 CTP 插件",
+                    Description = " QuantBox CTP 插件",
                     UserProductInfo = "OpenQuant",
                     Connections = new List<ConnectionInfo>(),
                     Users = new List<UserInfo>(),
@@ -36,7 +36,7 @@ namespace QuantBox
                 {"UserTopicResumeType", "UserTopicResumeType"},
                 {"UserProductInfo", "UserProductInfo"},
                 {"BrokerID", "BrokerID"},
-                {"AuthCode", "AuthCode"},
+                { "AuthCode", "AuthCode"},
                 {"Address", "Address"},
                 {"Port", "Port"},
                 {"IsUsingUdp", "IsUsingUdp"},

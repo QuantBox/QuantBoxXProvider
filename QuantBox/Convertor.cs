@@ -63,7 +63,9 @@ namespace QuantBox
             inst.Factor = field.VolumeMultiple;
             inst.PriceFormat = "F" + QBHelper.GetPrecision(field.PriceTick);
             inst.Maturity = field.ExpireDate();
-            if (!string.IsNullOrEmpty(field.UnderlyingInstrID)) {
+            if (!string.IsNullOrEmpty(field.UnderlyingInstrID) 
+                && field.UnderlyingInstrID != field.ProductID
+                && !field.InstrumentID.EndsWith("efp")) {
                 var underlying = _provider.InstrumentManager.Get(field.UnderlyingInstrID);
                 if (underlying == null) {
                     _provider.Logger.Warn($"没有找到合约标的物{field.UnderlyingInstrID},请先导入合约标的物");
@@ -109,6 +111,9 @@ namespace QuantBox
         public void ProcessMarketData(DepthMarketDataField field)
         {
             var inst = _provider.InstrumentManager.Get(field.InstrumentID);
+            if (inst == null) {
+                return;
+            }
             if (!_instInitFlag[inst.Id]) {
                 if (field.OpenPrice > 0) {
                     inst.SetMarketData(field);
@@ -122,17 +127,26 @@ namespace QuantBox
             if (exchageTime == DateTime.MaxValue) {
                 _provider.Logger.Warn($"交易所时间解析错误，{field.ActionDay}.{field.UpdateTime}.{field.UpdateMillisec}");
             }
-            if (field.Asks.Length > 0) {
+            if (field.Asks?.Length > 0) {
                 var ask = new Ask(datetime, exchageTime, _provider.Id, inst.Id, field.Asks[0].Price, field.Asks[0].Size);
                 _provider.ProcessMarketData(ask);
             }
-            if (field.Bids.Length > 0) {
+            if (field.Bids?.Length > 0) {
                 var bid = new Bid(datetime, exchageTime, _provider.Id, inst.Id, field.Bids[0].Price, field.Bids[0].Size);
                 _provider.ProcessMarketData(bid);
             }
-            var trade = new QBTrade(datetime, exchageTime, _provider.Id, inst.Id, field.LastPrice, (int)(field.Volume - last.Volume));
-            trade.OpenInterest = field.OpenInterest - last.OpenInterest;
-            trade.Turnover = field.Turnover - last.Turnover;
+
+            var trade = new QBTrade(datetime, exchageTime, _provider.Id, inst.Id, field.LastPrice, 0);
+            if (_provider.VolumeIsAccumulated) {
+                trade.Size = (int)(field.Volume - last.Volume);
+                trade.OpenInterest = field.OpenInterest - last.OpenInterest;
+                trade.Turnover = field.Turnover - last.Turnover;
+            }
+            else {
+                trade.Size = (int)last.Volume;
+                trade.OpenInterest = field.OpenInterest;
+                trade.Turnover = field.Turnover;
+            }
             trade.Field = field;
             _provider.ProcessMarketData(trade);
         }

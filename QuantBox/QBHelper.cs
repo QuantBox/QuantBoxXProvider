@@ -44,9 +44,9 @@ namespace QuantBox
             return Path.Combine(dir, $"{name}.json");
         }
 
-        public static string GetVersionString()
+        public static string GetVersionString(Type type)
         {
-            return Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            return type.Assembly.GetName().Version.ToString();
         }
 
         public static string MakeAbsolutePath(string path, string basePath = null)

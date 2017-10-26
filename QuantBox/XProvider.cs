@@ -36,6 +36,8 @@ namespace QuantBox
         internal TraderClient Trader;
         internal MarketDataClient Market;
 
+        protected internal bool VolumeIsAccumulated = true;
+
         private void CancelInstrumentRequest(InstrumentDefinitionRequest request, string text)
         {
             EmitInstrumentDefinitionEnd(request.Id, RequestResult.Error, text);
@@ -119,9 +121,9 @@ namespace QuantBox
 
         protected internal virtual string GetApiPath(string path)
         {
-            var dllPath = QBHelper.MakeAbsolutePath(path);
+            var dllPath = QBHelper.MakeAbsolutePath(path, Installation.ConfigDir.FullName);
             if (!File.Exists(dllPath)) {
-                dllPath = QBHelper.MakeAbsolutePath(path, Installation.ConfigDir.FullName);
+                dllPath = QBHelper.MakeAbsolutePath(path);
             }
             return dllPath;
         }
@@ -171,6 +173,7 @@ namespace QuantBox
 
         protected override void OnConnect()
         {
+            Status = ProviderStatus.Connecting;
             InitAccoutQueue();
             _emitter.Open();
             _processor.Open();
@@ -180,6 +183,7 @@ namespace QuantBox
 
         protected override void OnDisconnect()
         {
+            Status = ProviderStatus.Disconnecting;
             _connectManager.Post(new OnDisconnect());
         }
 
@@ -216,7 +220,7 @@ namespace QuantBox
 
         private void ClearAccoutQueue()
         {
-            if (IsExecutionProvider) {
+            if (_accountQueue != null) {
                 _accountQueue.Enqueue(new OnQueueClosed(_accountQueue));
                 _accountQueue = null;
             }
@@ -356,7 +360,7 @@ namespace QuantBox
 
         internal byte GetAltId()
         {
-            return InstrumentAltId > 0 ? Id : (byte)InstrumentAltId;
+            return InstrumentAltId > 0 ? (byte)InstrumentAltId : Id;
         }
 
         internal (string, string) GetSymbolInfo(Instrument inst)
@@ -416,7 +420,8 @@ namespace QuantBox
             _convertor = new Convertor(this);
             _timer = new TimedTask(this);
 #if DEBUG
-            _emitter = new EventDebugEmitter(this);
+            //_emitter = new EventDebugEmitter(this);
+            _emitter = new EventEmitter(this);
 #else
             _emitter = new EventEmitter(this);
 #endif
@@ -460,8 +465,12 @@ namespace QuantBox
 
         public override void Send(InstrumentDefinitionRequest request)
         {
-            if (!IsInstrumentProvider || !IsConnected) {
+            if (!IsConnected) {
                 CancelInstrumentRequest(request, MsgProviderNotConnected);
+                return;
+            }
+            if (!IsInstrumentProvider) {
+                CancelInstrumentRequest(request, "没有查询合约的功能");
                 return;
             }
             Task.Run(() => {
@@ -477,7 +486,7 @@ namespace QuantBox
         [Category(InfoSettings)]
         [Description("版本")]
         [ReadOnly(true)]
-        public string Version => QBHelper.GetVersionString();
+        public string Version => QBHelper.GetVersionString(GetType());
 
         private const string CategorySettings = "Settings";
         [Category(CategorySettings)]
