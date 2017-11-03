@@ -154,9 +154,14 @@ namespace QuantBox
             };
         }
 
+        protected virtual string GetSettingsFileName()
+        {
+            return GetType().Name;
+        }
+
         protected internal virtual void SaveSettings()
         {
-            Settings?.Save(QBHelper.GetConfigPath(Settings.Name));
+            Settings?.Save(QBHelper.GetConfigPath(GetSettingsFileName()));
         }
 
         protected internal virtual IDictionary<string, string> GetUserPropertyMap()

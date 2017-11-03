@@ -1,5 +1,4 @@
-﻿using System;
-using SmartQuant;
+﻿using SmartQuant;
 
 namespace QuantBox
 {

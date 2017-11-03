@@ -92,7 +92,7 @@ namespace QuantBox
             if (position == null) {
                 return;
             }
-            if (!_positions.TryGetValue(position.InstrumentID, out AccountPosition item)) {
+            if (!_positions.TryGetValue(position.InstrumentID, out var item)) {
                 item = new AccountPosition();
                 _positions.Add(position.InstrumentID, item);
             }

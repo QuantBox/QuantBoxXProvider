@@ -2,7 +2,7 @@
 
 namespace QuantBox
 {
-    internal class AccountPosition
+    public class AccountPosition
     {
         public string ExchangeId { get; private set; }
 
@@ -39,7 +39,7 @@ namespace QuantBox
                 InstrumentId = position.InstrumentID;
             }
 
-            if (position.Side == QuantBox.XApi.PositionSide.Long) {
+            if (position.Side == PositionSide.Long) {
                 Long = position;
             }
             else {
