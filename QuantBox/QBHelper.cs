@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
+using Microsoft.Win32;
+using NLog;
+using NLog.Config;
 using SmartQuant;
 
 namespace QuantBox
@@ -14,6 +18,29 @@ namespace QuantBox
             BasePath = Path.GetDirectoryName(typeof(XProvider).Assembly.Location) + Path.DirectorySeparatorChar;
         }
 
+        public static string GetSmartQuantPath()
+        {
+            var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{C224DA18-4901-433D-BD94-82D28B640B2C}");
+            if (key != null) {
+                var names = new List<string>(key.GetSubKeyNames());
+                names.Sort();
+                return key.GetValue("InstallLocation").ToString();
+            }
+            return Directory.GetParent(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).FullName;
+        }
+
+        public static void InitNLog()
+        {
+            const string nlogConfig = "NLog.config";
+            var configFile = Path.Combine(BasePath, nlogConfig);
+            if (!File.Exists(configFile)) {
+                configFile = Path.Combine(GetSmartQuantPath(), nlogConfig);
+            }
+            if (File.Exists(configFile)) {
+                LogManager.Configuration = new XmlLoggingConfiguration(configFile, true);
+            }
+        }
+
         public const string UserDataName = "UserData";
 
         public static Instrument[] FilterInstrument(InstrumentDefinitionRequest request, IEnumerable<Instrument> insts)
@@ -23,10 +50,10 @@ namespace QuantBox
                 if (request.FilterType.HasValue && request.FilterType != inst.Type) {
                     continue;
                 }
-                if (!string.IsNullOrEmpty(request.FilterExchange) && inst.Exchange.ToLower() != request.FilterExchange.ToLower()) {
+                if (!String.IsNullOrEmpty(request.FilterExchange) && inst.Exchange.ToLower() != request.FilterExchange.ToLower()) {
                     continue;
                 }
-                if (!string.IsNullOrEmpty(request.FilterSymbol) && !inst.Symbol.ToLower().Contains(request.FilterSymbol.ToLower())) {
+                if (!String.IsNullOrEmpty(request.FilterSymbol) && !inst.Symbol.ToLower().Contains(request.FilterSymbol.ToLower())) {
                     continue;
                 }
                 list.Add(inst);
@@ -60,7 +87,7 @@ namespace QuantBox
         public static int GetPrecision(double value)
         {
             var precision = 0;
-            while (Math.Abs(value * Math.Pow(10, precision) - Math.Round(value * Math.Pow(10, precision))) > double.Epsilon)
+            while (Math.Abs(value * Math.Pow(10, precision) - Math.Round(value * Math.Pow(10, precision))) > Double.Epsilon)
                 precision++;
             return precision;
         }

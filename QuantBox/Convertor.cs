@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using QuantBox.XApi;
@@ -17,6 +18,7 @@ namespace QuantBox
         private readonly Dictionary<string, AccountPosition> _positions = new Dictionary<string, AccountPosition>();
         private readonly IdArray<DepthMarketDataField> _marketData = new IdArray<DepthMarketDataField>();
         private readonly IdArray<bool> _instInitFlag = new IdArray<bool>();
+        private readonly IDictionary<string, Instrument> _instruments = new Dictionary<string, Instrument>();
 
         static Convertor()
         {
@@ -31,6 +33,14 @@ namespace QuantBox
         public Convertor(XProvider provider)
         {
             _provider = provider;
+            Init();
+        }
+
+        private void Init()
+        {
+            foreach (var inst in _provider.InstrumentManager.Instruments) {
+                _instruments.Add(inst.GetSymbol(_provider.GetAltId()), inst);
+            }
         }
 
         public static HedgeFlagType GetHedgeFlag(Order order, HedgeFlagType defaultValue)
@@ -63,7 +73,7 @@ namespace QuantBox
             inst.Factor = field.VolumeMultiple;
             inst.PriceFormat = "F" + QBHelper.GetPrecision(field.PriceTick);
             inst.Maturity = field.ExpireDate();
-            if (!string.IsNullOrEmpty(field.UnderlyingInstrID) 
+            if (!string.IsNullOrEmpty(field.UnderlyingInstrID)
                 && field.UnderlyingInstrID != field.ProductID
                 && !field.InstrumentID.EndsWith("efp")) {
                 var underlying = _provider.InstrumentManager.Get(field.UnderlyingInstrID);
@@ -110,7 +120,7 @@ namespace QuantBox
 
         public void ProcessMarketData(DepthMarketDataField field)
         {
-            var inst = _provider.InstrumentManager.Get(field.InstrumentID);
+            _instruments.TryGetValue(field.InstrumentID, out var inst);
             if (inst == null) {
                 return;
             }
@@ -135,20 +145,21 @@ namespace QuantBox
                 var bid = new Bid(datetime, exchageTime, _provider.Id, inst.Id, field.Bids[0].Price, field.Bids[0].Size);
                 _provider.ProcessMarketData(bid);
             }
-
-            var trade = new QBTrade(datetime, exchageTime, _provider.Id, inst.Id, field.LastPrice, 0);
-            if (_provider.VolumeIsAccumulated) {
-                trade.Size = (int)(field.Volume - last.Volume);
-                trade.OpenInterest = field.OpenInterest - last.OpenInterest;
-                trade.Turnover = field.Turnover - last.Turnover;
+            if (field.LastPrice > double.Epsilon) {
+                var trade = new QBTrade(datetime, exchageTime, _provider.Id, inst.Id, field.LastPrice, 0);
+                if (_provider.VolumeIsAccumulated) {
+                    trade.Size = (int)(field.Volume - last.Volume);
+                    trade.OpenInterest = field.OpenInterest - last.OpenInterest;
+                    trade.Turnover = field.Turnover - last.Turnover;
+                }
+                else {
+                    trade.Size = (int)last.Volume;
+                    trade.OpenInterest = field.OpenInterest;
+                    trade.Turnover = field.Turnover;
+                }
+                trade.Field = field;
+                _provider.ProcessMarketData(trade);
             }
-            else {
-                trade.Size = (int)last.Volume;
-                trade.OpenInterest = field.OpenInterest;
-                trade.Turnover = field.Turnover;
-            }
-            trade.Field = field;
-            _provider.ProcessMarketData(trade);
         }
     }
 }

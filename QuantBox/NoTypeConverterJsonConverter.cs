@@ -31,14 +31,14 @@ namespace QuantBox
             return typeof(T).IsAssignableFrom(objectType);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, Newtonsoft.Json.JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            return Newtonsoft.Json.JsonSerializer.CreateDefault(new JsonSerializerSettings { ContractResolver = Resolver }).Deserialize(reader, objectType);
+            return JsonSerializer.CreateDefault(new JsonSerializerSettings { ContractResolver = Resolver }).Deserialize(reader, objectType);
         }
 
-        public override void WriteJson(JsonWriter writer, object value, Newtonsoft.Json.JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            Newtonsoft.Json.JsonSerializer.CreateDefault(new JsonSerializerSettings { ContractResolver = Resolver }).Serialize(writer, value);
+            JsonSerializer.CreateDefault(new JsonSerializerSettings { ContractResolver = Resolver }).Serialize(writer, value);
         }
     }
 }

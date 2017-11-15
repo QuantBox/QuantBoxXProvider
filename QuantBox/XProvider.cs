@@ -5,7 +5,6 @@ using System.Drawing.Design;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.Win32;
 using NLog;
 using QuantBox.XApi;
 using SmartQuant;
@@ -21,6 +20,10 @@ namespace QuantBox
         private readonly List<Instrument> _instruments = new List<Instrument>();
         private int _tradingDataQueryInterval = 60;
         private int _connectTimeout = 2;
+
+        private string _currentUserId;
+        private string _currentUserPassword;
+        private string _currentServer;
 
         private ApiType _providerCapacity;
         private EventQueue _accountQueue;
@@ -133,14 +136,32 @@ namespace QuantBox
             return new XTradingApi(GetApiPath(path));
         }
 
-        protected internal virtual ServerInfoField GetServerInfo(int index)
+        protected internal virtual ServerInfoField GetServerInfo(int index, ApiType type)
         {
+            if (!string.IsNullOrEmpty(_currentServer)) {
+                return GetServerInfo(_currentServer, type);
+            }
             return Settings.Servers[index].Get();
+        }
+
+        protected virtual ServerInfoField GetServerInfo(string key, ApiType type)
+        {
+            foreach (var server in Settings.Servers) {
+                if (server.Name == key && (server.Type | type) == type) {
+                    return server.Get();
+                }
+            }
+            return null;
         }
 
         protected internal virtual UserInfoField GetUserInfo(int index)
         {
-            return Settings.Users[index].Get();
+            var info = Settings.Users[index].Get();
+            if (!string.IsNullOrEmpty(_currentUserId)) {
+                info.UserID = _currentUserId;
+                info.Password = _currentUserPassword;
+            }
+            return info;
         }
 
         protected virtual XProviderSettings LoadSettings()
@@ -381,27 +402,9 @@ namespace QuantBox
         #endregion
 
         #region Static Member
-        private static string GetSmartQuantPath()
-        {
-            var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{C224DA18-4901-433D-BD94-82D28B640B2C}");
-            if (key != null) {
-                var names = new List<string>(key.GetSubKeyNames());
-                names.Sort();
-                return key.GetValue("InstallLocation").ToString();
-            }
-            return Directory.GetParent(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).FullName;
-        }
-
         static XProvider()
         {
-            const string nlogConfig = "NLog.config";
-            var configFile = Path.Combine(QBHelper.BasePath, nlogConfig);
-            if (!File.Exists(configFile)) {
-                configFile = Path.Combine(GetSmartQuantPath(), nlogConfig);
-            }
-            if (File.Exists(configFile)) {
-                LogManager.Configuration = new NLog.Config.XmlLoggingConfiguration(configFile, true);
-            }
+            QBHelper.InitNLog();
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
         }
 
@@ -436,6 +439,13 @@ namespace QuantBox
         ~XProvider()
         {
             SaveSettings();
+        }
+
+        public void SetConnectInfo(string server, string userId, string password)
+        {
+            _currentServer = server;
+            _currentUserId = userId;
+            _currentUserPassword = password;
         }
 
         public override void Send(ExecutionCommand command)

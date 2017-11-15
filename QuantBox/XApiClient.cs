@@ -78,7 +78,7 @@ namespace QuantBox
             Info = info;
             Provider = provider;
             User = provider.GetUserInfo(info.User);
-            Server = provider.GetServerInfo(info.Server);
+            Server = provider.GetServerInfo(info.Server, info.UseType);
             Logger = LogManager.GetLogger($"{provider.Name}.{info.LogPrefix}.{User.UserID}");
             Api = provider.CreateXApi(provider.GetApiPath(Info.ApiPath));
             Api.ErrorHappened += OnErrorHappened;

@@ -20,6 +20,15 @@ namespace QuantBox
         [DataMember]
         public string Label { get; set; }
 
+        [Category("标签")]
+        [DataMember]
+        public string Name { get; set; }
+
+        [Category("标签")]
+        [Editor(typeof(ApiTypeSelectorEditor), typeof(UITypeEditor))]
+        [DataMember]
+        public ApiType Type { get; set; }
+
         /// <summary>
         /// 订阅主题
         /// </summary>

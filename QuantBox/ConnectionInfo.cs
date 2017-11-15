@@ -2,6 +2,7 @@
 using System.Drawing.Design;
 using System.Runtime.Serialization;
 using System.Windows.Forms.Design;
+using QuantBox.Design;
 using QuantBox.XApi;
 
 namespace QuantBox
@@ -26,11 +27,11 @@ namespace QuantBox
         [DataMember]
         public string Version { get; set; }
 
-        [TypeConverter(typeof(Design.UserSelectorConverter))]
+        [TypeConverter(typeof(UserSelectorConverter))]
         [DataMember]
         public int User { get; set; }
 
-        [TypeConverter(typeof(Design.ServerSelectorConverter))]
+        [TypeConverter(typeof(ServerSelectorConverter))]
         [DataMember]
         public int Server { get; set; }
 
@@ -46,7 +47,7 @@ namespace QuantBox
         public ApiType Type { get; set; }
 
         [Category(CategoryType)]
-        [Editor(typeof(Design.ApiTypeSelectorEditor), typeof(UITypeEditor))]
+        [Editor(typeof(ApiTypeSelectorEditor), typeof(UITypeEditor))]
         [DataMember]
         public ApiType UseType { get; set; }
 
