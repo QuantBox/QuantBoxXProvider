@@ -199,8 +199,9 @@ namespace QuantBox
 
         protected override void OnConnect()
         {
-            Status = ProviderStatus.Connecting;
+            Status = ProviderStatus.Connecting;            
             InitAccoutQueue();
+            _convertor.Init();
             _emitter.Open();
             _processor.Open();
             _timer.Start();

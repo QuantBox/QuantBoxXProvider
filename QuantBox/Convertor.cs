@@ -36,13 +36,18 @@ namespace QuantBox
             Init();
         }
 
-        private void Init()
+        public void Init()
         {
+            _instruments.Clear();
             foreach (var inst in _provider.InstrumentManager.Instruments) {
-                _instruments.Add(inst.GetSymbol(_provider.GetAltId()), inst);
+                if (inst.Maturity < DateTime.Today)
+                    continue;
+                var key = inst.GetSymbol(_provider.GetAltId());
+                _instruments.Remove(key);
+                _instruments.Add(key, inst);
             }
         }
-
+        
         public static HedgeFlagType GetHedgeFlag(Order order, HedgeFlagType defaultValue)
         {
             var flag = order.GetHedgeFlag();
