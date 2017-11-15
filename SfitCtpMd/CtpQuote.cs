@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using QuantBox.Sfit.Api;
-using Skyline;
 
 namespace QuantBox.XApi
 {
@@ -18,7 +16,7 @@ namespace QuantBox.XApi
         private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args)
         {
             var assemblyName = new AssemblyName(args.Name);
-            var path = Utility.GetCurrentPath(typeof(CtpQuote));
+            var path = Path.GetDirectoryName(typeof(CtpQuote).Assembly.Location);
             path = Path.Combine(path, assemblyName.Name + ".dll");
             return File.Exists(path) ? Assembly.LoadFile(path) : null;
         }

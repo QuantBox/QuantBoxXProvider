@@ -37,10 +37,6 @@
     <Reference Include="QuantBox.Sfit.Api, Version=6.3.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\GalaxyFutures.Sfit.Api.6.3.11\lib\net45\QuantBox.Sfit.Api.dll</HintPath>
     </Reference>
-    <Reference Include="Skyline.Core, Version=2017.8.8.0, Culture=neutral, PublicKeyToken=9ff31e85b4b12396, processorArchitecture=MSIL">
-      <HintPath>..\packages\Skyline.Lite.2017.8.8.0\lib\net40\Skyline.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
