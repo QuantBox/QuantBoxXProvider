@@ -4,12 +4,16 @@ namespace QuantBox.Sfit.Api
 {       
     public class CtpMdSpi : CtpSpi
     {    
-        void InitHandlerList()
+        private void InitHandlerList()
         {
-            RspHandlerList = new Action<CtpResponse>[CtpResponseType.Max];
+            void DefaultResponseHandler(ref CtpResponse rsp)
+            {
+            }
+            
+            RspHandlerList = new CtpResponseAction[CtpResponseType.Max];
             for (var i = 0; i < CtpResponseType.Max; i++)
             {
-                RspHandlerList[i] = (rsp) => {};
+                RspHandlerList[i] = DefaultResponseHandler;
             }        
             
             #region Response Handler
@@ -29,7 +33,7 @@ namespace QuantBox.Sfit.Api
         }        
         
         #region Event Definition
-        void DoFrontConnected(CtpResponse rsp)
+        private void DoFrontConnected(ref CtpResponse rsp)
         {
             var handler = OnFrontConnected;
             if (handler != null){
@@ -39,7 +43,7 @@ namespace QuantBox.Sfit.Api
         
         public event CtpEventHandler OnFrontConnected;
          
-        void DoFrontDisconnected(CtpResponse rsp)
+        private void DoFrontDisconnected(ref CtpResponse rsp)
         {
             var handler = OnFrontDisconnected;
             if (handler != null){
@@ -49,7 +53,7 @@ namespace QuantBox.Sfit.Api
         
         public event CtpEventHandler<int> OnFrontDisconnected;
          
-        void DoHeartBeatWarning(CtpResponse rsp)
+        private void DoHeartBeatWarning(ref CtpResponse rsp)
         {
             var handler = OnHeartBeatWarning;
             if (handler != null){
@@ -59,77 +63,77 @@ namespace QuantBox.Sfit.Api
         
         public event CtpEventHandler<int> OnHeartBeatWarning;
          
-        void DoRspUserLogin(CtpResponse rsp)
+        private void DoRspUserLogin(ref CtpResponse rsp)
         {
             var handler = OnRspUserLogin;
             if (handler != null){
-                handler(this, rsp.Item1.AsRspUserLogin, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+                handler(this, rsp.Item1.AsRspUserLogin, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
         
         public event CtpEventHandler4<CtpRspUserLogin> OnRspUserLogin;
          
-        void DoRspUserLogout(CtpResponse rsp)
+        private void DoRspUserLogout(ref CtpResponse rsp)
         {
             var handler = OnRspUserLogout;
             if (handler != null){
-                handler(this, rsp.Item1.AsUserLogout, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+                handler(this, rsp.Item1.AsUserLogout, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
         
         public event CtpEventHandler4<CtpUserLogout> OnRspUserLogout;
          
-        void DoRspError(CtpResponse rsp)
+        private void DoRspError(ref CtpResponse rsp)
         {
             var handler = OnRspError;
             if (handler != null){
-                handler(this, rsp.Item1.AsRspInfo, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+                handler(this, rsp.Item1.AsRspInfo, rsp.RequestID, rsp.IsLast);
             }
         }
         
         public event CtpEventHandler3 OnRspError;
          
-        void DoRspSubMarketData(CtpResponse rsp)
+        private void DoRspSubMarketData(ref CtpResponse rsp)
         {
             var handler = OnRspSubMarketData;
             if (handler != null){
-                handler(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+                handler(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
         
         public event CtpEventHandler4<CtpSpecificInstrument> OnRspSubMarketData;
          
-        void DoRspUnSubMarketData(CtpResponse rsp)
+        private void DoRspUnSubMarketData(ref CtpResponse rsp)
         {
             var handler = OnRspUnSubMarketData;
             if (handler != null){
-                handler(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+                handler(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
         
         public event CtpEventHandler4<CtpSpecificInstrument> OnRspUnSubMarketData;
          
-        void DoRspSubForQuoteRsp(CtpResponse rsp)
+        private void DoRspSubForQuoteRsp(ref CtpResponse rsp)
         {
             var handler = OnRspSubForQuoteRsp;
             if (handler != null){
-                handler(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+                handler(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
         
         public event CtpEventHandler4<CtpSpecificInstrument> OnRspSubForQuoteRsp;
          
-        void DoRspUnSubForQuoteRsp(CtpResponse rsp)
+        private void DoRspUnSubForQuoteRsp(ref CtpResponse rsp)
         {
             var handler = OnRspUnSubForQuoteRsp;
             if (handler != null){
-                handler(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+                handler(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
         
         public event CtpEventHandler4<CtpSpecificInstrument> OnRspUnSubForQuoteRsp;
          
-        void DoRtnDepthMarketData(CtpResponse rsp)
+        private void DoRtnDepthMarketData(ref CtpResponse rsp)
         {
             var handler = OnRtnDepthMarketData;
             if (handler != null){
@@ -139,7 +143,7 @@ namespace QuantBox.Sfit.Api
         
         public event CtpEventHandler<CtpDepthMarketData> OnRtnDepthMarketData;
          
-        void DoRtnForQuoteRsp(CtpResponse rsp)
+        private void DoRtnForQuoteRsp(ref CtpResponse rsp)
         {
             var handler = OnRtnForQuoteRsp;
             if (handler != null){
@@ -156,24 +160,24 @@ namespace QuantBox.Sfit.Api
             InitHandlerList();
         }
         
-        public override void ProcessResponse(CtpResponse rsp)
+        public override void ProcessResponse(ref CtpResponse rsp)
         {
             switch (rsp.TypeId) {
                 case CtpResponseType.Response:
                 case CtpResponseType.Max:
                     break;
                 default:
-                    RspHandlerList[rsp.TypeId](rsp);
+                    RspHandlerList[rsp.TypeId](ref rsp);
                     break;
             }
         }
         
-        public override void SetResponseHandler(byte type, Action<CtpResponse> handler)
+        public override void SetResponseHandler(byte type, CtpResponseAction handler)
         {
             if (type < CtpResponseType.Max)
                 RspHandlerList[type] = handler;
         }
         
-        public Action<CtpResponse>[] RspHandlerList { get; private set; }
+        public CtpResponseAction[] RspHandlerList { get; private set; }
     }
 }

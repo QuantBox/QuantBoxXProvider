@@ -16,7 +16,7 @@ namespace QuantBox.XApi
         private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args)
         {
             var assemblyName = new AssemblyName(args.Name);
-            var path = Path.GetDirectoryName(typeof(CtpQuote).Assembly.Location);
+            var path = Path.GetDirectoryName(typeof(CtpQuote).Assembly.Location);            
             path = Path.Combine(path, assemblyName.Name + ".dll");
             return File.Exists(path) ? Assembly.LoadFile(path) : null;
         }
@@ -47,7 +47,7 @@ namespace QuantBox.XApi
 
         public void Query(QueryType type, ReqQueryField query)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void Subscribe(string instrument, string exchange, InstrumentType type)
@@ -62,17 +62,21 @@ namespace QuantBox.XApi
 
         public string SendOrder(params OrderField[] orders)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public string CancelOrder(params string[] list)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public string ApiVersion => GetType().Assembly.GetName().Version.ToString();
         public ApiType ApiTypes => ApiType.MarketData;
+#if CTP
         public string ApiName => "CTP";
+#else
+        public string ApiName => "Rohon";
+#endif
         public bool Connected => _client?.Connected ?? false;
         public ServerInfoField Server => _client?.Server;
         public UserInfoField User => _client?.User;

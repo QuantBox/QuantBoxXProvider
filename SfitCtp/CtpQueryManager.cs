@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
+#if CTP
 using QuantBox.Sfit.Api;
+#else
+using QuantBox.Rohon.Api;
+#endif
 
 namespace QuantBox.XApi
 {
@@ -60,7 +64,7 @@ namespace QuantBox.XApi
             if (data == null)
                 return;
             if (CtpConvert.CheckRspInfo(rsp.Item2)) {
-                _client.Spi.ProcessQryAccount(CtpConvert.GetAccountField(data), rsp.IsLast == CtpResponse.True);
+                _client.Spi.ProcessQryAccount(CtpConvert.GetAccountField(data), rsp.IsLast);
             }
             else {
                 _client.SendError(rsp.Item2, nameof(ProcessAccount));
@@ -73,7 +77,7 @@ namespace QuantBox.XApi
             if (data == null)
                 return;
             if (CtpConvert.CheckRspInfo(rsp.Item2)) {
-                _client.Spi.ProcessQryPosition(CtpConvert.GetPositionField(data), rsp.IsLast == CtpResponse.True);
+                _client.Spi.ProcessQryPosition(CtpConvert.GetPositionField(data), rsp.IsLast);
             }
             else {
                 _client.SendError(rsp.Item2, nameof(ProcessPosition));
@@ -87,7 +91,7 @@ namespace QuantBox.XApi
                 if (data == null)
                     return;
                 if (CtpConvert.CheckRspInfo(rsp.Item2)) {
-                    _client.Spi.ProcessQryInstrument(CtpConvert.GetInstrumentField(data), rsp.IsLast == CtpResponse.True);
+                    _client.Spi.ProcessQryInstrument(CtpConvert.GetInstrumentField(data), rsp.IsLast);
                 }
                 else {
                     _client.SendError(rsp.Item2, nameof(ProcessInstrument));

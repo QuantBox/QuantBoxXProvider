@@ -1,16 +1,21 @@
 ﻿using System;
 
 namespace QuantBox.Sfit.Api
-{
+{       
     public class CtpTraderSpi : CtpSpi
-    {
-        void InitHandlerList()
+    {    
+        private void InitHandlerList()
         {
-            RspHandlerList = new Action<CtpResponse>[CtpResponseType.Max];
-            for (var i = 0; i < CtpResponseType.Max; i++) {
-                RspHandlerList[i] = (rsp) => { };
+            void DefaultResponseHandler(ref CtpResponse rsp)
+            {
             }
-
+            
+            RspHandlerList = new CtpResponseAction[CtpResponseType.Max];
+            for (var i = 0; i < CtpResponseType.Max; i++)
+            {
+                RspHandlerList[i] = DefaultResponseHandler;
+            }        
+            
             #region Response Handler
             RspHandlerList[CtpResponseType.OnFrontConnected] = DoFrontConnected;
             RspHandlerList[CtpResponseType.OnFrontDisconnected] = DoFrontDisconnected;
@@ -121,1114 +126,1114 @@ namespace QuantBox.Sfit.Api
             RspHandlerList[CtpResponseType.OnRtnCancelAccountByBank] = DoRtnCancelAccountByBank;
             RspHandlerList[CtpResponseType.OnRtnChangeAccountByBank] = DoRtnChangeAccountByBank;
             #endregion
-        }
-
+        }        
+        
         #region Event Definition
-        void DoFrontConnected(CtpResponse rsp)
+        private void DoFrontConnected(ref CtpResponse rsp)
         {
             var handler = OnFrontConnected;
-            if (handler != null) {
+            if (handler != null){
                 handler(this);
             }
         }
-
+        
         public event CtpEventHandler OnFrontConnected;
-
-        void DoFrontDisconnected(CtpResponse rsp)
+         
+        private void DoFrontDisconnected(ref CtpResponse rsp)
         {
             var handler = OnFrontDisconnected;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsInt.Value);
             }
         }
-
+        
         public event CtpEventHandler<int> OnFrontDisconnected;
-
-        void DoHeartBeatWarning(CtpResponse rsp)
+         
+        private void DoHeartBeatWarning(ref CtpResponse rsp)
         {
             var handler = OnHeartBeatWarning;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsInt.Value);
             }
         }
-
+        
         public event CtpEventHandler<int> OnHeartBeatWarning;
-
-        void DoRspAuthenticate(CtpResponse rsp)
+         
+        private void DoRspAuthenticate(ref CtpResponse rsp)
         {
             var handler = OnRspAuthenticate;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsRspAuthenticate, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsRspAuthenticate, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpRspAuthenticate> OnRspAuthenticate;
-
-        void DoRspUserLogin(CtpResponse rsp)
+         
+        private void DoRspUserLogin(ref CtpResponse rsp)
         {
             var handler = OnRspUserLogin;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsRspUserLogin, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsRspUserLogin, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpRspUserLogin> OnRspUserLogin;
-
-        void DoRspUserLogout(CtpResponse rsp)
+         
+        private void DoRspUserLogout(ref CtpResponse rsp)
         {
             var handler = OnRspUserLogout;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsUserLogout, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsUserLogout, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpUserLogout> OnRspUserLogout;
-
-        void DoRspUserPasswordUpdate(CtpResponse rsp)
+         
+        private void DoRspUserPasswordUpdate(ref CtpResponse rsp)
         {
             var handler = OnRspUserPasswordUpdate;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsUserPasswordUpdate, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsUserPasswordUpdate, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpUserPasswordUpdate> OnRspUserPasswordUpdate;
-
-        void DoRspTradingAccountPasswordUpdate(CtpResponse rsp)
+         
+        private void DoRspTradingAccountPasswordUpdate(ref CtpResponse rsp)
         {
             var handler = OnRspTradingAccountPasswordUpdate;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsTradingAccountPasswordUpdate, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsTradingAccountPasswordUpdate, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpTradingAccountPasswordUpdate> OnRspTradingAccountPasswordUpdate;
-
-        void DoRspOrderInsert(CtpResponse rsp)
+         
+        private void DoRspOrderInsert(ref CtpResponse rsp)
         {
             var handler = OnRspOrderInsert;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInputOrder, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInputOrder, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInputOrder> OnRspOrderInsert;
-
-        void DoRspParkedOrderInsert(CtpResponse rsp)
+         
+        private void DoRspParkedOrderInsert(ref CtpResponse rsp)
         {
             var handler = OnRspParkedOrderInsert;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsParkedOrder, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsParkedOrder, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpParkedOrder> OnRspParkedOrderInsert;
-
-        void DoRspParkedOrderAction(CtpResponse rsp)
+         
+        private void DoRspParkedOrderAction(ref CtpResponse rsp)
         {
             var handler = OnRspParkedOrderAction;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsParkedOrderAction, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsParkedOrderAction, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpParkedOrderAction> OnRspParkedOrderAction;
-
-        void DoRspOrderAction(CtpResponse rsp)
+         
+        private void DoRspOrderAction(ref CtpResponse rsp)
         {
             var handler = OnRspOrderAction;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInputOrderAction, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInputOrderAction, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInputOrderAction> OnRspOrderAction;
-
-        void DoRspQueryMaxOrderVolume(CtpResponse rsp)
+         
+        private void DoRspQueryMaxOrderVolume(ref CtpResponse rsp)
         {
             var handler = OnRspQueryMaxOrderVolume;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsQueryMaxOrderVolume, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsQueryMaxOrderVolume, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpQueryMaxOrderVolume> OnRspQueryMaxOrderVolume;
-
-        void DoRspSettlementInfoConfirm(CtpResponse rsp)
+         
+        private void DoRspSettlementInfoConfirm(ref CtpResponse rsp)
         {
             var handler = OnRspSettlementInfoConfirm;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsSettlementInfoConfirm, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsSettlementInfoConfirm, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpSettlementInfoConfirm> OnRspSettlementInfoConfirm;
-
-        void DoRspRemoveParkedOrder(CtpResponse rsp)
+         
+        private void DoRspRemoveParkedOrder(ref CtpResponse rsp)
         {
             var handler = OnRspRemoveParkedOrder;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsRemoveParkedOrder, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsRemoveParkedOrder, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpRemoveParkedOrder> OnRspRemoveParkedOrder;
-
-        void DoRspRemoveParkedOrderAction(CtpResponse rsp)
+         
+        private void DoRspRemoveParkedOrderAction(ref CtpResponse rsp)
         {
             var handler = OnRspRemoveParkedOrderAction;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsRemoveParkedOrderAction, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsRemoveParkedOrderAction, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpRemoveParkedOrderAction> OnRspRemoveParkedOrderAction;
-
-        void DoRspExecOrderInsert(CtpResponse rsp)
+         
+        private void DoRspExecOrderInsert(ref CtpResponse rsp)
         {
             var handler = OnRspExecOrderInsert;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInputExecOrder, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInputExecOrder, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInputExecOrder> OnRspExecOrderInsert;
-
-        void DoRspExecOrderAction(CtpResponse rsp)
+         
+        private void DoRspExecOrderAction(ref CtpResponse rsp)
         {
             var handler = OnRspExecOrderAction;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInputExecOrderAction, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInputExecOrderAction, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInputExecOrderAction> OnRspExecOrderAction;
-
-        void DoRspForQuoteInsert(CtpResponse rsp)
+         
+        private void DoRspForQuoteInsert(ref CtpResponse rsp)
         {
             var handler = OnRspForQuoteInsert;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInputForQuote, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInputForQuote, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInputForQuote> OnRspForQuoteInsert;
-
-        void DoRspQuoteInsert(CtpResponse rsp)
+         
+        private void DoRspQuoteInsert(ref CtpResponse rsp)
         {
             var handler = OnRspQuoteInsert;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInputQuote, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInputQuote, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInputQuote> OnRspQuoteInsert;
-
-        void DoRspQuoteAction(CtpResponse rsp)
+         
+        private void DoRspQuoteAction(ref CtpResponse rsp)
         {
             var handler = OnRspQuoteAction;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInputQuoteAction, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInputQuoteAction, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInputQuoteAction> OnRspQuoteAction;
-
-        void DoRspBatchOrderAction(CtpResponse rsp)
+         
+        private void DoRspBatchOrderAction(ref CtpResponse rsp)
         {
             var handler = OnRspBatchOrderAction;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInputBatchOrderAction, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInputBatchOrderAction, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInputBatchOrderAction> OnRspBatchOrderAction;
-
-        void DoRspCombActionInsert(CtpResponse rsp)
+         
+        private void DoRspCombActionInsert(ref CtpResponse rsp)
         {
             var handler = OnRspCombActionInsert;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInputCombAction, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInputCombAction, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInputCombAction> OnRspCombActionInsert;
-
-        void DoRspQryOrder(CtpResponse rsp)
+         
+        private void DoRspQryOrder(ref CtpResponse rsp)
         {
             var handler = OnRspQryOrder;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsOrder, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsOrder, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpOrder> OnRspQryOrder;
-
-        void DoRspQryTrade(CtpResponse rsp)
+         
+        private void DoRspQryTrade(ref CtpResponse rsp)
         {
             var handler = OnRspQryTrade;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsTrade, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsTrade, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpTrade> OnRspQryTrade;
-
-        void DoRspQryInvestorPosition(CtpResponse rsp)
+         
+        private void DoRspQryInvestorPosition(ref CtpResponse rsp)
         {
             var handler = OnRspQryInvestorPosition;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInvestorPosition, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInvestorPosition, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInvestorPosition> OnRspQryInvestorPosition;
-
-        void DoRspQryTradingAccount(CtpResponse rsp)
+         
+        private void DoRspQryTradingAccount(ref CtpResponse rsp)
         {
             var handler = OnRspQryTradingAccount;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsTradingAccount, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsTradingAccount, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpTradingAccount> OnRspQryTradingAccount;
-
-        void DoRspQryInvestor(CtpResponse rsp)
+         
+        private void DoRspQryInvestor(ref CtpResponse rsp)
         {
             var handler = OnRspQryInvestor;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInvestor, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInvestor, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInvestor> OnRspQryInvestor;
-
-        void DoRspQryTradingCode(CtpResponse rsp)
+         
+        private void DoRspQryTradingCode(ref CtpResponse rsp)
         {
             var handler = OnRspQryTradingCode;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsTradingCode, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsTradingCode, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpTradingCode> OnRspQryTradingCode;
-
-        void DoRspQryInstrumentMarginRate(CtpResponse rsp)
+         
+        private void DoRspQryInstrumentMarginRate(ref CtpResponse rsp)
         {
             var handler = OnRspQryInstrumentMarginRate;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInstrumentMarginRate, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInstrumentMarginRate, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInstrumentMarginRate> OnRspQryInstrumentMarginRate;
-
-        void DoRspQryInstrumentCommissionRate(CtpResponse rsp)
+         
+        private void DoRspQryInstrumentCommissionRate(ref CtpResponse rsp)
         {
             var handler = OnRspQryInstrumentCommissionRate;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInstrumentCommissionRate, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInstrumentCommissionRate, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInstrumentCommissionRate> OnRspQryInstrumentCommissionRate;
-
-        void DoRspQryExchange(CtpResponse rsp)
+         
+        private void DoRspQryExchange(ref CtpResponse rsp)
         {
             var handler = OnRspQryExchange;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsExchange, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsExchange, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpExchange> OnRspQryExchange;
-
-        void DoRspQryProduct(CtpResponse rsp)
+         
+        private void DoRspQryProduct(ref CtpResponse rsp)
         {
             var handler = OnRspQryProduct;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsProduct, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsProduct, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpProduct> OnRspQryProduct;
-
-        void DoRspQryInstrument(CtpResponse rsp)
+         
+        private void DoRspQryInstrument(ref CtpResponse rsp)
         {
             var handler = OnRspQryInstrument;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInstrument> OnRspQryInstrument;
-
-        void DoRspQryDepthMarketData(CtpResponse rsp)
+         
+        private void DoRspQryDepthMarketData(ref CtpResponse rsp)
         {
             var handler = OnRspQryDepthMarketData;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsDepthMarketData, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsDepthMarketData, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpDepthMarketData> OnRspQryDepthMarketData;
-
-        void DoRspQrySettlementInfo(CtpResponse rsp)
+         
+        private void DoRspQrySettlementInfo(ref CtpResponse rsp)
         {
             var handler = OnRspQrySettlementInfo;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsSettlementInfo, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsSettlementInfo, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpSettlementInfo> OnRspQrySettlementInfo;
-
-        void DoRspQryTransferBank(CtpResponse rsp)
+         
+        private void DoRspQryTransferBank(ref CtpResponse rsp)
         {
             var handler = OnRspQryTransferBank;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsTransferBank, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsTransferBank, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpTransferBank> OnRspQryTransferBank;
-
-        void DoRspQryInvestorPositionDetail(CtpResponse rsp)
+         
+        private void DoRspQryInvestorPositionDetail(ref CtpResponse rsp)
         {
             var handler = OnRspQryInvestorPositionDetail;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInvestorPositionDetail, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInvestorPositionDetail, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInvestorPositionDetail> OnRspQryInvestorPositionDetail;
-
-        void DoRspQryNotice(CtpResponse rsp)
+         
+        private void DoRspQryNotice(ref CtpResponse rsp)
         {
             var handler = OnRspQryNotice;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsNotice, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsNotice, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpNotice> OnRspQryNotice;
-
-        void DoRspQrySettlementInfoConfirm(CtpResponse rsp)
+         
+        private void DoRspQrySettlementInfoConfirm(ref CtpResponse rsp)
         {
             var handler = OnRspQrySettlementInfoConfirm;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsSettlementInfoConfirm, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsSettlementInfoConfirm, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpSettlementInfoConfirm> OnRspQrySettlementInfoConfirm;
-
-        void DoRspQryInvestorPositionCombineDetail(CtpResponse rsp)
+         
+        private void DoRspQryInvestorPositionCombineDetail(ref CtpResponse rsp)
         {
             var handler = OnRspQryInvestorPositionCombineDetail;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInvestorPositionCombineDetail, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInvestorPositionCombineDetail, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInvestorPositionCombineDetail> OnRspQryInvestorPositionCombineDetail;
-
-        void DoRspQryCFMMCTradingAccountKey(CtpResponse rsp)
+         
+        private void DoRspQryCFMMCTradingAccountKey(ref CtpResponse rsp)
         {
             var handler = OnRspQryCFMMCTradingAccountKey;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsCFMMCTradingAccountKey, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsCFMMCTradingAccountKey, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpCFMMCTradingAccountKey> OnRspQryCFMMCTradingAccountKey;
-
-        void DoRspQryEWarrantOffset(CtpResponse rsp)
+         
+        private void DoRspQryEWarrantOffset(ref CtpResponse rsp)
         {
             var handler = OnRspQryEWarrantOffset;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsEWarrantOffset, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsEWarrantOffset, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpEWarrantOffset> OnRspQryEWarrantOffset;
-
-        void DoRspQryInvestorProductGroupMargin(CtpResponse rsp)
+         
+        private void DoRspQryInvestorProductGroupMargin(ref CtpResponse rsp)
         {
             var handler = OnRspQryInvestorProductGroupMargin;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsInvestorProductGroupMargin, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsInvestorProductGroupMargin, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpInvestorProductGroupMargin> OnRspQryInvestorProductGroupMargin;
-
-        void DoRspQryExchangeMarginRate(CtpResponse rsp)
+         
+        private void DoRspQryExchangeMarginRate(ref CtpResponse rsp)
         {
             var handler = OnRspQryExchangeMarginRate;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsExchangeMarginRate, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsExchangeMarginRate, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpExchangeMarginRate> OnRspQryExchangeMarginRate;
-
-        void DoRspQryExchangeMarginRateAdjust(CtpResponse rsp)
+         
+        private void DoRspQryExchangeMarginRateAdjust(ref CtpResponse rsp)
         {
             var handler = OnRspQryExchangeMarginRateAdjust;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsExchangeMarginRateAdjust, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsExchangeMarginRateAdjust, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpExchangeMarginRateAdjust> OnRspQryExchangeMarginRateAdjust;
-
-        void DoRspQryExchangeRate(CtpResponse rsp)
+         
+        private void DoRspQryExchangeRate(ref CtpResponse rsp)
         {
             var handler = OnRspQryExchangeRate;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsExchangeRate, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsExchangeRate, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpExchangeRate> OnRspQryExchangeRate;
-
-        void DoRspQrySecAgentACIDMap(CtpResponse rsp)
+         
+        private void DoRspQrySecAgentACIDMap(ref CtpResponse rsp)
         {
             var handler = OnRspQrySecAgentACIDMap;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsSecAgentACIDMap, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsSecAgentACIDMap, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpSecAgentACIDMap> OnRspQrySecAgentACIDMap;
-
-        void DoRspQryProductExchRate(CtpResponse rsp)
+         
+        private void DoRspQryProductExchRate(ref CtpResponse rsp)
         {
             var handler = OnRspQryProductExchRate;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsProductExchRate, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsProductExchRate, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpProductExchRate> OnRspQryProductExchRate;
-
-        void DoRspQryProductGroup(CtpResponse rsp)
+         
+        private void DoRspQryProductGroup(ref CtpResponse rsp)
         {
             var handler = OnRspQryProductGroup;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsProductGroup, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsProductGroup, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpProductGroup> OnRspQryProductGroup;
-
-        void DoRspQryOptionInstrTradeCost(CtpResponse rsp)
+         
+        private void DoRspQryOptionInstrTradeCost(ref CtpResponse rsp)
         {
             var handler = OnRspQryOptionInstrTradeCost;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsOptionInstrTradeCost, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsOptionInstrTradeCost, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpOptionInstrTradeCost> OnRspQryOptionInstrTradeCost;
-
-        void DoRspQryOptionInstrCommRate(CtpResponse rsp)
+         
+        private void DoRspQryOptionInstrCommRate(ref CtpResponse rsp)
         {
             var handler = OnRspQryOptionInstrCommRate;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsOptionInstrCommRate, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsOptionInstrCommRate, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpOptionInstrCommRate> OnRspQryOptionInstrCommRate;
-
-        void DoRspQryExecOrder(CtpResponse rsp)
+         
+        private void DoRspQryExecOrder(ref CtpResponse rsp)
         {
             var handler = OnRspQryExecOrder;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsExecOrder, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsExecOrder, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpExecOrder> OnRspQryExecOrder;
-
-        void DoRspQryForQuote(CtpResponse rsp)
+         
+        private void DoRspQryForQuote(ref CtpResponse rsp)
         {
             var handler = OnRspQryForQuote;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsForQuote, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsForQuote, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpForQuote> OnRspQryForQuote;
-
-        void DoRspQryQuote(CtpResponse rsp)
+         
+        private void DoRspQryQuote(ref CtpResponse rsp)
         {
             var handler = OnRspQryQuote;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsQuote, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsQuote, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpQuote> OnRspQryQuote;
-
-        void DoRspQryCombInstrumentGuard(CtpResponse rsp)
+         
+        private void DoRspQryCombInstrumentGuard(ref CtpResponse rsp)
         {
             var handler = OnRspQryCombInstrumentGuard;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsCombInstrumentGuard, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsCombInstrumentGuard, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpCombInstrumentGuard> OnRspQryCombInstrumentGuard;
-
-        void DoRspQryCombAction(CtpResponse rsp)
+         
+        private void DoRspQryCombAction(ref CtpResponse rsp)
         {
             var handler = OnRspQryCombAction;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsCombAction, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsCombAction, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpCombAction> OnRspQryCombAction;
-
-        void DoRspQryTransferSerial(CtpResponse rsp)
+         
+        private void DoRspQryTransferSerial(ref CtpResponse rsp)
         {
             var handler = OnRspQryTransferSerial;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsTransferSerial, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsTransferSerial, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpTransferSerial> OnRspQryTransferSerial;
-
-        void DoRspQryAccountregister(CtpResponse rsp)
+         
+        private void DoRspQryAccountregister(ref CtpResponse rsp)
         {
             var handler = OnRspQryAccountregister;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsAccountregister, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsAccountregister, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpAccountregister> OnRspQryAccountregister;
-
-        void DoRspError(CtpResponse rsp)
+         
+        private void DoRspError(ref CtpResponse rsp)
         {
             var handler = OnRspError;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsRspInfo, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsRspInfo, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler3 OnRspError;
-
-        void DoRtnOrder(CtpResponse rsp)
+         
+        private void DoRtnOrder(ref CtpResponse rsp)
         {
             var handler = OnRtnOrder;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsOrder);
             }
         }
-
+        
         public event CtpEventHandler<CtpOrder> OnRtnOrder;
-
-        void DoRtnTrade(CtpResponse rsp)
+         
+        private void DoRtnTrade(ref CtpResponse rsp)
         {
             var handler = OnRtnTrade;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsTrade);
             }
         }
-
+        
         public event CtpEventHandler<CtpTrade> OnRtnTrade;
-
-        void DoErrRtnOrderInsert(CtpResponse rsp)
+         
+        private void DoErrRtnOrderInsert(ref CtpResponse rsp)
         {
             var handler = OnErrRtnOrderInsert;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsInputOrder, rsp.Item2);
             }
         }
-
+        
         public event CtpEventHandler2<CtpInputOrder> OnErrRtnOrderInsert;
-
-        void DoErrRtnOrderAction(CtpResponse rsp)
+         
+        private void DoErrRtnOrderAction(ref CtpResponse rsp)
         {
             var handler = OnErrRtnOrderAction;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsOrderAction, rsp.Item2);
             }
         }
-
+        
         public event CtpEventHandler2<CtpOrderAction> OnErrRtnOrderAction;
-
-        void DoRtnInstrumentStatus(CtpResponse rsp)
+         
+        private void DoRtnInstrumentStatus(ref CtpResponse rsp)
         {
             var handler = OnRtnInstrumentStatus;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsInstrumentStatus);
             }
         }
-
+        
         public event CtpEventHandler<CtpInstrumentStatus> OnRtnInstrumentStatus;
-
-        void DoRtnTradingNotice(CtpResponse rsp)
+         
+        private void DoRtnTradingNotice(ref CtpResponse rsp)
         {
             var handler = OnRtnTradingNotice;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsTradingNoticeInfo);
             }
         }
-
+        
         public event CtpEventHandler<CtpTradingNoticeInfo> OnRtnTradingNotice;
-
-        void DoRtnErrorConditionalOrder(CtpResponse rsp)
+         
+        private void DoRtnErrorConditionalOrder(ref CtpResponse rsp)
         {
             var handler = OnRtnErrorConditionalOrder;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsErrorConditionalOrder);
             }
         }
-
+        
         public event CtpEventHandler<CtpErrorConditionalOrder> OnRtnErrorConditionalOrder;
-
-        void DoRtnExecOrder(CtpResponse rsp)
+         
+        private void DoRtnExecOrder(ref CtpResponse rsp)
         {
             var handler = OnRtnExecOrder;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsExecOrder);
             }
         }
-
+        
         public event CtpEventHandler<CtpExecOrder> OnRtnExecOrder;
-
-        void DoErrRtnExecOrderInsert(CtpResponse rsp)
+         
+        private void DoErrRtnExecOrderInsert(ref CtpResponse rsp)
         {
             var handler = OnErrRtnExecOrderInsert;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsInputExecOrder, rsp.Item2);
             }
         }
-
+        
         public event CtpEventHandler2<CtpInputExecOrder> OnErrRtnExecOrderInsert;
-
-        void DoErrRtnExecOrderAction(CtpResponse rsp)
+         
+        private void DoErrRtnExecOrderAction(ref CtpResponse rsp)
         {
             var handler = OnErrRtnExecOrderAction;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsExecOrderAction, rsp.Item2);
             }
         }
-
+        
         public event CtpEventHandler2<CtpExecOrderAction> OnErrRtnExecOrderAction;
-
-        void DoErrRtnForQuoteInsert(CtpResponse rsp)
+         
+        private void DoErrRtnForQuoteInsert(ref CtpResponse rsp)
         {
             var handler = OnErrRtnForQuoteInsert;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsInputForQuote, rsp.Item2);
             }
         }
-
+        
         public event CtpEventHandler2<CtpInputForQuote> OnErrRtnForQuoteInsert;
-
-        void DoRtnQuote(CtpResponse rsp)
+         
+        private void DoRtnQuote(ref CtpResponse rsp)
         {
             var handler = OnRtnQuote;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsQuote);
             }
         }
-
+        
         public event CtpEventHandler<CtpQuote> OnRtnQuote;
-
-        void DoErrRtnQuoteInsert(CtpResponse rsp)
+         
+        private void DoErrRtnQuoteInsert(ref CtpResponse rsp)
         {
             var handler = OnErrRtnQuoteInsert;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsInputQuote, rsp.Item2);
             }
         }
-
+        
         public event CtpEventHandler2<CtpInputQuote> OnErrRtnQuoteInsert;
-
-        void DoErrRtnQuoteAction(CtpResponse rsp)
+         
+        private void DoErrRtnQuoteAction(ref CtpResponse rsp)
         {
             var handler = OnErrRtnQuoteAction;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsQuoteAction, rsp.Item2);
             }
         }
-
+        
         public event CtpEventHandler2<CtpQuoteAction> OnErrRtnQuoteAction;
-
-        void DoRtnForQuoteRsp(CtpResponse rsp)
+         
+        private void DoRtnForQuoteRsp(ref CtpResponse rsp)
         {
             var handler = OnRtnForQuoteRsp;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsForQuoteRsp);
             }
         }
-
+        
         public event CtpEventHandler<CtpForQuoteRsp> OnRtnForQuoteRsp;
-
-        void DoRtnCFMMCTradingAccountToken(CtpResponse rsp)
+         
+        private void DoRtnCFMMCTradingAccountToken(ref CtpResponse rsp)
         {
             var handler = OnRtnCFMMCTradingAccountToken;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsCFMMCTradingAccountToken);
             }
         }
-
+        
         public event CtpEventHandler<CtpCFMMCTradingAccountToken> OnRtnCFMMCTradingAccountToken;
-
-        void DoErrRtnBatchOrderAction(CtpResponse rsp)
+         
+        private void DoErrRtnBatchOrderAction(ref CtpResponse rsp)
         {
             var handler = OnErrRtnBatchOrderAction;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsBatchOrderAction, rsp.Item2);
             }
         }
-
+        
         public event CtpEventHandler2<CtpBatchOrderAction> OnErrRtnBatchOrderAction;
-
-        void DoRtnCombAction(CtpResponse rsp)
+         
+        private void DoRtnCombAction(ref CtpResponse rsp)
         {
             var handler = OnRtnCombAction;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsCombAction);
             }
         }
-
+        
         public event CtpEventHandler<CtpCombAction> OnRtnCombAction;
-
-        void DoErrRtnCombActionInsert(CtpResponse rsp)
+         
+        private void DoErrRtnCombActionInsert(ref CtpResponse rsp)
         {
             var handler = OnErrRtnCombActionInsert;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsInputCombAction, rsp.Item2);
             }
         }
-
+        
         public event CtpEventHandler2<CtpInputCombAction> OnErrRtnCombActionInsert;
-
-        void DoRspQryContractBank(CtpResponse rsp)
+         
+        private void DoRspQryContractBank(ref CtpResponse rsp)
         {
             var handler = OnRspQryContractBank;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsContractBank, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsContractBank, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpContractBank> OnRspQryContractBank;
-
-        void DoRspQryParkedOrder(CtpResponse rsp)
+         
+        private void DoRspQryParkedOrder(ref CtpResponse rsp)
         {
             var handler = OnRspQryParkedOrder;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsParkedOrder, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsParkedOrder, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpParkedOrder> OnRspQryParkedOrder;
-
-        void DoRspQryParkedOrderAction(CtpResponse rsp)
+         
+        private void DoRspQryParkedOrderAction(ref CtpResponse rsp)
         {
             var handler = OnRspQryParkedOrderAction;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsParkedOrderAction, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsParkedOrderAction, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpParkedOrderAction> OnRspQryParkedOrderAction;
-
-        void DoRspQryTradingNotice(CtpResponse rsp)
+         
+        private void DoRspQryTradingNotice(ref CtpResponse rsp)
         {
             var handler = OnRspQryTradingNotice;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsTradingNotice, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsTradingNotice, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpTradingNotice> OnRspQryTradingNotice;
-
-        void DoRspQryBrokerTradingParams(CtpResponse rsp)
+         
+        private void DoRspQryBrokerTradingParams(ref CtpResponse rsp)
         {
             var handler = OnRspQryBrokerTradingParams;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsBrokerTradingParams, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsBrokerTradingParams, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpBrokerTradingParams> OnRspQryBrokerTradingParams;
-
-        void DoRspQryBrokerTradingAlgos(CtpResponse rsp)
+         
+        private void DoRspQryBrokerTradingAlgos(ref CtpResponse rsp)
         {
             var handler = OnRspQryBrokerTradingAlgos;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsBrokerTradingAlgos, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsBrokerTradingAlgos, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpBrokerTradingAlgos> OnRspQryBrokerTradingAlgos;
-
-        void DoRspQueryCFMMCTradingAccountToken(CtpResponse rsp)
+         
+        private void DoRspQueryCFMMCTradingAccountToken(ref CtpResponse rsp)
         {
             var handler = OnRspQueryCFMMCTradingAccountToken;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsQueryCFMMCTradingAccountToken, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsQueryCFMMCTradingAccountToken, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpQueryCFMMCTradingAccountToken> OnRspQueryCFMMCTradingAccountToken;
-
-        void DoRtnFromBankToFutureByBank(CtpResponse rsp)
+         
+        private void DoRtnFromBankToFutureByBank(ref CtpResponse rsp)
         {
             var handler = OnRtnFromBankToFutureByBank;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsRspTransfer);
             }
         }
-
+        
         public event CtpEventHandler<CtpRspTransfer> OnRtnFromBankToFutureByBank;
-
-        void DoRtnFromFutureToBankByBank(CtpResponse rsp)
+         
+        private void DoRtnFromFutureToBankByBank(ref CtpResponse rsp)
         {
             var handler = OnRtnFromFutureToBankByBank;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsRspTransfer);
             }
         }
-
+        
         public event CtpEventHandler<CtpRspTransfer> OnRtnFromFutureToBankByBank;
-
-        void DoRtnRepealFromBankToFutureByBank(CtpResponse rsp)
+         
+        private void DoRtnRepealFromBankToFutureByBank(ref CtpResponse rsp)
         {
             var handler = OnRtnRepealFromBankToFutureByBank;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsRspRepeal);
             }
         }
-
+        
         public event CtpEventHandler<CtpRspRepeal> OnRtnRepealFromBankToFutureByBank;
-
-        void DoRtnRepealFromFutureToBankByBank(CtpResponse rsp)
+         
+        private void DoRtnRepealFromFutureToBankByBank(ref CtpResponse rsp)
         {
             var handler = OnRtnRepealFromFutureToBankByBank;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsRspRepeal);
             }
         }
-
+        
         public event CtpEventHandler<CtpRspRepeal> OnRtnRepealFromFutureToBankByBank;
-
-        void DoRtnFromBankToFutureByFuture(CtpResponse rsp)
+         
+        private void DoRtnFromBankToFutureByFuture(ref CtpResponse rsp)
         {
             var handler = OnRtnFromBankToFutureByFuture;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsRspTransfer);
             }
         }
-
+        
         public event CtpEventHandler<CtpRspTransfer> OnRtnFromBankToFutureByFuture;
-
-        void DoRtnFromFutureToBankByFuture(CtpResponse rsp)
+         
+        private void DoRtnFromFutureToBankByFuture(ref CtpResponse rsp)
         {
             var handler = OnRtnFromFutureToBankByFuture;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsRspTransfer);
             }
         }
-
+        
         public event CtpEventHandler<CtpRspTransfer> OnRtnFromFutureToBankByFuture;
-
-        void DoRtnRepealFromBankToFutureByFutureManual(CtpResponse rsp)
+         
+        private void DoRtnRepealFromBankToFutureByFutureManual(ref CtpResponse rsp)
         {
             var handler = OnRtnRepealFromBankToFutureByFutureManual;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsRspRepeal);
             }
         }
-
+        
         public event CtpEventHandler<CtpRspRepeal> OnRtnRepealFromBankToFutureByFutureManual;
-
-        void DoRtnRepealFromFutureToBankByFutureManual(CtpResponse rsp)
+         
+        private void DoRtnRepealFromFutureToBankByFutureManual(ref CtpResponse rsp)
         {
             var handler = OnRtnRepealFromFutureToBankByFutureManual;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsRspRepeal);
             }
         }
-
+        
         public event CtpEventHandler<CtpRspRepeal> OnRtnRepealFromFutureToBankByFutureManual;
-
-        void DoRtnQueryBankBalanceByFuture(CtpResponse rsp)
+         
+        private void DoRtnQueryBankBalanceByFuture(ref CtpResponse rsp)
         {
             var handler = OnRtnQueryBankBalanceByFuture;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsNotifyQueryAccount);
             }
         }
-
+        
         public event CtpEventHandler<CtpNotifyQueryAccount> OnRtnQueryBankBalanceByFuture;
-
-        void DoErrRtnBankToFutureByFuture(CtpResponse rsp)
+         
+        private void DoErrRtnBankToFutureByFuture(ref CtpResponse rsp)
         {
             var handler = OnErrRtnBankToFutureByFuture;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsReqTransfer, rsp.Item2);
             }
         }
-
+        
         public event CtpEventHandler2<CtpReqTransfer> OnErrRtnBankToFutureByFuture;
-
-        void DoErrRtnFutureToBankByFuture(CtpResponse rsp)
+         
+        private void DoErrRtnFutureToBankByFuture(ref CtpResponse rsp)
         {
             var handler = OnErrRtnFutureToBankByFuture;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsReqTransfer, rsp.Item2);
             }
         }
-
+        
         public event CtpEventHandler2<CtpReqTransfer> OnErrRtnFutureToBankByFuture;
-
-        void DoErrRtnRepealBankToFutureByFutureManual(CtpResponse rsp)
+         
+        private void DoErrRtnRepealBankToFutureByFutureManual(ref CtpResponse rsp)
         {
             var handler = OnErrRtnRepealBankToFutureByFutureManual;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsReqRepeal, rsp.Item2);
             }
         }
-
+        
         public event CtpEventHandler2<CtpReqRepeal> OnErrRtnRepealBankToFutureByFutureManual;
-
-        void DoErrRtnRepealFutureToBankByFutureManual(CtpResponse rsp)
+         
+        private void DoErrRtnRepealFutureToBankByFutureManual(ref CtpResponse rsp)
         {
             var handler = OnErrRtnRepealFutureToBankByFutureManual;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsReqRepeal, rsp.Item2);
             }
         }
-
+        
         public event CtpEventHandler2<CtpReqRepeal> OnErrRtnRepealFutureToBankByFutureManual;
-
-        void DoErrRtnQueryBankBalanceByFuture(CtpResponse rsp)
+         
+        private void DoErrRtnQueryBankBalanceByFuture(ref CtpResponse rsp)
         {
             var handler = OnErrRtnQueryBankBalanceByFuture;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsReqQueryAccount, rsp.Item2);
             }
         }
-
+        
         public event CtpEventHandler2<CtpReqQueryAccount> OnErrRtnQueryBankBalanceByFuture;
-
-        void DoRtnRepealFromBankToFutureByFuture(CtpResponse rsp)
+         
+        private void DoRtnRepealFromBankToFutureByFuture(ref CtpResponse rsp)
         {
             var handler = OnRtnRepealFromBankToFutureByFuture;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsRspRepeal);
             }
         }
-
+        
         public event CtpEventHandler<CtpRspRepeal> OnRtnRepealFromBankToFutureByFuture;
-
-        void DoRtnRepealFromFutureToBankByFuture(CtpResponse rsp)
+         
+        private void DoRtnRepealFromFutureToBankByFuture(ref CtpResponse rsp)
         {
             var handler = OnRtnRepealFromFutureToBankByFuture;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsRspRepeal);
             }
         }
-
+        
         public event CtpEventHandler<CtpRspRepeal> OnRtnRepealFromFutureToBankByFuture;
-
-        void DoRspFromBankToFutureByFuture(CtpResponse rsp)
+         
+        private void DoRspFromBankToFutureByFuture(ref CtpResponse rsp)
         {
             var handler = OnRspFromBankToFutureByFuture;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsReqTransfer, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsReqTransfer, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpReqTransfer> OnRspFromBankToFutureByFuture;
-
-        void DoRspFromFutureToBankByFuture(CtpResponse rsp)
+         
+        private void DoRspFromFutureToBankByFuture(ref CtpResponse rsp)
         {
             var handler = OnRspFromFutureToBankByFuture;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsReqTransfer, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsReqTransfer, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpReqTransfer> OnRspFromFutureToBankByFuture;
-
-        void DoRspQueryBankAccountMoneyByFuture(CtpResponse rsp)
+         
+        private void DoRspQueryBankAccountMoneyByFuture(ref CtpResponse rsp)
         {
             var handler = OnRspQueryBankAccountMoneyByFuture;
-            if (handler != null) {
-                handler(this, rsp.Item1.AsReqQueryAccount, rsp.Item2, rsp.RequestID, rsp.IsLast == CtpResponse.True);
+            if (handler != null){
+                handler(this, rsp.Item1.AsReqQueryAccount, rsp.Item2, rsp.RequestID, rsp.IsLast);
             }
         }
-
+        
         public event CtpEventHandler4<CtpReqQueryAccount> OnRspQueryBankAccountMoneyByFuture;
-
-        void DoRtnOpenAccountByBank(CtpResponse rsp)
+         
+        private void DoRtnOpenAccountByBank(ref CtpResponse rsp)
         {
             var handler = OnRtnOpenAccountByBank;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsOpenAccount);
             }
         }
-
+        
         public event CtpEventHandler<CtpOpenAccount> OnRtnOpenAccountByBank;
-
-        void DoRtnCancelAccountByBank(CtpResponse rsp)
+         
+        private void DoRtnCancelAccountByBank(ref CtpResponse rsp)
         {
             var handler = OnRtnCancelAccountByBank;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsCancelAccount);
             }
         }
-
+        
         public event CtpEventHandler<CtpCancelAccount> OnRtnCancelAccountByBank;
-
-        void DoRtnChangeAccountByBank(CtpResponse rsp)
+         
+        private void DoRtnChangeAccountByBank(ref CtpResponse rsp)
         {
             var handler = OnRtnChangeAccountByBank;
-            if (handler != null) {
+            if (handler != null){
                 handler(this, rsp.Item1.AsChangeAccount);
             }
         }
-
+        
         public event CtpEventHandler<CtpChangeAccount> OnRtnChangeAccountByBank;
-
+         
         #endregion
-
+        
         public CtpTraderSpi()
         {
             InitHandlerList();
         }
-
-        public override void ProcessResponse(CtpResponse rsp)
+        
+        public override void ProcessResponse(ref CtpResponse rsp)
         {
             switch (rsp.TypeId) {
                 case CtpResponseType.Response:
                 case CtpResponseType.Max:
                     break;
                 default:
-                    RspHandlerList[rsp.TypeId](rsp);
+                    RspHandlerList[rsp.TypeId](ref rsp);
                     break;
             }
         }
-
-        public override void SetResponseHandler(byte type, Action<CtpResponse> handler)
+        
+        public override void SetResponseHandler(byte type, CtpResponseAction handler)
         {
             if (type < CtpResponseType.Max)
                 RspHandlerList[type] = handler;
         }
-
-        public Action<CtpResponse>[] RspHandlerList { get; private set; }
+        
+        public CtpResponseAction[] RspHandlerList { get; private set; }
     }
 }

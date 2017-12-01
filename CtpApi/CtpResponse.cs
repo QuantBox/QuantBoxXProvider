@@ -8,9 +8,6 @@ namespace QuantBox.Sfit.Api
 {
     public struct CtpResponse
     {
-        public const byte True = 1;
-        public const byte False = 0;
-
         public CtpResponse(byte[] clientID, byte id)
         {
             ClientID = clientID;
@@ -18,7 +15,7 @@ namespace QuantBox.Sfit.Api
             Item1 = new CtpAny(0);
             Item2 = null;
             RequestID = 0;
-            IsLast = True;
+            IsLast = true;
             UserID = "";
         }
 
@@ -59,6 +56,6 @@ namespace QuantBox.Sfit.Api
         public CtpAny Item1;
         public CtpRspInfo Item2;
         public int RequestID;
-        public byte IsLast;
+        public bool IsLast;
     }
 }

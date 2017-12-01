@@ -8,12 +8,13 @@ using System;
 
 namespace QuantBox.Sfit.Api
 {
-	/// <summary>
-	/// Description of ICtpResponseHandler.
-	/// </summary>
-	public interface ICtpResponseHandler
-	{
-		void SetResponseHandler(byte type, Action<CtpResponse> handler);
-		void ProcessResponse(CtpResponse rsp);
-	}
+    public delegate void CtpResponseAction(ref CtpResponse rsp);
+    /// <summary>
+    /// Description of ICtpResponseHandler.
+    /// </summary>
+    public interface ICtpResponseHandler
+    {
+        void SetResponseHandler(byte type, CtpResponseAction handler);
+        void ProcessResponse(ref CtpResponse rsp);
+    }
 }

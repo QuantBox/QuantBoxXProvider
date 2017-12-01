@@ -1,5 +1,9 @@
 ﻿using System;
+#if CTP
 using QuantBox.Sfit.Api;
+#else
+using QuantBox.Rohon.Api;
+#endif
 
 namespace QuantBox.XApi
 {

@@ -1,17 +1,18 @@
 ﻿using System;
 
 namespace QuantBox.Sfit.Api
-{
+{       
     public class CtpApiProxy
-    {
-        private void InitHandlerList()
+    {    
+        void InitHandlerList()
         {
-            DefaultHandler = (req) => { };
+            DefaultHandler = (req) => {};
             ReqHandlerList = new Action<CtpRequest>[CtpRequestType.Max];
-            for (var i = 0; i < CtpRequestType.Max; i++) {
+            for (var i = 0; i < CtpRequestType.Max; i++)
+            {
                 ReqHandlerList[i] = DefaultHandler;
             }
-
+            
             #region Request Handler
             ReqHandlerList[CtpRequestType.SubscribeMarketData] = req => SubscribeMarketData(req, req.Args.AsStringArray);
             ReqHandlerList[CtpRequestType.UnSubscribeMarketData] = req => SubscribeMarketData(req, req.Args.AsStringArray);
@@ -84,13 +85,13 @@ namespace QuantBox.Sfit.Api
             ReqHandlerList[CtpRequestType.ReqFromFutureToBankByFuture] = req => ReqFromFutureToBankByFuture(req, req.Args.AsReqTransfer);
             ReqHandlerList[CtpRequestType.ReqQueryBankAccountMoneyByFuture] = req => ReqQueryBankAccountMoneyByFuture(req, req.Args.AsReqQueryAccount);
             #endregion
-        }
-
+        }        
+               
         public CtpApiProxy()
         {
             InitHandlerList();
         }
-
+        
         public void ProcessRequest(CtpRequest req)
         {
             switch (req.TypeId) {
@@ -102,362 +103,362 @@ namespace QuantBox.Sfit.Api
                     break;
             }
         }
-
+        
         #region Handler Definition
-
+        
         public virtual void SubscribeMarketData(CtpRequest req, string[] data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void UnSubscribeMarketData(CtpRequest req, string[] data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void SubscribeForQuoteRsp(CtpRequest req, string[] data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void UnSubscribeForQuoteRsp(CtpRequest req, string[] data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqAuthenticate(CtpRequest req, CtpReqAuthenticate data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqUserLogin(CtpRequest req, CtpReqUserLogin data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqUserLogout(CtpRequest req, CtpUserLogout data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqUserPasswordUpdate(CtpRequest req, CtpUserPasswordUpdate data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqTradingAccountPasswordUpdate(CtpRequest req, CtpTradingAccountPasswordUpdate data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqOrderInsert(CtpRequest req, CtpInputOrder data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqParkedOrderInsert(CtpRequest req, CtpParkedOrder data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqParkedOrderAction(CtpRequest req, CtpParkedOrderAction data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqOrderAction(CtpRequest req, CtpInputOrderAction data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQueryMaxOrderVolume(CtpRequest req, CtpQueryMaxOrderVolume data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqSettlementInfoConfirm(CtpRequest req, CtpSettlementInfoConfirm data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqRemoveParkedOrder(CtpRequest req, CtpRemoveParkedOrder data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqRemoveParkedOrderAction(CtpRequest req, CtpRemoveParkedOrderAction data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqExecOrderInsert(CtpRequest req, CtpInputExecOrder data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqExecOrderAction(CtpRequest req, CtpInputExecOrderAction data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqForQuoteInsert(CtpRequest req, CtpInputForQuote data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQuoteInsert(CtpRequest req, CtpInputQuote data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQuoteAction(CtpRequest req, CtpInputQuoteAction data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqBatchOrderAction(CtpRequest req, CtpInputBatchOrderAction data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqCombActionInsert(CtpRequest req, CtpInputCombAction data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryOrder(CtpRequest req, CtpQryOrder data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryTrade(CtpRequest req, CtpQryTrade data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryInvestorPosition(CtpRequest req, CtpQryInvestorPosition data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryTradingAccount(CtpRequest req, CtpQryTradingAccount data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryInvestor(CtpRequest req, CtpQryInvestor data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryTradingCode(CtpRequest req, CtpQryTradingCode data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryInstrumentMarginRate(CtpRequest req, CtpQryInstrumentMarginRate data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryInstrumentCommissionRate(CtpRequest req, CtpQryInstrumentCommissionRate data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryExchange(CtpRequest req, CtpQryExchange data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryProduct(CtpRequest req, CtpQryProduct data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryInstrument(CtpRequest req, CtpQryInstrument data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryDepthMarketData(CtpRequest req, CtpQryDepthMarketData data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQrySettlementInfo(CtpRequest req, CtpQrySettlementInfo data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryTransferBank(CtpRequest req, CtpQryTransferBank data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryInvestorPositionDetail(CtpRequest req, CtpQryInvestorPositionDetail data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryNotice(CtpRequest req, CtpQryNotice data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQrySettlementInfoConfirm(CtpRequest req, CtpQrySettlementInfoConfirm data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryInvestorPositionCombineDetail(CtpRequest req, CtpQryInvestorPositionCombineDetail data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryCFMMCTradingAccountKey(CtpRequest req, CtpQryCFMMCTradingAccountKey data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryEWarrantOffset(CtpRequest req, CtpQryEWarrantOffset data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryInvestorProductGroupMargin(CtpRequest req, CtpQryInvestorProductGroupMargin data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryExchangeMarginRate(CtpRequest req, CtpQryExchangeMarginRate data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryExchangeMarginRateAdjust(CtpRequest req, CtpQryExchangeMarginRateAdjust data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryExchangeRate(CtpRequest req, CtpQryExchangeRate data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQrySecAgentACIDMap(CtpRequest req, CtpQrySecAgentACIDMap data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryProductExchRate(CtpRequest req, CtpQryProductExchRate data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryProductGroup(CtpRequest req, CtpQryProductGroup data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryOptionInstrTradeCost(CtpRequest req, CtpQryOptionInstrTradeCost data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryOptionInstrCommRate(CtpRequest req, CtpQryOptionInstrCommRate data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryExecOrder(CtpRequest req, CtpQryExecOrder data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryForQuote(CtpRequest req, CtpQryForQuote data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryQuote(CtpRequest req, CtpQryQuote data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryCombInstrumentGuard(CtpRequest req, CtpQryCombInstrumentGuard data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryCombAction(CtpRequest req, CtpQryCombAction data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryTransferSerial(CtpRequest req, CtpQryTransferSerial data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryAccountregister(CtpRequest req, CtpQryAccountregister data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryContractBank(CtpRequest req, CtpQryContractBank data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryParkedOrder(CtpRequest req, CtpQryParkedOrder data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryParkedOrderAction(CtpRequest req, CtpQryParkedOrderAction data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryTradingNotice(CtpRequest req, CtpQryTradingNotice data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryBrokerTradingParams(CtpRequest req, CtpQryBrokerTradingParams data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQryBrokerTradingAlgos(CtpRequest req, CtpQryBrokerTradingAlgos data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQueryCFMMCTradingAccountToken(CtpRequest req, CtpQueryCFMMCTradingAccountToken data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqFromBankToFutureByFuture(CtpRequest req, CtpReqTransfer data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqFromFutureToBankByFuture(CtpRequest req, CtpReqTransfer data)
         {
             DefaultHandler(req);
         }
-
+        
         public virtual void ReqQueryBankAccountMoneyByFuture(CtpRequest req, CtpReqQueryAccount data)
         {
             DefaultHandler(req);
         }
-
+        
         #endregion
-
-        public Action<CtpRequest> DefaultHandler { get; set; }
+        
+        public Action<CtpRequest> DefaultHandler { get; set;}
         public Action<CtpRequest>[] ReqHandlerList { get; private set; }
     }
 }

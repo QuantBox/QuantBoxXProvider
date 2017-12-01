@@ -92,7 +92,11 @@ namespace QuantBox.XApi
 
         public string ApiVersion => GetType().Assembly.GetName().Version.ToString();
         public ApiType ApiTypes => ApiType.Trade | ApiType.Instrument | ApiType.Query;
+#if CTP
         public string ApiName => "CTP";
+#else
+        public string ApiName => "Rohon";
+#endif
         public bool Connected => _client?.Connected ?? false;
         public ServerInfoField Server => _client?.Server;
         public UserInfoField User => _client?.User;

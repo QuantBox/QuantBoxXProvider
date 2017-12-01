@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+#if CTP
 using QuantBox.Sfit.Api;
+#else
+using QuantBox.Rohon.Api;
+#endif
 
 namespace QuantBox.XApi
 {
@@ -204,7 +208,7 @@ namespace QuantBox.XApi
         {
             if (Connected && !_instruments.Contains(instrument)) {
                 _instruments.Add(instrument);
-                _api.SubscribeMarketData(new[] { instrument });
+                _api.SubscribeMarketData(new[] { instrument }, 1);
             }
         }
 
@@ -212,7 +216,7 @@ namespace QuantBox.XApi
         {
             if (Connected && _instruments.Contains(instrument)) {
                 _instruments.Remove(instrument);
-                _api.UnSubscribeMarketData(new[] { instrument });
+                _api.UnSubscribeMarketData(new[] { instrument }, 1);
             }
         }
     }

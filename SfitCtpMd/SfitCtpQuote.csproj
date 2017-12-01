@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>c:\Users\22002\AppData\Roaming\SmartQuant Ltd\OpenQuant 2014\XAPI\x64\CTP\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CTP</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -26,16 +26,13 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>c:\Users\22002\AppData\Roaming\SmartQuant Ltd\OpenQuant 2014\XAPI\x64\CTP\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;CTP</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CtpApi4Clr_x64, Version=6.3.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\CtpApiDotNet_x64.6.3.6.4\lib\net45\CtpApi4Clr_x64.dll</HintPath>
-    </Reference>
     <Reference Include="QuantBox.Sfit.Api, Version=6.3.6.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\GalaxyFutures.Sfit.Api.6.3.11\lib\net45\QuantBox.Sfit.Api.dll</HintPath>
+      <HintPath>..\packages\GalaxyFutures.Sfit.Api.6.3.13\lib\net45\QuantBox.Sfit.Api.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -73,6 +70,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="sfit_ctp_x64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="thostmduserapi.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

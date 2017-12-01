@@ -40,14 +40,17 @@ namespace QuantBox
         {
             _instruments.Clear();
             foreach (var inst in _provider.InstrumentManager.Instruments) {
-                if (inst.Maturity < DateTime.Today)
+                if (inst.Maturity < DateTime.Today && 
+                    (inst.Type == InstrumentType.Future 
+                        || inst.Type == InstrumentType.FutureOption
+                        || inst.Type == InstrumentType.Option))
                     continue;
                 var key = inst.GetSymbol(_provider.GetAltId());
                 _instruments.Remove(key);
                 _instruments.Add(key, inst);
             }
         }
-        
+
         public static HedgeFlagType GetHedgeFlag(Order order, HedgeFlagType defaultValue)
         {
             var flag = order.GetHedgeFlag();
@@ -127,8 +130,12 @@ namespace QuantBox
         {
             _instruments.TryGetValue(field.InstrumentID, out var inst);
             if (inst == null) {
-                return;
+                inst = _provider.InstrumentManager.Get(field.InstrumentID);
+                if (inst == null) {
+                    return;
+                }
             }
+
             if (!_instInitFlag[inst.Id]) {
                 if (field.OpenPrice > 0) {
                     inst.SetMarketData(field);
@@ -141,6 +148,7 @@ namespace QuantBox
             var exchageTime = field.ExchangeDateTime();
             if (exchageTime == DateTime.MaxValue) {
                 _provider.Logger.Warn($"交易所时间解析错误，{field.ActionDay}.{field.UpdateTime}.{field.UpdateMillisec}");
+                exchageTime = datetime;
             }
             if (field.Asks?.Length > 0) {
                 var ask = new Ask(datetime, exchageTime, _provider.Id, inst.Id, field.Asks[0].Price, field.Asks[0].Size);

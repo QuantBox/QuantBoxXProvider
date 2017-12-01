@@ -1,8 +1,12 @@
 ﻿using System.IO;
-using QuantBox.Sfit.Api;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+#if CTP
+using QuantBox.Sfit.Api;
+#else
+using QuantBox.Rohon.Api;
+#endif
 
 namespace QuantBox.XApi
 {
@@ -111,12 +115,12 @@ namespace QuantBox.XApi
             Api.ReqAuthenticate(info, GetNextRequestId());
         }
 
-        private void OnRspError(CtpResponse rsp)
+        private void OnRspError(ref CtpResponse rsp)
         {
             SendError(rsp.Item1.AsRspInfo, nameof(OnRspError));
         }
 
-        private void OnRspUserLogin(CtpResponse rsp)
+        private void OnRspUserLogin(ref CtpResponse rsp)
         {
             CtpLoginInfo = rsp.Item1.AsRspUserLogin;
             if (CtpLoginInfo != null && CtpConvert.CheckRspInfo(rsp.Item2)) {
@@ -135,7 +139,7 @@ namespace QuantBox.XApi
             }
         }
 
-        private void OnFrontConnected(CtpResponse rsp)
+        private void OnFrontConnected(ref CtpResponse rsp)
         {
             if (_lastDisconnectReason != NetworkReadError) {
                 _publisher.Post(ConnectionStatus.Connected);
@@ -148,7 +152,7 @@ namespace QuantBox.XApi
             }
         }
 
-        private void OnFrontDisconnected(CtpResponse rsp)
+        private void OnFrontDisconnected(ref CtpResponse rsp)
         {
             Connected = false;
             if (rsp.Item1.AsInt != null) {
@@ -164,7 +168,7 @@ namespace QuantBox.XApi
             _publisher.Post(ConnectionStatus.Disconnected);
         }
 
-        private void OnRspAuthenticate(CtpResponse rsp)
+        private void OnRspAuthenticate(ref CtpResponse rsp)
         {
             var data = rsp.Item1.AsRspAuthenticate;
             if (data != null && CtpConvert.CheckRspInfo(rsp.Item2)) {
@@ -177,7 +181,7 @@ namespace QuantBox.XApi
             }
         }
 
-        private void OnRspSettlementInfoConfirm(CtpResponse rsp)
+        private void OnRspSettlementInfoConfirm(ref CtpResponse rsp)
         {
             var data = rsp.Item1.AsSettlementInfoConfirm;
             if (data != null && CtpConvert.CheckRspInfo(rsp.Item2)) {
@@ -195,12 +199,12 @@ namespace QuantBox.XApi
 
         #region Query Response Handler
 
-        private void ProcessQuery(CtpResponse rsp)
+        private void ProcessQuery(ref CtpResponse rsp)
         {
             _queryManager?.Post(rsp);
         }
 
-        private void OnRtnInstrumentStatus(CtpResponse rsp)
+        private void OnRtnInstrumentStatus(ref CtpResponse rsp)
         {
         }
 
@@ -208,7 +212,7 @@ namespace QuantBox.XApi
 
         #region Order Response Handler
 
-        private void ProcessDeal(CtpResponse rsp)
+        private void ProcessDeal(ref CtpResponse rsp)
         {
             _processor.Post(rsp);
         }

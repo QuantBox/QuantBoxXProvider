@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="QuantBoxRohon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QuantBoxCtp.cs" />
   </ItemGroup>

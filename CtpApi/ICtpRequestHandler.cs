@@ -9,8 +9,9 @@ using System.Security;
 
 namespace QuantBox.Sfit.Api
 {
-	public interface ICtpRequestHandler
-	{
-		int ProcessRequest(CtpRequest req);
-	}
+    public delegate int CtpRequestFunc(ref CtpRequest req);
+    public interface ICtpRequestHandler
+    {
+        int ProcessRequest(ref CtpRequest req);
+    }
 }
