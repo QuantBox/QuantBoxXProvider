@@ -59,11 +59,19 @@ namespace QuantBox.XApi
         public static int GetTime(string time)
         {
             if (time.Length <= 6) {
-                return int.Parse(time);
+                if (time[1] != ':' && time[2] != ':') {
+                    return int.Parse(time);
+                }
             }
-            return int.Parse(time.Substring(0, 2)) * 10000
-                + int.Parse(time.Substring(3, 2)) * 100
-                + int.Parse(time.Substring(6, 2));
+            if (time.Length == 8) {
+                return int.Parse(time.Substring(0, 2)) * 10000
+                    + int.Parse(time.Substring(3, 2)) * 100
+                    + int.Parse(time.Substring(6, 2));
+            }
+            var item = time.Split(':');
+            return int.Parse(item[0]) * 10000
+                   + int.Parse(item[1]) * 100
+                   + int.Parse(item[2]);
         }
 
         public static AccountField GetAccountField(CtpTradingAccount info)
