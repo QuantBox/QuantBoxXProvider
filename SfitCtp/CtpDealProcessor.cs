@@ -193,7 +193,10 @@ namespace QuantBox.XApi
             var action = new CtpInputOrderAction();
             (action.FrontID, action.SessionID, action.OrderRef) = GetFrontSessionItems(order.ID);
             (action.ExchangeID, action.InstrumentID, action.OrderSysID) = GetOrderSysItems(order.OrderID);
+            action.ActionFlag = CtpActionFlagType.Delete;
             action.OrderActionRef = _client.GetNextRequestId();
+            action.InvestorID = _client.CtpLoginInfo.UserID;
+            action.BrokerID = _client.CtpLoginInfo.BrokerID;
             _client.Api.ReqOrderAction(action, _client.GetNextRequestId());
         }
 
