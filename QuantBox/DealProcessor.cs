@@ -67,16 +67,8 @@ namespace QuantBox
         }
         private static ExecutionReport CreateReport(OrderRecord record, OrderStatus ordStatus, ExecType execType, string text = "")
         {
-            var report = new ExecutionReport();
+            var report = new ExecutionReport(record.Order);
             report.DateTime = DateTime.Now;
-            report.Order = record.Order;
-            report.Instrument = record.Order.Instrument;
-            report.Side = record.Order.Side;
-            report.OrdType = record.Order.Type;
-            report.TimeInForce = record.Order.TimeInForce;
-            report.OrdQty = record.Order.Qty;
-            report.Price = record.Order.Price;
-            report.StopPx = record.Order.StopPx;
             report.AvgPx = record.AvgPx;
             report.CumQty = record.CumQty;
             report.LeavesQty = record.LeavesQty;

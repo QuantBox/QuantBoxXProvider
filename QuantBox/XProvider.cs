@@ -116,7 +116,7 @@ namespace QuantBox
         }
 
         internal InstrumentManager InstrumentManager => framework.InstrumentManager;
-        internal bool IsDataProvider => (_providerCapacity & ApiType.MarketData) == ApiType.MarketData;
+        internal bool IsDataProvider => !OnlyTrader && (_providerCapacity & ApiType.MarketData) == ApiType.MarketData;
         internal bool IsExecutionProvider => !OnlyMarketData && (_providerCapacity & ApiType.Trade) == ApiType.Trade;
         internal bool IsInstrumentProvider => !OnlyMarketData && (_providerCapacity & ApiType.Instrument) == ApiType.Instrument;
 
@@ -199,7 +199,7 @@ namespace QuantBox
 
         protected override void OnConnect()
         {
-            Status = ProviderStatus.Connecting;            
+            Status = ProviderStatus.Connecting;
             InitAccoutQueue();
             _convertor.Init();
             _emitter.Open();
@@ -553,6 +553,9 @@ namespace QuantBox
         [Description("是否只连接行情服务")]
         public bool OnlyMarketData { get; set; } = false;
 
+        [Category(CategoryTrade)]
+        [Description("是否只连接交易服务")]
+        public bool OnlyTrader { get; set; } = false;
         #endregion
     }
 }

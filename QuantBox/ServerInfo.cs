@@ -3,6 +3,7 @@ using System.Drawing.Design;
 using System.Runtime.Serialization;
 using System.Windows.Forms.Design;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using QuantBox.Design;
 using QuantBox.XApi;
 
@@ -97,6 +98,8 @@ namespace QuantBox
         [DataMember]
         public bool IsMulticast { get; set; }
 
+        public bool ReadOnly { get; set; }
+
         public ServerInfo()
         {
             UserProductInfo = OpenQuant;
@@ -128,7 +131,16 @@ namespace QuantBox
 
         public ServerInfo Clone()
         {
-            return (ServerInfo)MemberwiseClone();
+            var item = (ServerInfo)MemberwiseClone();
+            item.ReadOnly = false;
+            return item;
+        }
+
+        public static ServerInfo Load(JToken token)
+        {
+            var server = new ServerInfo();
+            Helper.LoadFromJson(server, typeof(ServerInfo), token);
+            return server;
         }
     }
 }

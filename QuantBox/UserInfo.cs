@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using QuantBox.Design;
 using QuantBox.XApi;
 
@@ -48,6 +49,13 @@ namespace QuantBox
         public UserInfo Clone()
         {
             return (UserInfo)MemberwiseClone();
+        }
+
+        public static UserInfo Load(JToken token)
+        {
+            var user = new UserInfo();
+            Helper.LoadFromJson(user, typeof(UserInfo), token);
+            return user;
         }
     }
 }

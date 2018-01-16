@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using QuantBox.XApi;
@@ -40,12 +39,15 @@ namespace QuantBox
         {
             _instruments.Clear();
             foreach (var inst in _provider.InstrumentManager.Instruments) {
-                if (inst.Maturity < DateTime.Today && 
-                    (inst.Type == InstrumentType.Future 
+                if (inst.Maturity < DateTime.Today &&
+                    (inst.Type == InstrumentType.Future
                         || inst.Type == InstrumentType.FutureOption
                         || inst.Type == InstrumentType.Option))
                     continue;
                 var key = inst.GetSymbol(_provider.GetAltId());
+                if (inst.Type == InstrumentType.Stock || inst.Type == InstrumentType.Index) {
+                    key = key + "." + inst.GetExchange(_provider.GetAltId());
+                }
                 _instruments.Remove(key);
                 _instruments.Add(key, inst);
             }

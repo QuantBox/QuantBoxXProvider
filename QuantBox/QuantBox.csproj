@@ -64,6 +64,22 @@
     <Compile Include="AccountPosition.cs" />
     <Compile Include="Design\FolderBrowser2.cs" />
     <Compile Include="Design\FolderNameEditor2.cs" />
+    <Compile Include="Design\RPropertyGrid.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Design\RPropertyGrid.Designer.cs">
+      <DependentUpon>RPropertyGrid.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Design\RPropertyGrid.ReadOnlyConverter.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Design\RPropertyGrid.ReadOnlyPropertyDescriptor.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Design\RPropertyGrid.ReadOnlyWrapper.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Helper.cs" />
     <Compile Include="OnAutoDisconnect.cs" />
     <Compile Include="SubscribeManager.cs" />
     <Compile Include="TimeRange.cs" />
