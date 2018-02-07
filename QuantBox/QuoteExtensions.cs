@@ -8,12 +8,22 @@ namespace QuantBox
     {
         private static DepthMarketDataField GetMarketData(this Instrument inst)
         {
-            return (DepthMarketDataField)inst.Fields[QuantBoxConst.ExtensionsOffset];
+            return (DepthMarketDataField)inst.Fields[QuantBoxConst.InstrumentMarketDataOffset];
+        }
+
+        public static TimeRangeManager GetTimeFilter(this Instrument inst)
+        {
+            return (TimeRangeManager)inst.Fields[QuantBoxConst.InstrumentTimeManagerOffset];
+        }
+
+        public static void SetTimeFilter(this Instrument inst, TimeRangeManager manager)
+        {
+            inst.Fields[QuantBoxConst.InstrumentTimeManagerOffset] = manager;
         }
 
         public static void SetMarketData(this Instrument inst, DepthMarketDataField field)
         {
-            inst.Fields[QuantBoxConst.ExtensionsOffset] = field;
+            inst.Fields[QuantBoxConst.InstrumentMarketDataOffset] = field;
         }
 
         public static double GetUpperLimitPrice(this Instrument inst)

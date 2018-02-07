@@ -17,6 +17,7 @@ namespace QuantBox
         private readonly Dictionary<string, AccountPosition> _positions = new Dictionary<string, AccountPosition>();
         private readonly IdArray<DepthMarketDataField> _marketData = new IdArray<DepthMarketDataField>();
         private readonly IdArray<bool> _instInitFlag = new IdArray<bool>();
+        private readonly IdArray<TimeRangeManager> _instTimeRange = new IdArray<TimeRangeManager>();
         private readonly IDictionary<string, Instrument> _instruments = new Dictionary<string, Instrument>();
 
         static Convertor()
@@ -37,6 +38,7 @@ namespace QuantBox
 
         public void Init()
         {
+            _instInitFlag.Clear();
             _instruments.Clear();
             foreach (var inst in _provider.InstrumentManager.Instruments) {
                 if (inst.Maturity < DateTime.Today &&
@@ -50,6 +52,7 @@ namespace QuantBox
                 }
                 _instruments.Remove(key);
                 _instruments.Add(key, inst);
+                _marketData[inst.Id] = EmptyMarketData;
             }
         }
 
@@ -88,7 +91,7 @@ namespace QuantBox
                 && !field.InstrumentID.EndsWith("efp")) {
                 var underlying = _provider.InstrumentManager.Get(field.UnderlyingInstrID);
                 if (underlying == null) {
-                    _provider.Logger.Warn($"没有找到合约标的物{field.UnderlyingInstrID},请先导入合约标的物");
+                    //_provider.Logger.Warn($"没有找到合约标的物{field.UnderlyingInstrID},请先导入合约标的物");
                 }
                 else {
                     inst.Legs.Add(new Leg(underlying));
@@ -138,43 +141,72 @@ namespace QuantBox
                 }
             }
 
+            var datetime = DateTime.Now;
+            var exchangeTime = field.ExchangeDateTime();
+            if (exchangeTime.Year == DateTime.MaxValue.Year) {
+                _provider.Logger.Warn($"交易所时间解析错误，{field.ActionDay}.{field.UpdateTime}.{field.UpdateMillisec}");
+                exchangeTime = datetime;
+            }
+            else {
+                if (_provider.NightTradingTimeCorrection) {
+                    exchangeTime = Helper.CorrectionActionDay(datetime, exchangeTime);
+                }
+            }
+
             if (!_instInitFlag[inst.Id]) {
+                if (datetime.Day == exchangeTime.Day && Math.Abs(datetime.Hour - exchangeTime.Hour) > 1) {
+                    return;
+                }
+                _instTimeRange[inst.Id] = inst.GetTimeFilter();
                 if (field.OpenPrice > 0) {
                     inst.SetMarketData(field);
                     _instInitFlag[inst.Id] = true;
                 }
             }
-            var last = _marketData[inst.Id] ?? EmptyMarketData;
-            _marketData[inst.Id] = field;
-            var datetime = DateTime.Now;
-            var exchageTime = field.ExchangeDateTime();
-            if (exchageTime == DateTime.MaxValue) {
-                _provider.Logger.Warn($"交易所时间解析错误，{field.ActionDay}.{field.UpdateTime}.{field.UpdateMillisec}");
-                exchageTime = datetime;
+
+            var last = _marketData[inst.Id];
+            if (field.ClosePrice > 0) {
+                _marketData[inst.Id] = EmptyMarketData;
             }
+            else {
+                _marketData[inst.Id] = field;
+            }
+
+            var filter = _instTimeRange[inst.Id];
+            if (_provider.DiscardNoTrading) {
+                if (!filter.InRange(exchangeTime.TimeOfDay)) {
+                    return;
+                }
+            }
+
             if (field.Asks?.Length > 0) {
-                var ask = new Ask(datetime, exchageTime, _provider.Id, inst.Id, field.Asks[0].Price, field.Asks[0].Size);
+                var ask = new Ask(datetime, exchangeTime, _provider.Id, inst.Id, field.Asks[0].Price, field.Asks[0].Size);
                 _provider.ProcessMarketData(ask);
             }
             if (field.Bids?.Length > 0) {
-                var bid = new Bid(datetime, exchageTime, _provider.Id, inst.Id, field.Bids[0].Price, field.Bids[0].Size);
+                var bid = new Bid(datetime, exchangeTime, _provider.Id, inst.Id, field.Bids[0].Price, field.Bids[0].Size);
                 _provider.ProcessMarketData(bid);
             }
-            if (field.LastPrice > double.Epsilon) {
-                var trade = new QBTrade(datetime, exchageTime, _provider.Id, inst.Id, field.LastPrice, 0);
-                if (_provider.VolumeIsAccumulated) {
-                    trade.Size = (int)(field.Volume - last.Volume);
-                    trade.OpenInterest = field.OpenInterest - last.OpenInterest;
-                    trade.Turnover = field.Turnover - last.Turnover;
-                }
-                else {
-                    trade.Size = (int)last.Volume;
-                    trade.OpenInterest = field.OpenInterest;
-                    trade.Turnover = field.Turnover;
-                }
-                trade.Field = field;
-                _provider.ProcessMarketData(trade);
+
+            if (!(field.LastPrice > double.Epsilon))
+                return;
+
+            var trade = new QBTrade(datetime, exchangeTime, _provider.Id, inst.Id, field.LastPrice, 0);
+            if (_provider.VolumeIsAccumulated) {
+                trade.Size = (int)(field.Volume - last.Volume);
+                trade.OpenInterest = field.OpenInterest - last.OpenInterest;
+                trade.Turnover = field.Turnover - last.Turnover;
             }
+            else {
+                trade.Size = (int)field.Volume;
+                trade.OpenInterest = field.OpenInterest;
+                trade.Turnover = field.Turnover;
+            }
+
+            if (_provider.DiscardEmptyTrade && trade.Size <= 0)
+                return;
+            trade.Field = field;
+            _provider.ProcessMarketData(trade);
         }
     }
 }

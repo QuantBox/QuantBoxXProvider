@@ -7,10 +7,10 @@ namespace QuantBox
     {
         private static QuantBoxOrderInfo GetOrderInfo(Order order)
         {
-            var data = (QuantBoxOrderInfo)order.Fields[QuantBoxConst.ExtensionsOffset];
+            var data = (QuantBoxOrderInfo)order.Fields[QuantBoxConst.InstrumentMarketDataOffset];
             if (data == null) {
                 data = new QuantBoxOrderInfo();
-                order.Fields[QuantBoxConst.ExtensionsOffset] = data;
+                order.Fields[QuantBoxConst.InstrumentMarketDataOffset] = data;
             }
             return data;
         }

@@ -116,9 +116,24 @@ namespace QuantBox
         }
 
         internal InstrumentManager InstrumentManager => framework.InstrumentManager;
-        internal bool IsDataProvider => !OnlyTrader && (_providerCapacity & ApiType.MarketData) == ApiType.MarketData;
-        internal bool IsExecutionProvider => !OnlyMarketData && (_providerCapacity & ApiType.Trade) == ApiType.Trade;
-        internal bool IsInstrumentProvider => !OnlyMarketData && (_providerCapacity & ApiType.Instrument) == ApiType.Instrument;
+        internal bool IsDataProvider => ConnectMarketData && (_providerCapacity & ApiType.MarketData) == ApiType.MarketData;
+        internal bool IsExecutionProvider => ConnectTrader && (_providerCapacity & ApiType.Trade) == ApiType.Trade;
+        internal bool IsInstrumentProvider => ConnectTrader && (_providerCapacity & ApiType.Instrument) == ApiType.Instrument;
+
+        protected internal bool InTradingSession()
+        {
+            if (SessionTimes.Count == 0) {
+                return true;
+            }
+            var time = DateTime.Now.TimeOfDay;
+            time = new TimeSpan(time.Hours, time.Minutes, time.Seconds);
+            foreach (var range in SessionTimes) {
+                if (time >= range.Begin && time <= range.End) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         #region Derived Override Methods
 
@@ -253,7 +268,7 @@ namespace QuantBox
             }
         }
 
-        private void StartTimerTask()
+        internal void StartTimerTask()
         {
             _timer.Start();
         }
@@ -342,8 +357,10 @@ namespace QuantBox
 
         internal void OnMessage(AccountField data)
         {
-            _convertor.ProcessAccount(data);
-            Logger.Info(data.DebugInfo());
+            if (data != null) {
+                _convertor.ProcessAccount(data);
+                Logger.Info(data.DebugInfo());
+            }
             _timer.EnableQueryPosition = true;
         }
 
@@ -468,6 +485,7 @@ namespace QuantBox
         public override void Subscribe(Instrument instrument)
         {
             if (IsDataProvider) {
+                instrument.SetTimeFilter(MarketDataFilter.Instance.GetFilter(instrument));
                 _subscribeManager.Subscribe(instrument);
             }
         }
@@ -550,12 +568,25 @@ namespace QuantBox
         public int InstrumentAltId { get; set; } = -1;
 
         [Category(CategoryTrade)]
-        [Description("是否只连接行情服务")]
-        public bool OnlyMarketData { get; set; } = false;
+        [Description("连接行情服务")]
+        public bool ConnectMarketData { get; set; } = true;
 
         [Category(CategoryTrade)]
-        [Description("是否只连接交易服务")]
-        public bool OnlyTrader { get; set; } = false;
+        [Description("连接交易服务")]
+        public bool ConnectTrader { get; set; } = true;
+
+        [Category(CategoryTrade)]
+        [Description("启用夜盘行情时间修正")]
+        public bool NightTradingTimeCorrection { get; set; } = false;
+
+        [Category(CategoryTrade)]
+        [Description("过滤非交易时间的行情")]
+        public bool DiscardNoTrading { get; set; } = true;
+
+        [Category(CategoryTrade)]
+        [Description("过滤成交量为零的行情")]
+        public bool DiscardEmptyTrade { get; set; } = true;
+
         #endregion
     }
 }

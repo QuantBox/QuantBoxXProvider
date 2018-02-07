@@ -18,7 +18,15 @@ namespace QuantBox
             switch (@event.TypeId) {
                 case EventType.OnConnect:
                     _provider.SetStatus(ProviderStatus.Connecting);
-                    ConnectClient();
+                    _connectStart = DateTime.Now;
+                    if (_provider.InTradingSession()) {
+                        ConnectClient();
+                    }
+                    else {
+                        _provider.Logger.Info("等待交易时段......");
+                        _provider.StartTimerTask();
+                        _manualDisconnecting = false;
+                    }
                     break;
                 case EventType.OnDisconnect:
                     _provider.SetStatus(ProviderStatus.Disconnecting);
@@ -40,14 +48,15 @@ namespace QuantBox
                         && !_provider.IsConnected
                         && _connectStart != DateTime.MaxValue
                         && (DateTime.Now - _connectStart).TotalMinutes > _provider.ConnectTimeout) {
-                        _provider.Logger.Info("交易时段内自动重连");
+                        _provider.Logger.Info("交易时段内自动重连.");
                         DisconnectClient();
+                        _connectStart = DateTime.Now;
                         ConnectClient();
                     }
                     break;
                 case XEventType.OnAutoDisconnect:
                     if (!_manualDisconnecting) {
-                        _provider.Logger.Info("非交易时段内自动断开");
+                        _provider.Logger.Info("非交易时段内自动断开.");
                         if (_provider.Status == ProviderStatus.Connected) {
                             _provider.SetStatus(ProviderStatus.Connecting);
                         }
@@ -89,7 +98,6 @@ namespace QuantBox
         private void DisconnectDone()
         {
             _provider.DisconnectDone();
-            _manualDisconnecting = false;
             _provider.SetStatus(ProviderStatus.Disconnected);
         }
 
@@ -105,7 +113,6 @@ namespace QuantBox
         private void ConnectClient()
         {
             try {
-                _connectStart = DateTime.Now;
                 if (_provider.IsExecutionProvider) {
                     ConnectTrader();
                 }

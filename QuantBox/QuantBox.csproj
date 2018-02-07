@@ -62,6 +62,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccountPosition.cs" />
+    <Compile Include="MarketDataFilter.cs" />
+    <Compile Include="QBTimeBarFactoryItem.cs" />
+    <Compile Include="TimeRangeManager.cs" />
+    <Compile Include="Design\TimeSpanEditor.cs" />
     <Compile Include="Design\FolderBrowser2.cs" />
     <Compile Include="Design\FolderNameEditor2.cs" />
     <Compile Include="Design\RPropertyGrid.cs">
