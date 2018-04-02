@@ -145,10 +145,26 @@ namespace QuantBox
                 _provider.Disconnect();
                 return;
             }
-
+            if (!CheckConnection(connection)) {
+                _provider.Disconnect();
+                return;
+            }
             _provider.Market?.Disconnect();
             _provider.Market = new MarketDataClient(_provider, connection);
             _provider.Market.Connect();
+        }
+
+        private bool CheckConnection(ConnectionInfo conn)
+        {
+            if (_provider.GetUserInfo(conn.User) == null) {
+                _provider.Logger.Error("连接用户信息未设定.");
+                return false;
+            }
+            if (_provider.GetServerInfo(conn.Server, conn.UseType) == null) {
+                _provider.Logger.Error("连接服务器信息未设定.");
+                return false;
+            }
+            return true;
         }
 
         private void ConnectTrader()
@@ -159,7 +175,10 @@ namespace QuantBox
                 _provider.Disconnect();
                 return;
             }
-
+            if (!CheckConnection(connection)) {
+                _provider.Disconnect();
+                return;
+            }
             _provider.Trader?.Disconnect();
             _provider.Trader = new TraderClient(_provider, connection);
             _provider.Trader.Connect();

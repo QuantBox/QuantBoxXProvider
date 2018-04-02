@@ -94,7 +94,7 @@ namespace QuantBox
 
         private void OnErrorHappened(object sender, ErrorField error)
         {
-            Provider.OnProviderError(error.XErrorId, error.Text);
+            Provider.OnProviderError(error);
         }
 
         public void Connect()

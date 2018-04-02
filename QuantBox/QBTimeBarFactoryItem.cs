@@ -100,7 +100,7 @@ namespace QuantBox
             GetOpenCloseDateTime(tick, out var time, out _closeDateTime);
             if (_enableLog && _framework.Mode == FrameworkMode.Realtime) {
                 _logger.Debug($"new_bar,{time: dd_HH:mm:ss},{_closeDateTime: dd_HH:mm:ss}");
-            }            
+            }
             bar = new Bar(time, time, tick.InstrumentId, barType, barSize, tick.Price, tick.Price, tick.Price, tick.Price, tick.Size);
             EmitBarOpen();
         }
@@ -114,28 +114,30 @@ namespace QuantBox
             if (_enableLog && _framework.Mode == FrameworkMode.Realtime) {
                 _logger.Debug($"{tick.Size},{tick.DateTime: HH:mm:ss},{tick.ExchangeDateTime: HH:mm:ss}");
             }
-            if (tick.Size == 0) {
-                return;
-            }
 
             if (bar != null) {
                 if (_closeDateTime < tick.ExchangeDateTime) {
                     RaiseBar();
+                    if (tick.Size == 0) {
+                        return;
+                    }
                     CreateBar(tick);
                 }
                 base.OnData(tick);
-            }
-            else {
-                CreateBar(tick);
-            }
-
-            if (_closeDateTime == tick.ExchangeDateTime) {
-                RaiseBar();
-            }
-            else {
-                if (obj is QBTrade trade && trade.Field.ClosePrice > 0) {
+                if (_closeDateTime == tick.ExchangeDateTime) {
                     RaiseBar();
                 }
+                else {
+                    if (obj is QBTrade trade && trade.Field.ClosePrice > 0) {
+                        RaiseBar();
+                    }
+                }
+            }
+            else {
+                if (tick.Size == 0) {
+                    return;
+                }
+                CreateBar(tick);
             }
         }
     }

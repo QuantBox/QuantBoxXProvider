@@ -8,14 +8,14 @@ namespace QuantBox
         public static DateTime CorrectionActionDay(DateTime local, DateTime exchange)
         {
             switch (exchange.Hour) {
-                case 23:
-                    if (local.Hour == 0) {
-                        return local.Date.AddDays(-1).Add(exchange.TimeOfDay);
-                    }
-                    break;
                 case 0:
                     if (local.Hour == 23) {
                         return local.Date.AddDays(1).Add(exchange.TimeOfDay);
+                    }
+                    break;
+                case 23:
+                    if (local.Hour == 0) {
+                        return local.Date.AddDays(-1).Add(exchange.TimeOfDay);
                     }
                     break;
             }

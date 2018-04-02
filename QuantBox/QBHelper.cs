@@ -5,6 +5,7 @@ using System.Reflection;
 using Microsoft.Win32;
 using NLog;
 using NLog.Config;
+using NLog.LayoutRenderers;
 using SmartQuant;
 
 namespace QuantBox
@@ -31,10 +32,11 @@ namespace QuantBox
 
         public static void InitNLog()
         {
+            LayoutRenderer.Register("op_logsdir", (logEvent) => Installation.LogsDir.FullName);
             const string nlogConfig = "NLog.config";
             var configFile = Path.Combine(BasePath, nlogConfig);
             if (!File.Exists(configFile)) {
-                configFile = Path.Combine(GetSmartQuantPath(), nlogConfig);
+                configFile = Path.Combine(Installation.ConfigDir.FullName, nlogConfig);
             }
             if (File.Exists(configFile)) {
                 LogManager.Configuration = new XmlLoggingConfiguration(configFile, true);
@@ -50,10 +52,12 @@ namespace QuantBox
                 if (request.FilterType.HasValue && request.FilterType != inst.Type) {
                     continue;
                 }
-                if (!String.IsNullOrEmpty(request.FilterExchange) && inst.Exchange.ToLower() != request.FilterExchange.ToLower()) {
+                if (!string.IsNullOrEmpty(request.FilterExchange)
+                    && !string.Equals(inst.Exchange, request.FilterExchange, StringComparison.CurrentCultureIgnoreCase)) {
                     continue;
                 }
-                if (!String.IsNullOrEmpty(request.FilterSymbol) && !inst.Symbol.ToLower().Contains(request.FilterSymbol.ToLower())) {
+                if (!string.IsNullOrEmpty(request.FilterSymbol)
+                    && !inst.Symbol.ToLower().Contains(request.FilterSymbol.ToLower())) {
                     continue;
                 }
                 list.Add(inst);
@@ -87,7 +91,7 @@ namespace QuantBox
         public static int GetPrecision(double value)
         {
             var precision = 0;
-            while (Math.Abs(value * Math.Pow(10, precision) - Math.Round(value * Math.Pow(10, precision))) > Double.Epsilon)
+            while (Math.Abs(value * Math.Pow(10, precision) - Math.Round(value * Math.Pow(10, precision))) > double.Epsilon)
                 precision++;
             return precision;
         }

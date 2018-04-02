@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using SmartQuant;
@@ -11,6 +12,7 @@ namespace QuantBox
     {
         private const string Futures = "futures";
         private const string Stock = "stock";
+        private const string RemoteDataFile = "http://data.thanf.com/other_files/trading_range.json";
 
         private readonly TimeRangeManager _default = new TimeRangeManager();
         private readonly Dictionary<string, TimeRangeManager> _items = new Dictionary<string, TimeRangeManager>();
@@ -20,8 +22,25 @@ namespace QuantBox
         static MarketDataFilter()
         {
             lock (typeof(MarketDataFilter)) {
+                UpdateDataFromRemote();
                 Instance = new MarketDataFilter();
                 Instance.Load();
+            }
+        }
+
+        private static string GetLocalDataFile()
+        {
+            return Path.Combine(Installation.ConfigDir.FullName, "thanf", "trading_range.json");
+        }
+
+        private static void UpdateDataFromRemote()
+        {
+            try {
+                var task = new WebClient().DownloadFileTaskAsync(RemoteDataFile, GetLocalDataFile());
+                task.Wait(2000);
+            }
+            catch {
+                // ignored
             }
         }
 
@@ -34,7 +53,7 @@ namespace QuantBox
         public void Load()
         {
             try {
-                var file = Path.Combine(Installation.ConfigDir.FullName, "thanf", "trading_range.json");
+                var file = GetLocalDataFile();
                 if (File.Exists(file)) {
                     var list = JToken.Parse(File.ReadAllText(file));
                     var current = list.First;

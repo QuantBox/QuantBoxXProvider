@@ -15,6 +15,7 @@ namespace QuantBox
     public partial class XProvider : Provider
     {
         private const string MsgProviderNotConnected = @"Provider is not connected.";
+        private const int DefaultInstrumentProvider = 60;
 
         internal bool QryInstrumentCompleted;
         private readonly List<Instrument> _instruments = new List<Instrument>();
@@ -156,6 +157,9 @@ namespace QuantBox
             if (!string.IsNullOrEmpty(_currentServer)) {
                 return GetServerInfo(_currentServer, type);
             }
+            if (index < 0 || index >= Settings.Servers.Count) {
+                return null;
+            }
             return Settings.Servers[index].Get();
         }
 
@@ -171,6 +175,9 @@ namespace QuantBox
 
         protected internal virtual UserInfoField GetUserInfo(int index)
         {
+            if (index < 0 || index >= Settings.Users.Count) {
+                return null;
+            }
             var info = Settings.Users[index].Get();
             if (!string.IsNullOrEmpty(_currentUserId)) {
                 info.UserID = _currentUserId;
@@ -296,6 +303,12 @@ namespace QuantBox
             Trader = null;
         }
 
+        internal void OnProviderError(ErrorField error)
+        {
+            Logger.Warn("id: {0}, msg: {1}, source: {2}", error.XErrorId, error.Text, error.Source);
+            EmitError(error.XErrorId, error.RawErrorId, $"{error.Source}:{error.Text}");
+        }
+
         internal void OnProviderError(int errorId, string errorMsg)
         {
             Logger.Warn("id: {0}, msg: {1}", errorId, errorMsg);
@@ -366,7 +379,13 @@ namespace QuantBox
 
         internal void OnMessage(DepthMarketDataField data)
         {
-            _convertor.ProcessMarketData(data);
+            try {
+                _convertor.ProcessMarketData(data);
+            }
+            catch (Exception e) {
+                Logger.Error(e);
+                throw;
+            }
         }
 
         internal void OnMessage(TradeField field)
@@ -545,6 +564,10 @@ namespace QuantBox
             }
         }
 
+        [Category(CategoryTrade)]
+        [Description("启动行情调试日志")]
+        public bool EnableMarketLog { get; set; } = false;
+
         private const string CategoryTrade = "Settings - Trade";
         [Category(CategoryTrade)]
         [Description("默认的投机保值设置")]
@@ -565,7 +588,7 @@ namespace QuantBox
         [Category(CategoryTrade)]
         [Description("指定使用的合约附加信息")]
         [TypeConverter(typeof(Design.InstrumentProviderConverter))]
-        public int InstrumentAltId { get; set; } = -1;
+        public int InstrumentAltId { get; set; } = DefaultInstrumentProvider;
 
         [Category(CategoryTrade)]
         [Description("连接行情服务")]
@@ -580,13 +603,8 @@ namespace QuantBox
         public bool NightTradingTimeCorrection { get; set; } = false;
 
         [Category(CategoryTrade)]
-        [Description("过滤非交易时间的行情")]
-        public bool DiscardNoTrading { get; set; } = true;
-
-        [Category(CategoryTrade)]
         [Description("过滤成交量为零的行情")]
         public bool DiscardEmptyTrade { get; set; } = true;
-
         #endregion
     }
 }
