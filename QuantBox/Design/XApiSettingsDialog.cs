@@ -17,16 +17,16 @@ namespace QuantBox.Design
             InitializeComponent();
             _provider = provider;
             var settings = provider.Settings;
+            ServerInfoConverter.Provider = provider;
+            UserInfoConverter.Provider = provider;
+            UserSelectorConverter.Users = settings.Users;
+            ServerSelectorConverter.Servers = settings.Servers;
             _userBindingList = new BindingList<UserInfo>(settings.Users);
             userInfoBindingSource.DataSource = _userBindingList;
             _serverBindingList = new BindingList<ServerInfo>(settings.Servers);
             serverInfoBindingSource.DataSource = _serverBindingList;
             _connectionBindingList = new BindingList<ConnectionInfo>(settings.Connections);
             connectionInfoBindingSource.DataSource = _connectionBindingList;
-            ServerInfoConverter.Provider = provider;
-            UserInfoConverter.Provider = provider;
-            UserSelectorConverter.Users = settings.Users;
-            ServerSelectorConverter.Servers = settings.Servers;
         }
 
         private void XApiSettingsDialogs_FormClosed(object sender, FormClosedEventArgs e)
@@ -63,7 +63,8 @@ namespace QuantBox.Design
 
         private void btnRemoveServer_Click(object sender, EventArgs e)
         {
-            if (lstServer.SelectedItem != null) {
+            var item = (ServerInfo)lstServer.SelectedItem;
+            if (item != null && !item.ReadOnly) {
                 _serverBindingList.Remove((ServerInfo)lstServer.SelectedItem);
             }
         }
@@ -109,7 +110,9 @@ namespace QuantBox.Design
 
         private void lstServer_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (lstServer.SelectedItem != null) {
+            var item = (ServerInfo)lstServer.SelectedItem;
+            if (item != null) {
+                propertyGrid.ReadOnly = item.ReadOnly;
                 propertyGrid.SelectedObject = lstServer.SelectedItem;
             }
         }

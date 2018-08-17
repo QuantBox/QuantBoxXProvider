@@ -14,6 +14,7 @@
         void ProcessDepthMarketData(DepthMarketDataField data);
         void ProcessRtnOrder(OrderField order);
         void ProcessRtnTrade(TradeField trade);
+        void ProcessRtnInstrumentStatus(InstrumentStatusField status);
         void ProcessLog(LogField log);
     }
 }

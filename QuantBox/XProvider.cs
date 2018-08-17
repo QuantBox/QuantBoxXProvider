@@ -189,7 +189,7 @@ namespace QuantBox
         protected virtual XProviderSettings LoadSettings()
         {
             return new XProviderSettings {
-                Id = 50,
+                Id = 60,
                 Name = "xapi",
                 Description = "XApi Provider",
                 Url = "www.thanf.com",
@@ -315,11 +315,22 @@ namespace QuantBox
             EmitError(errorId, errorId, errorMsg);
         }
 
+        private void InitCalendar()
+        {
+
+        }
+
         internal void OnClientConnected(XApiClient client)
         {
             if (client == Market) {
+                TradingCalendar.Instance.Init(Market.TradingDay);
                 _subscribeManager.Resubscribe();
             }
+
+            if (client == Trader) {
+                TradingCalendar.Instance.Init(Market.TradingDay);
+            }
+
             _connectManager.Post(new OnClientConnected());
         }
 
@@ -345,6 +356,7 @@ namespace QuantBox
                     case InstrumentType.Future:
                     case InstrumentType.Option:
                     case InstrumentType.FutureOption:
+                    case InstrumentType.MultiLeg:
                         _instruments.Add(inst);
                         break;
                 }
@@ -401,6 +413,13 @@ namespace QuantBox
 
         #region Internal Methods 
 
+        internal void SubscribeDone(Instrument inst)
+        {
+            if (IsExecutionProvider && SubscribeAndQueryQuote) {
+                Trader.QueryQuote(inst);
+            }
+        }
+
         internal void ProcessMarketData(DataObject data)
         {
             _emitter.EmitData(data);
@@ -442,18 +461,14 @@ namespace QuantBox
         static XProvider()
         {
             QBHelper.InitNLog();
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
+            AssemblyResolver.AddPath(QBHelper.BasePath);
         }
 
-        private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args)
+        public static void BacktestInit(bool updateCalendar = false)
         {
-            var assemblyName = new AssemblyName(args.Name);
-            var path = Path.Combine(QBHelper.BasePath, assemblyName.Name + ".dll");
-            if (File.Exists(path)) {
-                return Assembly.LoadFile(path);
-            }
-            return null;
+            TradingCalendar.Instance.Init(DateTime.Today, updateCalendar);
         }
+
         #endregion
 
         public XProvider(Framework framework)
@@ -504,7 +519,8 @@ namespace QuantBox
         public override void Subscribe(Instrument instrument)
         {
             if (IsDataProvider) {
-                instrument.SetTimeFilter(MarketDataFilter.Instance.GetFilter(instrument));
+                instrument.SetTimeRange(TradingCalendar.Instance.GetTimeRange(instrument, DateTime.Today));
+                _convertor.InitInstrument(instrument);
                 _subscribeManager.Subscribe(instrument);
             }
         }
@@ -605,6 +621,19 @@ namespace QuantBox
         [Category(CategoryTrade)]
         [Description("过滤成交量为零的行情")]
         public bool DiscardEmptyTrade { get; set; } = true;
+
+        [Category(CategoryTrade)]
+        [Description("过滤非交易时间的行情")]
+        public bool DiscardOutOfTimeRange { get; set; } = true;
+
+        [Category(CategoryTrade)]
+        [Description("交易所和本地之间的最大时差,超过这个设定的行情将被过滤(单位: 分钟)")]
+        public int MaxTimeDiffExchangeLocal { get; set; } = 60;
+
+        [Category(CategoryTrade)]
+        [Description("在订阅行情的同时通过交易接口查询行情,解决融航柜台无法报单的问题")]
+        public bool SubscribeAndQueryQuote { get; set; } = false;
+
         #endregion
     }
 }

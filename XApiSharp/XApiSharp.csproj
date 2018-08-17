@@ -43,11 +43,16 @@
     <Compile Include="ApiType.cs" />
     <Compile Include="BarType.cs" />
     <Compile Include="BusinessType.cs" />
+    <Compile Include="AssemblyResolver.cs" />
+    <Compile Include="EnterReasonType.cs" />
+    <Compile Include="InstrumentStatusField.cs" />
     <Compile Include="ConnectionStatus.cs" />
+    <Compile Include="InstrumentStatusType.cs" />
     <Compile Include="ErrorField.cs" />
     <Compile Include="IXApi.cs" />
     <Compile Include="IXSpi.cs" />
     <Compile Include="LogField.cs" />
+    <Compile Include="ManagedApiLoader.cs" />
     <Compile Include="ManagedManager.cs" />
     <Compile Include="Nactive\UnmanagedOrders.cs" />
     <Compile Include="InternalSettlementInfoField.cs" />
@@ -63,6 +68,7 @@
     <Compile Include="ExecType.cs" />
     <Compile Include="HedgeFlagType.cs" />
     <Compile Include="InternalRspUserLoginField.cs" />
+    <Compile Include="QueryManager.cs" />
     <Compile Include="XApiHelper.cs" />
     <Compile Include="IdCardType.cs" />
     <Compile Include="InstLifePhaseType.cs" />

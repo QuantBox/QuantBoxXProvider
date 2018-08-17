@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -19,9 +18,10 @@ namespace QuantBox.XApi
                     }
                 }
                 catch (Exception) {
+                    // ignored
                 }
             }
-            return Assembly.LoadFile(path);
+            return ManagedApiLoader.LoadFile(path);
         }
 
         private static Type GetApiType(string path)
@@ -45,7 +45,7 @@ namespace QuantBox.XApi
             lock (Locker) {
                 var type = GetApiType(path);
                 if (type == null) {
-                    throw new InvalidOperationException("XApi tpye not found.");
+                    throw new InvalidOperationException("XApi type not found.");
                 }
                 return Activator.CreateInstance(type);
             }

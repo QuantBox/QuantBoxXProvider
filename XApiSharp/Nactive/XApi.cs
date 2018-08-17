@@ -60,7 +60,8 @@ namespace QuantBox.XApi.Nactive
             }
 
             if (data.Size1 > 0) {
-                UserLogin = PInvokeUtility.PtrToStruct<RspUserLoginField>(data.Ptr1);
+                var field = PInvokeUtility.PtrToStruct<InternalRspUserLoginField>(data.Ptr1);
+                UserLogin = new RspUserLoginField(field);
             }
             _spi.ProcessConnectionStatus(status, UserLogin);
         }
@@ -189,7 +190,7 @@ namespace QuantBox.XApi.Nactive
         public void Query(QueryType type, ReqQueryField query)
         {
             if (query == null) {
-                query = new ReqQueryField() {
+                query = new ReqQueryField {
                     AccountID = UserLogin?.AccountID,
                     ClientID = User.UserID
                 };

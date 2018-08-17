@@ -171,18 +171,45 @@ namespace QuantBox.XApi
 
         #region DateTime
 
+        private static DateTime GetDateTime(int date)
+        {
+            if (date <= 0) {
+                return DateTime.Today;
+            }
+            var year = date / 10000;
+            var month = date % 10000 / 100;
+            var day = date % 100;
+            return new DateTime(Math.Max(year, 1970), Math.Max(month, 1), Math.Max(day, 1));
+        }
+
+        private static DateTime GetDateTime(int date, int time, int ms = 0)
+        {
+            var hh = time / 10000;
+            var mm = time % 10000 / 100;
+            var ss = time % 100;
+            if (date <= 0) {
+                return DateTime.Today.Add(new TimeSpan(hh, mm, ss));
+            }
+            var year = date / 10000;
+            var month = date % 10000 / 100;
+            var day = date % 100;
+            return new DateTime(Math.Max(year, 1970), Math.Max(month, 1), Math.Max(day, 1), hh, mm, ss, ms);
+        }
+
+        public static TimeSpan EnterTime(this InstrumentStatusField field)
+        {
+            var hh = field.EnterTime / 10000;
+            var mm = field.EnterTime % 10000 / 100;
+            var ss = field.EnterTime % 100;
+            return new TimeSpan(hh, mm, ss);
+        }
+
         public static DateTime TradingDay(this RspUserLoginField field)
         {
             if (field == null || field.TradingDay == 0) {
                 return DateTime.MaxValue;
             }
-            if (field.TradingDay > 0) {
-                var year = field.TradingDay / 10000;
-                var month = field.TradingDay % 10000 / 100;
-                var day = field.TradingDay % 100;
-                return new DateTime(year, month, day);
-            }
-            return DateTime.Today;
+            return field.TradingDay > 0 ? GetDateTime(field.TradingDay) : DateTime.Today;
         }
 
         public static DateTime TradingDay(this DepthMarketDataField field)
@@ -190,13 +217,7 @@ namespace QuantBox.XApi
             if (field == null || field.TradingDay == 0) {
                 return DateTime.MaxValue;
             }
-            if (field.TradingDay > 0) {
-                var year = field.TradingDay / 10000;
-                var month = field.TradingDay % 10000 / 100;
-                var day = field.TradingDay % 100;
-                return new DateTime(year, month, day);
-            }
-            return DateTime.Today;
+            return field.TradingDay > 0 ? GetDateTime(field.TradingDay) : DateTime.Today;
         }
 
         public static DateTime ExchangeDateTime(this DepthMarketDataField field)
@@ -204,14 +225,7 @@ namespace QuantBox.XApi
             if (field == null || field.UpdateTime <= 0) {
                 return DateTime.MaxValue;
             }
-            var hh = field.UpdateTime / 10000;
-            var mm = field.UpdateTime % 10000 / 100;
-            var ss = field.UpdateTime % 100;
-            var year = field.ActionDay / 10000;
-            var month = field.ActionDay % 10000 / 100;
-            var day = field.ActionDay % 100;
-
-            return new DateTime(year, month, day, hh, mm, ss, field.UpdateMillisec);
+            return GetDateTime(field.ActionDay, field.UpdateTime, field.UpdateMillisec);
         }
 
         public static DateTime UpdateTime(this TradeField field)
@@ -219,16 +233,7 @@ namespace QuantBox.XApi
             if (field == null || field.Time == 0) {
                 return DateTime.MaxValue;
             }
-            var hh = field.Time / 10000;
-            var mm = field.Time % 10000 / 100;
-            var ss = field.Time % 100;
-            if (field.Date > 0) {
-                var year = field.Date / 10000;
-                var month = field.Date % 10000 / 100;
-                var day = field.Date % 100;
-                return new DateTime(year, month, day, hh, mm, ss);
-            }
-            return DateTime.Today.Add(new TimeSpan(hh, mm, ss));
+            return GetDateTime(field.Date, field.Time);
         }
 
         public static DateTime UpdateTime(this OrderField field)
@@ -236,23 +241,13 @@ namespace QuantBox.XApi
             if (field == null || field.Time == 0) {
                 return DateTime.MaxValue;
             }
-            var hh = field.Time / 10000;
-            var mm = field.Time % 10000 / 100;
-            var ss = field.Time % 100;
-            var year = field.Date / 10000;
-            var month = field.Date % 10000 / 100;
-            var day = field.Date % 100;
-
-            return new DateTime(year, month, day, hh, mm, ss);
+            return GetDateTime(field.Date, field.Time);
         }
 
         public static DateTime ExpireDate(this InstrumentField field)
         {
             if (field != null && field.ExpireDate > 0) {
-                var year = field.ExpireDate / 10000;
-                var month = field.ExpireDate % 10000 / 100;
-                var day = field.ExpireDate % 100;
-                return new DateTime(year, month, day);
+                return GetDateTime(field.ExpireDate);
             }
             return DateTime.MaxValue;
         }

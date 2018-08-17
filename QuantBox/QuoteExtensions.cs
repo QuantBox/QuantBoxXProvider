@@ -11,12 +11,12 @@ namespace QuantBox
             return (DepthMarketDataField)inst.Fields[QuantBoxConst.InstrumentMarketDataOffset];
         }
 
-        public static TimeRangeManager GetTimeFilter(this Instrument inst)
+        public static TradingTimeRange GetTimeRange(this Instrument inst)
         {
-            return (TimeRangeManager)inst.Fields[QuantBoxConst.InstrumentTimeManagerOffset];
+            return (TradingTimeRange)inst.Fields[QuantBoxConst.InstrumentTimeManagerOffset];
         }
 
-        public static void SetTimeFilter(this Instrument inst, TimeRangeManager manager)
+        public static void SetTimeRange(this Instrument inst, TradingTimeRange manager)
         {
             inst.Fields[QuantBoxConst.InstrumentTimeManagerOffset] = manager;
         }
@@ -46,10 +46,9 @@ namespace QuantBox
             return GetMarketData(inst)?.PreClosePrice ?? double.NaN;
         }
 
-        [Obsolete("持仓量不再储存在合约中，请从QBTrade中获取", true)]
-        public static double GetOpenInterest(this Instrument inst)
+        public static DateTime GetTradingDay(this Instrument inst)
         {
-            return GetMarketData(inst)?.OpenInterest ?? double.NaN;
+            return GetMarketData(inst)?.TradingDay() ?? DateTime.Today;
         }
 
         public static double GetPreOpenInterest(this Instrument inst)
@@ -57,21 +56,42 @@ namespace QuantBox
             return GetMarketData(inst)?.PreOpenInterest ?? double.NaN;
         }
 
-        [Obsolete("成交金额不再储存在合约中，请从QBTrade中获取", true)]
-        public static double GetTurnover(this Instrument inst)
+        public static DepthMarketDataField GetMarketData(this Trade trade)
         {
-            return GetMarketData(inst)?.Turnover ?? double.NaN;
+            return (DepthMarketDataField)trade.Fields[QuantBoxConst.TradeMarketDataOffset];
         }
 
-        [Obsolete("成交均价不再储存在合约中，请从QBTrade中获取", true)]
-        public static double GetAveragePrice(this Instrument inst)
+        public static double GetOpenInterest(this Trade trade)
         {
-            return GetMarketData(inst)?.AveragePrice ?? double.NaN;
+            return trade.Fields[QuantBoxConst.TradeOpenInterestOffset] == null
+                ? double.NaN
+                : trade.Fields.GetDouble(QuantBoxConst.TradeOpenInterestOffset);
         }
 
-        public static DateTime GetTradingDay(this Instrument inst)
+        public static double GetTurnover(this Trade trade)
         {
-            return GetMarketData(inst)?.TradingDay() ?? DateTime.Today;
+            return trade.Fields[QuantBoxConst.TradeTurnoverOffset] == null
+                ? double.NaN
+                : trade.Fields.GetDouble(QuantBoxConst.TradeTurnoverOffset);
+        }
+
+        public static double GetClosePrice(this Trade trade)
+        {
+            return trade.Fields[QuantBoxConst.TradeClosePriceOffset] == null
+                ? double.NaN
+                : trade.Fields.GetDouble(QuantBoxConst.TradeClosePriceOffset);
+        }
+
+        public static void SetMarketData(this Trade trade, DepthMarketDataField field)
+        {
+            trade.Fields[QuantBoxConst.TradeMarketDataOffset] = field;
+            trade.Fields[QuantBoxConst.TradeClosePriceOffset] = field.ClosePrice;
+        }
+
+        public static void SetMarketData(this Trade trade, double turnover, double openInterest)
+        {
+            trade.Fields[QuantBoxConst.TradeOpenInterestOffset] = openInterest;
+            trade.Fields[QuantBoxConst.TradeTurnoverOffset] = turnover;
         }
     }
 }

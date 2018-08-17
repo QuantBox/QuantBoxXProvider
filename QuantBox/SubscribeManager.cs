@@ -11,6 +11,12 @@ namespace QuantBox
         private readonly ActionBlock<Event> _action;
         private readonly Dictionary<int, Instrument> _instruments = new Dictionary<int, Instrument>();
 
+        private void DoSubscribe(Instrument inst)
+        {
+            _provider.Market.Subscribe(inst);
+            _provider.SubscribeDone(inst);
+        }
+
         private void SubscribeAction(Event e)
         {
             switch (e.TypeId) {
@@ -19,13 +25,13 @@ namespace QuantBox
                     break;
                 case EventType.OnConnect:
                     foreach (var item in _instruments) {
-                        _provider.Market.Subscribe(item.Value);
+                        DoSubscribe(item.Value);
                     }
                     break;
                 case EventType.OnSubscribe:
                     var sub = (OnSubscribe)e;
                     if (_provider.IsConnected) {
-                        _provider.Market.Subscribe(sub.Instrument);
+                        DoSubscribe(sub.Instrument);
                     }
                     if (!_instruments.ContainsKey(sub.Instrument.Id)) {
                         _instruments.Add(sub.Instrument.Id, sub.Instrument);

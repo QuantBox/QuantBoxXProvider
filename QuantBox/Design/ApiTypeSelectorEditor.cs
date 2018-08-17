@@ -26,15 +26,16 @@ namespace QuantBox.Design
         protected override void FillTreeWithData(Selector selector, ITypeDescriptorContext context, IServiceProvider provider)
         {
             if (context?.Instance != null) {
-                var instance = (ConnectionInfo)context.Instance;
                 _selector = selector;
                 selector.CheckBoxes = true;
                 selector.BeforeSelect += SelectBefore;
                 selector.Clear();
+                var instance = context.Instance as ConnectionInfo;
                 foreach (ApiType category in Enum.GetValues(typeof(ApiType))) {
                     if (category != ApiType.None) {
-                        if ((instance.Type & category) == category) {
-                            selector.AddNode(category.ToString(), (int)category, null).Checked = (instance.UseType & category) == category;
+                        var node = selector.AddNode(category.ToString(), (int)category, null);
+                        if (instance != null) {
+                            node.Checked = (instance.Type & category) == category;
                         }
                     }
                 }

@@ -33,10 +33,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NLog.4.4.13\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.5.8\lib\net45\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenQuantCompatibility, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenQuantCompatibility.1.0.1\lib\net451\OpenQuantCompatibility.dll</HintPath>
     </Reference>
     <Reference Include="SmartQuant, Version=1.2.0.1, Culture=neutral, PublicKeyToken=023ca4f8a69375d5, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -45,15 +48,19 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.6.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\TasksDataflow.4.8.0\lib\net45\System.Threading.Tasks.Dataflow.dll</HintPath>
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.6.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Dataflow.4.9.0\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
     </Reference>
-    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="Microsoft.CSharp" />
@@ -63,9 +70,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccountPosition.cs" />
-    <Compile Include="MarketDataFilter.cs" />
+    <Compile Include="TickFilter.cs" />
+    <Compile Include="IgnoreSerializerContractResolver.cs" />
+    <Compile Include="JsonOrderServer.cs" />
+    <Compile Include="TradingDayList.cs" />
+    <Compile Include="TradingCalendar.cs" />
     <Compile Include="QBTimeBarFactoryItem.cs" />
-    <Compile Include="TimeRangeManager.cs" />
+    <Compile Include="TradingTimeRange.cs" />
     <Compile Include="Design\TimeSpanEditor.cs" />
     <Compile Include="Design\FolderBrowser2.cs" />
     <Compile Include="Design\FolderNameEditor2.cs" />
@@ -117,12 +128,12 @@
     <Compile Include="OrderMap.cs" />
     <Compile Include="OrderRecord.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QBTrade.cs" />
     <Compile Include="QuoteExtensions.cs" />
     <Compile Include="QuantBoxConst.cs" />
     <Compile Include="QuantBoxOrderInfo.cs" />
     <Compile Include="ServerInfo.cs" />
     <Compile Include="TraderClient.cs" />
+    <Compile Include="TradingTimeManager.cs" />
     <Compile Include="UserInfo.cs" />
     <Compile Include="XApiClient.cs" />
     <Compile Include="XApiEventType.cs" />

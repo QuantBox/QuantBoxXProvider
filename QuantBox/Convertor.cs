@@ -12,14 +12,15 @@ namespace QuantBox
     {
         private static readonly List<FieldInfo> AccountFields = new List<FieldInfo>();
         private static readonly DepthMarketDataField EmptyMarketData = new DepthMarketDataField();
-        private static readonly PropertyInfo LegsProperty;
 
         private readonly XProvider _provider;
         private readonly Dictionary<string, AccountPosition> _positions = new Dictionary<string, AccountPosition>();
         private readonly IdArray<DepthMarketDataField> _marketData = new IdArray<DepthMarketDataField>();
-        private readonly IdArray<bool> _instOpenFlag = new IdArray<bool>();
+        private readonly IdArray<bool> _instOpenFlag = new IdArray<bool>(100);
+        private readonly IdArray<bool> _instCloseFlag = new IdArray<bool>(100);
+        private readonly IdArray<bool> _czceInstFlag = new IdArray<bool>(100);
         private readonly IDictionary<string, Instrument> _instruments = new Dictionary<string, Instrument>();
-        private readonly IdArray<TimeRangeManager> _timeRanges = new IdArray<TimeRangeManager>();
+        private readonly IdArray<TradingTimeRange> _timeRanges = new IdArray<TradingTimeRange>();
 
         static Convertor()
         {
@@ -29,7 +30,6 @@ namespace QuantBox
             EmptyMarketData.OpenInterest = 0;
             EmptyMarketData.Turnover = 0;
             EmptyMarketData.Volume = 0;
-            LegsProperty = typeof(Instrument).GetProperty("Legs", BindingFlags.Instance | BindingFlags.Public);
         }
 
         public Convertor(XProvider provider)
@@ -41,18 +41,33 @@ namespace QuantBox
         public void Init()
         {
             _instOpenFlag.Clear();
+            _instCloseFlag.Clear();
+            _czceInstFlag.Clear();
             _instruments.Clear();
         }
 
-        private void InitInstrument(Instrument inst)
+        internal void InitInstrument(Instrument inst)
         {
+            if (inst.GetExchange(_provider.GetAltId()).ToUpper() == "CZCE") {
+                _czceInstFlag[inst.Id] = true;
+            }
+            if (_provider.EnableMarketLog) {
+                _provider.Logger.Debug($"{inst.Symbol} init.");
+            }
             var key = inst.GetSymbol(_provider.GetAltId());
             if (inst.Type == InstrumentType.Stock || inst.Type == InstrumentType.Index) {
                 key = key + "." + inst.GetExchange(_provider.GetAltId());
             }
             _instruments[key] = inst;
             _marketData[inst.Id] = EmptyMarketData;
-            _timeRanges[inst.Id] = MarketDataFilter.Instance.GetFilter(inst);
+            _instCloseFlag[inst.Id] = false;
+            _instOpenFlag[inst.Id] = false;
+            if (_provider.DiscardOutOfTimeRange) {
+                _timeRanges[inst.Id] = TradingCalendar.Instance.GetTimeRange(inst, DateTime.Today);
+            }
+            else {
+                _timeRanges[inst.Id] = TradingTimeRange.Fulltime;
+            }
         }
 
         public static HedgeFlagType GetHedgeFlag(Order order, HedgeFlagType defaultValue)
@@ -71,13 +86,6 @@ namespace QuantBox
                 return (XApi.OrderSide)order.Side;
             }
             return side;
-        }
-
-        private static void AddLeg(Instrument inst, Leg leg)
-        {
-            if (LegsProperty == null) return;
-            var legs = (List<Leg>)LegsProperty.GetValue(inst);
-            legs?.Add(leg);
         }
 
         public Instrument GetInstument(InstrumentField field)
@@ -100,7 +108,7 @@ namespace QuantBox
                     //_provider.Logger.Warn($"没有找到合约标的物{field.UnderlyingInstrID},请先导入合约标的物");
                 }
                 else {
-                    AddLeg(inst, new Leg(underlying));
+                    OpenQuant.Helper.AddLeg(inst, new Leg(underlying));
                 }
             }
             return inst;
@@ -142,48 +150,58 @@ namespace QuantBox
             if (field == null) {
                 return;
             }
+
             if (_provider.EnableMarketLog) {
-                _provider.Logger.Debug($"{field.InstrumentID},{field.UpdateTime},{field.LastPrice},{field.Volume},{field.OpenPrice},{field.ClosePrice}.");
+                //_provider.Logger.Debug($"{field.InstrumentID},{field.UpdateTime},{field.Bids[0].Price},{field.Bids[0].Size},{field.Asks[0].Price},{field.Asks[0].Size},{field.LastPrice},{field.Volume}.");
+                _provider.Logger.Debug($"{field.InstrumentID},{field.UpdateTime},{field.LastPrice},{field.Volume}.");
             }
+
             _instruments.TryGetValue(field.InstrumentID, out var inst);
             if (inst == null) {
-                inst = _provider.InstrumentManager.Get(field.InstrumentID);
-                if (inst == null) {
-                    if (_provider.EnableMarketLog) {
-                        _provider.Logger.Debug($"not found {field.InstrumentID}.");
-                    }
-                    return;
-                }
-                InitInstrument(inst);
                 if (_provider.EnableMarketLog) {
-                    _provider.Logger.Debug($"{inst.Symbol}, init.");
+                    _provider.Logger.Debug($"unsubscribed tick: {field.InstrumentID}.");
                 }
+                return;
             }
 
             var instId = inst.Id;
-            var datetime = DateTime.Now;
+            var localTime = DateTime.Now;
             var exchangeTime = field.ExchangeDateTime();
             if (exchangeTime.Year == DateTime.MaxValue.Year) {
                 if (_provider.EnableMarketLog) {
-                    _provider.Logger.Debug($"empty trading time，{field.InstrumentID}");
+                    _provider.Logger.Debug($"empty trading time, {field.InstrumentID}");
                 }
-                exchangeTime = datetime;
+                exchangeTime = localTime;
             }
             else {
                 if (_provider.NightTradingTimeCorrection) {
-                    exchangeTime = Helper.CorrectionActionDay(datetime, exchangeTime);
+                    exchangeTime = Helper.CorrectionActionDay(localTime, exchangeTime);
                 }
             }
 
             var time = exchangeTime.TimeOfDay;
+            if (_provider.MaxTimeDiffExchangeLocal > 0) {
+                var diff = Math.Abs((localTime.TimeOfDay - time).TotalMinutes);
+                if (diff > _provider.MaxTimeDiffExchangeLocal) {
+                    if (_provider.EnableMarketLog) {
+                        _provider.Logger.Debug($"time diff ={diff},{field.InstrumentID}");
+                    }
+                    return;
+                }
+            }
+
             var range = _timeRanges[instId];
             if (!_instOpenFlag[instId]) {
-                if (field.OpenPrice > 0
-                    && range.InRange(time)
-                    && !range.IsClose(time)
-                    && (DateTime.Now.TimeOfDay - time).Hours < 1) {
+                if (range.InRange(time)) {
+                    if (_instCloseFlag[instId] && range.IsClose(time)) {
+                        if (_provider.EnableMarketLog) {
+                            _provider.Logger.Debug($"already closed, {field.InstrumentID}.");
+                        }
+                        return;
+                    }
                     inst.SetMarketData(field);
                     _instOpenFlag[instId] = true;
+                    _instCloseFlag[instId] = false;
                     if (_provider.EnableMarketLog) {
                         _provider.Logger.Debug($"market open, {field.InstrumentID}.");
                     }
@@ -199,6 +217,7 @@ namespace QuantBox
             var last = _marketData[instId];
             if (field.ClosePrice > 0 && range.IsClose(time)) {
                 inst.SetMarketData(field);
+                _instCloseFlag[instId] = true;
                 _instOpenFlag[instId] = false;
                 _marketData[instId] = EmptyMarketData;
                 if (_provider.EnableMarketLog) {
@@ -206,15 +225,18 @@ namespace QuantBox
                 }
             }
             else {
+                if (_czceInstFlag[inst.Id]) {
+                    field.ClosePrice = 0;
+                }
                 _marketData[instId] = field;
             }
 
-            if (field.Asks?.Length > 0) {
-                var ask = new Ask(datetime, exchangeTime, _provider.Id, instId, field.Asks[0].Price, field.Asks[0].Size);
+            if (field.Asks?.Length > 0 && field.Asks[0].Size > 0) {
+                var ask = OpenQuant.Helper.NewTick<Ask>(localTime, exchangeTime, _provider.Id, instId, field.Asks[0].Price, field.Asks[0].Size);
                 _provider.ProcessMarketData(ask);
             }
-            if (field.Bids?.Length > 0) {
-                var bid = new Bid(datetime, exchangeTime, _provider.Id, instId, field.Bids[0].Price, field.Bids[0].Size);
+            if (field.Bids?.Length > 0 && field.Bids[0].Size > 0) {
+                var bid = OpenQuant.Helper.NewTick<Bid>(localTime, exchangeTime, _provider.Id, instId, field.Bids[0].Price, field.Bids[0].Size);
                 _provider.ProcessMarketData(bid);
             }
 
@@ -225,28 +247,28 @@ namespace QuantBox
                 return;
             }
 
-            var size = (int)(field.Volume - last.Volume);
+            var size = _provider.VolumeIsAccumulated ? field.Volume - last.Volume : field.Volume;
             if (_provider.DiscardEmptyTrade
-                && size == 0
+                && _provider.VolumeIsAccumulated
+                && Math.Abs(size) < double.Epsilon
                 && _instOpenFlag[instId]) {
                 if (_provider.EnableMarketLog) {
                     _provider.Logger.Debug($"empty trade, {field.InstrumentID}.");
                 }
                 return;
             }
-
-            var trade = new QBTrade(datetime, exchangeTime, _provider.Id, instId, field.LastPrice, 0);
+            double openInterest, turnover;
+            var trade = OpenQuant.Helper.NewTick<Trade>(localTime, exchangeTime, _provider.Id, instId, field.LastPrice, size);
             if (_provider.VolumeIsAccumulated) {
-                trade.Size = size;
-                trade.OpenInterest = field.OpenInterest - last.OpenInterest;
-                trade.Turnover = field.Turnover - last.Turnover;
+                openInterest = field.OpenInterest - last.OpenInterest;
+                turnover = field.Turnover - last.Turnover;
             }
             else {
-                trade.Size = (int)field.Volume;
-                trade.OpenInterest = field.OpenInterest;
-                trade.Turnover = field.Turnover;
+                openInterest = field.OpenInterest;
+                turnover = field.Turnover;
             }
-            trade.Field = field;
+            trade.SetMarketData(field);
+            trade.SetMarketData(openInterest, turnover);
             _provider.ProcessMarketData(trade);
         }
     }

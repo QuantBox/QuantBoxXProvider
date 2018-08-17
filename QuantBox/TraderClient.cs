@@ -1,4 +1,5 @@
 ﻿using QuantBox.XApi;
+using SmartQuant;
 
 namespace QuantBox
 {
@@ -49,6 +50,18 @@ namespace QuantBox
         {
             if (Connected) {
                 Api.Query(QueryType.ReqQryInvestorPosition, null);
+            }
+        }
+
+        public void QueryQuote(Instrument inst)
+        {
+            if (Connected) {
+                var (symbol, exchange) = Provider.GetSymbolInfo(inst);
+                Api.Query(QueryType.ReqQryQuote, new ReqQueryField {
+                    ExchangeID = exchange,
+                    InstrumentID = symbol,
+                    Symbol = symbol
+                });
             }
         }
     }

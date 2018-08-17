@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 
 namespace QuantBox.XApi
 {
@@ -19,6 +18,12 @@ namespace QuantBox.XApi
         private readonly object _instance;
 
         #region Response Handler
+
+        void IXSpi.ProcessRtnInstrumentStatus(InstrumentStatusField status)
+        {
+            InstrumentStatusChanged?.Invoke(this, status);
+        }
+
         void IXSpi.ProcessConnectionStatus(ConnectionStatus status, RspUserLoginField login)
         {
             StatusChanged?.Invoke(this, status, login);
@@ -176,7 +181,9 @@ namespace QuantBox.XApi
         public event XApiEventHandler3<TradeField> TradeReceived;
         public event EventHandler<DepthMarketDataField> MarketDataReceived;
         public event EventHandler<OrderField> OrderReturn;
-        public event EventHandler<TradeField> TradeReturn;        
+        public event EventHandler<TradeField> TradeReturn;
+        public event EventHandler<InstrumentStatusField> InstrumentStatusChanged;
+
         #endregion
     }
 }

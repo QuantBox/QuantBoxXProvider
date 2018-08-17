@@ -10,7 +10,7 @@ namespace QuantBox
         public bool IsClose { get; set; }
         public bool IsNight { get; set; }
 
-        public TimeRange(TimeSpan begin, TimeSpan end, bool open, bool close, bool night)
+        public TimeRange(TimeSpan begin, TimeSpan end, bool open = false, bool close = false, bool night = false)
         {
             Begin = begin;
             End = end;
@@ -21,6 +21,11 @@ namespace QuantBox
 
         public TimeRange()
         {
+        }
+
+        public TimeRange Clone()
+        {
+            return (TimeRange)MemberwiseClone();
         }
 
         public override string ToString()

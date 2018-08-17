@@ -1,4 +1,6 @@
-﻿namespace QuantBox.Design
+﻿using System.Windows.Forms;
+
+namespace QuantBox.Design
 {
     partial class XApiSettingsDialog
     {
@@ -51,7 +53,7 @@
             this.btnAddUser = new System.Windows.Forms.Button();
             this.btnRemoveUser = new System.Windows.Forms.Button();
             this.btnCopyUser = new System.Windows.Forms.Button();
-            this.propertyGrid = new System.Windows.Forms.PropertyGrid();
+            this.propertyGrid = new Rajeev.Windows.Forms.RPropertyGrid();
             this.pnlList.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.connectionInfoBindingSource)).BeginInit();
@@ -101,7 +103,7 @@
             // 
             // connectionInfoBindingSource
             // 
-            this.connectionInfoBindingSource.DataSource = typeof(ConnectionInfo);
+            this.connectionInfoBindingSource.DataSource = typeof(QuantBox.ConnectionInfo);
             // 
             // flowLayoutPanel3
             // 
@@ -170,7 +172,7 @@
             // 
             // serverInfoBindingSource
             // 
-            this.serverInfoBindingSource.DataSource = typeof(ServerInfo);
+            this.serverInfoBindingSource.DataSource = typeof(QuantBox.ServerInfo);
             // 
             // flowLayoutPanel2
             // 
@@ -239,7 +241,7 @@
             // 
             // userInfoBindingSource
             // 
-            this.userInfoBindingSource.DataSource = typeof(UserInfo);
+            this.userInfoBindingSource.DataSource = typeof(QuantBox.UserInfo);
             // 
             // flowLayoutPanel1
             // 
@@ -284,12 +286,13 @@
             // 
             // propertyGrid
             // 
-            this.propertyGrid.LineColor = System.Drawing.SystemColors.ControlDark;
-            this.propertyGrid.Location = new System.Drawing.Point(524, 66);
+            this.propertyGrid.Location = new System.Drawing.Point(544, 116);
+            this.propertyGrid.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.propertyGrid.Name = "propertyGrid";
-            this.propertyGrid.Size = new System.Drawing.Size(231, 184);
-            this.propertyGrid.TabIndex = 5;
-            this.propertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.propertyGrid_PropertyValueChanged);
+            this.propertyGrid.ReadOnly = false;
+            this.propertyGrid.Size = new System.Drawing.Size(233, 179);
+            this.propertyGrid.TabIndex = 6;
+            this.propertyGrid.PropertyValueChanged += new PropertyValueChangedEventHandler(this.propertyGrid_PropertyValueChanged);
             // 
             // XApiSettingsDialog
             // 
@@ -320,6 +323,11 @@
 
         }
 
+        private void PropertyGrid_PropertyValueChanged(object s, System.Windows.Forms.PropertyValueChangedEventArgs e)
+        {
+            throw new System.NotImplementedException();
+        }
+
         #endregion
 
         private System.Windows.Forms.Panel pnlList;
@@ -341,9 +349,9 @@
         private System.Windows.Forms.Button btnAddUser;
         private System.Windows.Forms.Button btnRemoveUser;
         private System.Windows.Forms.Button btnCopyUser;
-        private System.Windows.Forms.PropertyGrid propertyGrid;
         private System.Windows.Forms.BindingSource userInfoBindingSource;
         private System.Windows.Forms.BindingSource serverInfoBindingSource;
         private System.Windows.Forms.BindingSource connectionInfoBindingSource;
+        private Rajeev.Windows.Forms.RPropertyGrid propertyGrid;
     }
 }
