@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks.Dataflow;
 #if CTP
 using QuantBox.Sfit.Api;
 #else
@@ -9,92 +7,64 @@ using QuantBox.Rohon.Api;
 
 namespace QuantBox.XApi
 {
-    internal class CtpQueryManager
+    internal class CtpQueryManager : QueryManager<CtpResponse?>
     {
-        private struct QueryEvent
-        {
-            public QueryType? Type { get; }
-            public CtpResponse? Response { get; }
-
-            public QueryEvent(QueryType type)
-            {
-                Type = type;
-                Response = null;
-            }
-
-            public QueryEvent(CtpResponse rsp)
-            {
-                Response = rsp;
-                Type = null;
-            }
-        }
-
         private readonly CtpTradeClient _client;
-        private readonly ActionBlock<QueryEvent> _action;
-        private int _sleeps;
 
-        private void ProcessQuery(QueryEvent e)
+        protected override int QryTradingAccount(ReqQueryField field)
         {
-            var ret = 0;
-            switch (e.Type) {
-                case QueryType.ReqQryInstrument:
-                    ret = _client.Api.ReqQryInstrument(new CtpQryInstrument(), _client.GetNextRequestId());
-                    break;
-                case QueryType.ReqQryInvestorPosition:
-                    ret = QryInvestorPosition();
-                    break;
-                case QueryType.ReqQryTradingAccount:
-                    ret = QryTradingAccount();
-                    break;
+            var account = new CtpQryTradingAccount();
+            account.BrokerID = _client.CtpLoginInfo.BrokerID;
+            account.InvestorID = _client.CtpLoginInfo.UserID;
+            return _client.Api.ReqQryTradingAccount(account, _client.GetNextRequestId());
+        }
 
-            }
-            if (ret == 0) {
-                _sleeps = 1;
-            }
-            else {
-                _sleeps *= 4;
-                _sleeps %= 1023;
-                _action.Post(e);
-            }
-            Thread.Sleep(_sleeps);
-        }
-        private void ProcessAccount(CtpResponse rsp)
+        protected override int QryOrder(ReqQueryField field)
         {
-            var data = rsp.Item1.AsTradingAccount;
-            if (data == null)
+            throw new NotImplementedException();
+        }
+
+        protected override int QryInstrumentCommissionRate(ReqQueryField field)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override int QryInstrumentMarginRate(ReqQueryField field)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override int QrySettlementInfo(ReqQueryField field)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override int QryInvestor(ReqQueryField field)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override int QryQuote(ReqQueryField field)
+        {
+            var req = new CtpQryDepthMarketData();
+            req.InstrumentID = field.InstrumentID;
+            return _client.Api.ReqQryDepthMarketData(req, _client.GetNextRequestId());
+        }
+
+        protected override void ProcessInstrument(CtpResponse? rsp)
+        {
+            if (!rsp.HasValue) {
                 return;
-            if (CtpConvert.CheckRspInfo(rsp.Item2)) {
-                _client.Spi.ProcessQryAccount(CtpConvert.GetAccountField(data), rsp.IsLast);
             }
-            else {
-                _client.SendError(rsp.Item2, nameof(ProcessAccount));
-                _client.Spi.ProcessQryAccount(null, true);
-            }
-        }
-        private void ProcessPosition(CtpResponse rsp)
-        {
-            var data = rsp.Item1.AsInvestorPosition;
-            if (data == null)
-                return;
-            if (CtpConvert.CheckRspInfo(rsp.Item2)) {
-                _client.Spi.ProcessQryPosition(CtpConvert.GetPositionField(data), rsp.IsLast);
-            }
-            else {
-                _client.SendError(rsp.Item2, nameof(ProcessPosition));
-                _client.Spi.ProcessQryPosition(null, true);
-            }
-        }
-        private void ProcessInstrument(CtpResponse rsp)
-        {
             try {
-                var data = rsp.Item1.AsInstrument;
+                var data = rsp.Value.Item1.AsInstrument;
                 if (data == null)
                     return;
-                if (CtpConvert.CheckRspInfo(rsp.Item2)) {
-                    _client.Spi.ProcessQryInstrument(CtpConvert.GetInstrumentField(data), rsp.IsLast);
+                if (CtpConvert.CheckRspInfo(rsp.Value.Item2)) {
+                    _client.Spi.ProcessQryInstrument(CtpConvert.GetInstrumentField(data), rsp.Value.IsLast);
                 }
                 else {
-                    _client.SendError(rsp.Item2, nameof(ProcessInstrument));
+                    _client.SendError(rsp.Value.Item2, nameof(ProcessInstrument));
                     _client.Spi.ProcessQryInstrument(null, true);
                 }
             }
@@ -104,72 +74,80 @@ namespace QuantBox.XApi
             }
         }
 
-        private void ProcessResponse(QueryEvent e)
+        protected override void ProcessInvestorPosition(CtpResponse? rsp)
         {
-            if (e.Response == null)
-                return;
-            var rsp = e.Response.Value;
-            switch (rsp.TypeId) {
-                case CtpResponseType.OnRspQryTradingAccount:
-                    ProcessAccount(rsp);
-                    break;
-                case CtpResponseType.OnRspQryInvestorPosition:
-                    ProcessPosition(rsp);
-                    break;
-                case CtpResponseType.OnRspQryInstrument:
-                    ProcessInstrument(rsp);
-                    break;
-            }
-        }
-        private void QueryAction(QueryEvent e)
-        {
-            if (!_client.Connected) {
+            if (!rsp.HasValue) {
                 return;
             }
-            if (e.Type.HasValue) {
-                ProcessQuery(e);
+            if (CtpConvert.CheckRspInfo(rsp.Value.Item2)) {
+                var data = rsp.Value.Item1.AsInvestorPosition;
+                PositionField position = null;
+                if (data != null) {
+                    position = CtpConvert.GetPositionField(data);
+                }
+                _client.Spi.ProcessQryPosition(position, rsp.Value.IsLast);
             }
             else {
-                ProcessResponse(e);
+                _client.SendError(rsp.Value.Item2, nameof(ProcessInvestorPosition));
+                _client.Spi.ProcessQryPosition(null, true);
             }
         }
 
-        private int QryTradingAccount()
+        protected override void ProcessTradingAccount(CtpResponse? rsp)
         {
-            var field = new CtpQryTradingAccount();
-            field.BrokerID = _client.CtpLoginInfo.BrokerID;
-            field.InvestorID = _client.CtpLoginInfo.UserID;
-            return _client.Api.ReqQryTradingAccount(field, _client.GetNextRequestId());
+            var data = rsp?.Item1.AsTradingAccount;
+            if (data == null)
+                return;
+            if (CtpConvert.CheckRspInfo(rsp.Value.Item2)) {
+                _client.Spi.ProcessQryAccount(CtpConvert.GetAccountField(data), rsp.Value.IsLast);
+            }
+            else {
+                _client.SendError(rsp.Value.Item2, nameof(ProcessTradingAccount));
+                _client.Spi.ProcessQryAccount(null, true);
+            }
         }
 
-        private int QryInvestorPosition()
+        protected override void ProcessOrder(CtpResponse? rsp)
         {
-            var field = new CtpQryInvestorPosition();
-            field.BrokerID = _client.CtpLoginInfo.BrokerID;
-            field.InvestorID = _client.CtpLoginInfo.UserID;
-            return _client.Api.ReqQryInvestorPosition(field, _client.GetNextRequestId());
+            throw new NotImplementedException();
+        }
+
+        protected override void ProcessInstrumentCommissionRate(CtpResponse? rsp)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void ProcessInstrumentMarginRate(CtpResponse? rsp)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void ProcessSettlementInfo(CtpResponse? rsp)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void ProcessInvestor(CtpResponse? rsp)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override int QueryInstrument(ReqQueryField field)
+        {
+            return _client.Api.ReqQryInstrument(new CtpQryInstrument(), _client.GetNextRequestId());
+        }
+
+        protected override int QryInvestorPosition(ReqQueryField field)
+        {
+            var position = new CtpQryInvestorPosition();
+            position.BrokerID = _client.CtpLoginInfo.BrokerID;
+            position.InvestorID = _client.CtpLoginInfo.UserID;
+            return _client.Api.ReqQryInvestorPosition(position, _client.GetNextRequestId());
         }
 
         public CtpQueryManager(CtpTradeClient client)
         {
             _client = client;
-            _action = new ActionBlock<QueryEvent>((Action<QueryEvent>)QueryAction);
-        }
-
-        public void Post(QueryType type)
-        {
-            _action.Post(new QueryEvent(type));
-        }
-
-        public void Post(CtpResponse rsp)
-        {
-            _action.Post(new QueryEvent(rsp));
-        }
-
-        public void Close()
-        {
-            _action.Complete();
-            _action.Completion.Wait();
         }
     }
 }

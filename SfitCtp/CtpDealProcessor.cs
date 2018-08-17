@@ -222,8 +222,8 @@ namespace QuantBox.XApi
             var data = CtpConvert.GetCtpOrder(e.Order);
             data.InvestorID = _client.CtpLoginInfo.UserID;
             data.BrokerID = _client.CtpLoginInfo.BrokerID;
-            _client.Api.ReqOrderInsert(data, _client.GetNextRequestId());
             _orders.AddOrder(e.Order);
+            _client.Api.ReqOrderInsert(data, _client.GetNextRequestId());
         }
 
         public CtpDealProcessor(CtpTradeClient client)

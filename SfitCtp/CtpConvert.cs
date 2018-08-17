@@ -9,14 +9,60 @@ namespace QuantBox.XApi
 {
     internal static class CtpConvert
     {
-        public static bool IsMax(double value)
+        public static bool IsInvalid(double value)
         {
-            return Math.Abs(double.MaxValue - value) < double.Epsilon;
+            return double.IsNaN(value)
+                   || Math.Abs(value) < double.Epsilon
+                   || Math.Abs(double.MaxValue - value) < double.Epsilon
+                   || Math.Abs(value - double.MinValue) < double.Epsilon;
         }
 
         public static bool CheckRspInfo(CtpRspInfo info)
         {
             return info == null || info.ErrorID == 0;
+        }
+
+        public static InstrumentStatusField GetInstrumentStatus(CtpInstrumentStatus status)
+        {
+            var field = new InstrumentStatusField();
+            field.Status = GetInstrumentStatusType(status.InstrumentStatus);
+            field.EnterReason = GetEnterReasonType(status.EnterReason);
+            field.EnterTime = GetTime(status.EnterTime);
+            field.InstrumentID = status.InstrumentID;
+            field.ExchangeID = status.ExchangeID;
+            return field;
+        }
+
+        public static EnterReasonType GetEnterReasonType(byte type)
+        {
+            switch (type) {
+                case CtpInstStatusEnterReasonType.Automatic:
+                    return EnterReasonType.Automatic;
+                case CtpInstStatusEnterReasonType.Manual:
+                    return EnterReasonType.Manual;
+                default:
+                    return EnterReasonType.Fuse;
+            }
+        }
+
+        public static InstrumentStatusType GetInstrumentStatusType(byte type)
+        {
+            switch (type) {
+                case CtpInstrumentStatusType.AuctionBalance:
+                    return InstrumentStatusType.AuctionBalance;
+                case CtpInstrumentStatusType.AuctionMatch:
+                    return InstrumentStatusType.AuctionMatch;
+                case CtpInstrumentStatusType.AuctionOrdering:
+                    return InstrumentStatusType.AuctionOrdering;
+                case CtpInstrumentStatusType.BeforeTrading:
+                    return InstrumentStatusType.BeforeTrading;
+                case CtpInstrumentStatusType.Closed:
+                    return InstrumentStatusType.Closed;
+                case CtpInstrumentStatusType.Continous:
+                    return InstrumentStatusType.Continous;
+                default:
+                    return InstrumentStatusType.NoTrading;
+            }
         }
 
         public static string GetReasonMsg(int reason)
@@ -58,7 +104,7 @@ namespace QuantBox.XApi
 
         public static int GetTime(string time)
         {
-            if (time.Length <= 6) {
+            if (time.Length == 6) {
                 if (time[1] != ':' && time[2] != ':') {
                     return int.Parse(time);
                 }
@@ -68,16 +114,22 @@ namespace QuantBox.XApi
                     + int.Parse(time.Substring(3, 2)) * 100
                     + int.Parse(time.Substring(6, 2));
             }
+
             var item = time.Split(':');
-            return int.Parse(item[0]) * 10000
-                   + int.Parse(item[1]) * 100
-                   + int.Parse(item[2]);
+            if (item.Length >= 3) {
+                return int.Parse(item[0]) * 10000
+                       + int.Parse(item[1]) * 100
+                       + int.Parse(item[2]);
+            }
+
+            return 0;
         }
 
         public static AccountField GetAccountField(CtpTradingAccount info)
         {
             var account = new AccountField();
             account.AccountID = info.AccountID;
+            account.ClientID = info.TradingDay;
             account.PreBalance = info.PreBalance;
             account.CurrMargin = info.CurrMargin;
             account.Commission = info.Commission;
@@ -115,6 +167,7 @@ namespace QuantBox.XApi
         public static PositionField GetPositionField(CtpInvestorPosition info)
         {
             var position = new PositionField();
+            position.Date = int.Parse(info.TradingDay);
             position.InstrumentID = info.InstrumentID;
             position.Symbol = info.InstrumentID;
             position.AccountID = info.InvestorID;
@@ -185,7 +238,7 @@ namespace QuantBox.XApi
                     return InstrumentType.MultiLeg;
                 case CtpProductClassType.Options:
                 case CtpProductClassType.SpotOption:
-                    return InstrumentType.Option;
+                    return InstrumentType.FutureOption;
             }
             return InstrumentType.Stock;
         }

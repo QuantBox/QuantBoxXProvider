@@ -11,15 +11,7 @@ namespace QuantBox.XApi
 
         static CtpTrader()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
-        }
-
-        private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            var assemblyName = new AssemblyName(args.Name);
-            var path = Path.GetDirectoryName(typeof(CtpTrader).Assembly.Location);
-            path = Path.Combine(path, assemblyName.Name + ".dll");
-            return File.Exists(path) ? Assembly.LoadFile(path) : null;
+            AssemblyResolver.AddPath(Path.GetDirectoryName(typeof(CtpTrader).Assembly.Location));
         }
 
         public void RegisterSpi(IXSpi spi)
@@ -48,7 +40,7 @@ namespace QuantBox.XApi
 
         public void Query(QueryType type, ReqQueryField query)
         {
-            _client?.Query(type);
+            _client?.Query(type, query);
         }
 
         public void Subscribe(string instrument, string exchange, InstrumentType type)

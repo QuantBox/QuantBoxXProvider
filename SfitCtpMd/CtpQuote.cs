@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 
 namespace QuantBox.XApi
 {
@@ -10,15 +9,7 @@ namespace QuantBox.XApi
 
         static CtpQuote()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
-        }
-
-        private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            var assemblyName = new AssemblyName(args.Name);
-            var path = Path.GetDirectoryName(typeof(CtpQuote).Assembly.Location);            
-            path = Path.Combine(path, assemblyName.Name + ".dll");
-            return File.Exists(path) ? Assembly.LoadFile(path) : null;
+            AssemblyResolver.AddPath(Path.GetDirectoryName(typeof(CtpQuote).Assembly.Location));
         }
 
         public void RegisterSpi(IXSpi spi)

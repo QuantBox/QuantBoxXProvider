@@ -75,12 +75,12 @@ namespace QuantBox.XApi
                     break;
             }
 
-            market.LastPrice = CtpConvert.IsMax(data.LastPrice) ? 0 : data.LastPrice;
+            market.LastPrice = CtpConvert.IsInvalid(data.LastPrice) ? 0 : data.LastPrice;
             market.Volume = data.Volume;
             market.OpenInterest = data.OpenInterest;
             market.Turnover = data.Turnover;
             market.AveragePrice = data.AveragePrice;
-            if (CtpConvert.IsMax(data.OpenPrice)) {
+            if (CtpConvert.IsInvalid(data.OpenPrice)) {
                 market.OpenPrice = 0;
                 market.HighestPrice = 0;
                 market.LowestPrice = 0;
@@ -93,31 +93,61 @@ namespace QuantBox.XApi
                 market.TradingPhase = TradingPhaseType.Continuous;
             }
 
-            if (CtpConvert.IsMax(data.ClosePrice)) {
+            if (CtpConvert.IsInvalid(data.ClosePrice)) {
                 market.ClosePrice = 0;
             }
             else {
                 market.ClosePrice = data.ClosePrice;
                 market.TradingPhase = TradingPhaseType.Closed;
             }
-            market.SettlementPrice = CtpConvert.IsMax(data.SettlementPrice) ? 0 : data.SettlementPrice;
+            market.SettlementPrice = CtpConvert.IsInvalid(data.SettlementPrice) ? 0 : data.SettlementPrice;
             market.UpperLimitPrice = data.UpperLimitPrice;
             market.LowerLimitPrice = data.LowerLimitPrice;
             market.PreClosePrice = data.PreClosePrice;
             market.PreSettlementPrice = data.PreSettlementPrice;
             market.PreOpenInterest = data.PreOpenInterest;
-            if (!CtpConvert.IsMax(data.AskPrice1)) {
-                market.Asks = new[] { new DepthField { Price = data.AskPrice1, Size = data.AskVolume1 } };
-            }
-            else {
-                market.Asks = new DepthField[0];
+            market.Asks = new DepthField[5];
+            market.Bids = new DepthField[5];
+            if (!CtpConvert.IsInvalid(data.AskPrice1)) {
+                market.Asks[0].Price = data.AskPrice1;
+                market.Asks[0].Size = data.AskVolume1;
+                if (!CtpConvert.IsInvalid(data.AskPrice2)) {
+                    market.Asks[1].Price = data.AskPrice2;
+                    market.Asks[1].Size = data.AskVolume2;
+                    if (!CtpConvert.IsInvalid(data.AskPrice3)) {
+                        market.Asks[2].Price = data.AskPrice3;
+                        market.Asks[2].Size = data.AskVolume3;
+                        if (!CtpConvert.IsInvalid(data.AskPrice4)) {
+                            market.Asks[3].Price = data.AskPrice4;
+                            market.Asks[3].Size = data.AskVolume4;
+                            if (!CtpConvert.IsInvalid(data.AskPrice5)) {
+                                market.Asks[4].Price = data.AskPrice5;
+                                market.Asks[4].Size = data.AskVolume5;
+                            }
+                        }
+                    }
+                }
             }
 
-            if (!CtpConvert.IsMax(data.BidPrice1)) {
-                market.Bids = new[] { new DepthField { Price = data.BidPrice1, Size = data.BidVolume1 } };
-            }
-            else {
-                market.Bids = new DepthField[0];
+            if (!CtpConvert.IsInvalid(data.BidPrice1)) {
+                market.Bids[0].Price = data.BidPrice1;
+                market.Bids[0].Size = data.BidVolume1;
+                if (!CtpConvert.IsInvalid(data.BidPrice2)) {
+                    market.Bids[1].Price = data.BidPrice2;
+                    market.Bids[1].Size = data.BidVolume2;
+                    if (!CtpConvert.IsInvalid(data.BidPrice3)) {
+                        market.Bids[2].Price = data.BidPrice3;
+                        market.Bids[2].Size = data.BidVolume3;
+                        if (!CtpConvert.IsInvalid(data.BidPrice4)) {
+                            market.Bids[3].Price = data.BidPrice4;
+                            market.Bids[3].Size = data.BidVolume4;
+                            if (!CtpConvert.IsInvalid(data.BidPrice5)) {
+                                market.Bids[4].Price = data.BidPrice5;
+                                market.Bids[4].Size = data.BidVolume5;
+                            }
+                        }
+                    }
+                }
             }
             _spi.ProcessDepthMarketData(market);
         }

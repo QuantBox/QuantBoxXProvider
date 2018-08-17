@@ -16,7 +16,6 @@ namespace QuantBox.XApi
 
         private static readonly Random Rand = new Random((int)DateTime.Now.Ticks);
         private int _lastDisconnectReason;
-
         private int _requestId;
         private int _orderRefId;
         private CtpQueryManager _queryManager;
@@ -72,7 +71,7 @@ namespace QuantBox.XApi
             Api.RspHandlerList[CtpResponseType.OnRspQryTradingAccount] = ProcessQuery;
             Api.RspHandlerList[CtpResponseType.OnRspQryInvestorPosition] = ProcessQuery;
             Api.RspHandlerList[CtpResponseType.OnRtnInstrumentStatus] = OnRtnInstrumentStatus;
-
+            Api.RspHandlerList[CtpResponseType.OnRspQryDepthMarketData] = OnRspQryDepthMarketData;
             // Connection
             Api.RspHandlerList[CtpResponseType.OnFrontConnected] = OnFrontConnected;
             Api.RspHandlerList[CtpResponseType.OnFrontDisconnected] = OnFrontDisconnected;
@@ -82,6 +81,7 @@ namespace QuantBox.XApi
             Api.RspHandlerList[CtpResponseType.OnRspError] = OnRspError;
         }
 
+
         #region Connect Response Handler
 
         private void DoSettlementInfoConfirm()
@@ -89,6 +89,8 @@ namespace QuantBox.XApi
             var confirm = new CtpSettlementInfoConfirm();
             confirm.BrokerID = Server.BrokerID;
             confirm.InvestorID = User.UserID;
+            confirm.ConfirmDate = DateTime.Now.ToString("yyyyMMdd");
+            confirm.ConfirmTime = DateTime.Now.ToString("hhmmss");
             _publisher.Post(ConnectionStatus.Confirming);
             Api.ReqSettlementInfoConfirm(confirm, GetNextRequestId());
         }
@@ -130,7 +132,12 @@ namespace QuantBox.XApi
                 UserLogin.UserID = CtpLoginInfo.UserID;
                 UserLogin.SessionID = $"{CtpLoginInfo.FrontID}:{CtpLoginInfo.SessionID}";
                 _publisher.Post(ConnectionStatus.Logined, UserLogin);
-                _orderRefId = int.Parse(CtpLoginInfo.MaxOrderRef) + 1;
+                if (string.IsNullOrEmpty(CtpLoginInfo.MaxOrderRef)) {
+                    _orderRefId = 1;
+                }
+                else {
+                    _orderRefId = int.Parse(CtpLoginInfo.MaxOrderRef) + 1;
+                }
                 DoSettlementInfoConfirm();
             }
             else {
@@ -201,11 +208,29 @@ namespace QuantBox.XApi
 
         private void ProcessQuery(ref CtpResponse rsp)
         {
-            _queryManager?.Post(rsp);
+            switch (rsp.TypeId) {
+                case CtpResponseType.OnRspQryTradingAccount:
+                    _queryManager?.Post(QueryType.ReqQryTradingAccount, rsp);
+                    break;
+                case CtpResponseType.OnRspQryInvestorPosition:
+                    _queryManager?.Post(QueryType.ReqQryInvestorPosition, rsp);
+                    break;
+                case CtpResponseType.OnRspQryInstrument:
+                    _queryManager?.Post(QueryType.ReqQryInstrument, rsp);
+                    break;
+            }
         }
 
         private void OnRtnInstrumentStatus(ref CtpResponse rsp)
         {
+            var status = rsp.Item1.AsInstrumentStatus;
+            var field = CtpConvert.GetInstrumentStatus(status);
+            Spi.ProcessRtnInstrumentStatus(field);
+        }
+        
+        private void OnRspQryDepthMarketData(ref CtpResponse rsp)
+        {
+            
         }
 
         #endregion
@@ -287,10 +312,10 @@ namespace QuantBox.XApi
             }
         }
 
-        public void Query(QueryType type)
+        public void Query(QueryType type, ReqQueryField field)
         {
             if (Connected) {
-                _queryManager.Post(type);
+                _queryManager.Post(type, field);
             }
         }
 
