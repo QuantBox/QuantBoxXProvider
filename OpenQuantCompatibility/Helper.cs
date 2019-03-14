@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -13,6 +14,7 @@ namespace OpenQuant
     public class Helper
     {
         #region Fast Invoke
+        [Conditional("DEBUG")]
         public static void ShowDynamicMethodVisualizer(object objectToVisualize)
         {
 #if DynamicMethodVisualizer
@@ -20,6 +22,8 @@ namespace OpenQuant
             visualizerHost.ShowVisualizer();
 #endif
         }
+
+        private delegate object FastInvokeHandler(object target, object[] paramters);
         private delegate object FastConstructorHandler(params object[] paramters);
         private static FastConstructorHandler CreateFastConstructor(ConstructorInfo methodInfo)
         {
@@ -74,7 +78,7 @@ namespace OpenQuant
             }
 
             il.Emit(OpCodes.Ret);
-            //ShowDynamicMethodVisualizer(dynamicMethod);
+            ShowDynamicMethodVisualizer(dynamicMethod);
             return (FastConstructorHandler)dynamicMethod.CreateDelegate(typeof(FastConstructorHandler));
         }
         private static void EmitCastToReference(ILGenerator il, Type type)
@@ -128,7 +132,86 @@ namespace OpenQuant
                 il.Emit(OpCodes.Ldc_I4, value);
             }
         }
+        private static void EmitBoxIfNeeded(ILGenerator il, Type type)
+        {
+            if (type.IsValueType) {
+                il.Emit(OpCodes.Box, type);
+            }
+        }
+        private static FastInvokeHandler CreateFastInvoker(MethodInfo methodInfo)
+        {
+            if (methodInfo.DeclaringType == null) {
+                return null;
+            }
+            var dynamicMethod = new DynamicMethod(
+                string.Empty,
+                typeof(object),
+                new[] { typeof(object), typeof(object[]) },
+                methodInfo.DeclaringType.Module,
+                true);
+
+            var il = dynamicMethod.GetILGenerator();
+            var parameters = methodInfo.GetParameters();
+            var paramTypes = new Type[parameters.Length];
+            for (var i = 0; i < paramTypes.Length; i++) {
+                if (parameters[i].ParameterType.IsByRef)
+                    paramTypes[i] = parameters[i].ParameterType.GetElementType();
+                else
+                    paramTypes[i] = parameters[i].ParameterType;
+            }
+            var locals = new LocalBuilder[paramTypes.Length];
+
+            for (var i = 0; i < paramTypes.Length; i++) {
+                locals[i] = il.DeclareLocal(paramTypes[i], true);
+            }
+            for (var i = 0; i < paramTypes.Length; i++) {
+                il.Emit(OpCodes.Ldarg_1);
+                EmitFastInt(il, i);
+                il.Emit(OpCodes.Ldelem_Ref);
+                EmitCastToReference(il, paramTypes[i]);
+                il.Emit(OpCodes.Stloc, locals[i]);
+            }
+            if (!methodInfo.IsStatic) {
+                il.Emit(OpCodes.Ldarg_0);
+            }
+            for (var i = 0; i < paramTypes.Length; i++) {
+                if (parameters[i].ParameterType.IsByRef)
+                    il.Emit(OpCodes.Ldloca_S, locals[i]);
+                else
+                    il.Emit(OpCodes.Ldloc, locals[i]);
+            }
+            if (methodInfo.IsStatic)
+                il.EmitCall(OpCodes.Call, methodInfo, null);
+            else
+                il.EmitCall(OpCodes.Callvirt, methodInfo, null);
+            if (methodInfo.ReturnType == typeof(void))
+                il.Emit(OpCodes.Ldnull);
+            else
+                EmitBoxIfNeeded(il, methodInfo.ReturnType);
+
+            for (var i = 0; i < paramTypes.Length; i++) {
+                if (parameters[i].ParameterType.IsByRef) {
+                    il.Emit(OpCodes.Ldarg_1);
+                    EmitFastInt(il, i);
+                    il.Emit(OpCodes.Ldloc, locals[i]);
+                    if (locals[i].LocalType.IsValueType)
+                        il.Emit(OpCodes.Box, locals[i].LocalType);
+                    il.Emit(OpCodes.Stelem_Ref);
+                }
+            }
+
+            il.Emit(OpCodes.Ret);
+            ShowDynamicMethodVisualizer(dynamicMethod);
+            return (FastInvokeHandler)dynamicMethod.CreateDelegate(typeof(FastInvokeHandler));
+        }
+
         #endregion
+
+        private static FastInvokeHandler GetSizeGetter()
+        {
+            var prop = typeof(Tick).GetProperty("Size");
+            return CreateFastInvoker(prop.GetMethod);
+        }
 
         private static FastConstructorHandler GetTickConstructor<T>(ref bool doubleSize) where T : Tick
         {
@@ -162,10 +245,12 @@ namespace OpenQuant
         static Helper()
         {
             LegsProperty = typeof(Instrument).GetProperty("Legs", BindingFlags.Instance | BindingFlags.Public);
+            TickConstructor = GetTickConstructor<Tick>(ref DoubleSize);
             AskConstructor = GetTickConstructor<Ask>(ref DoubleSize);
             BidConstructor = GetTickConstructor<Bid>(ref DoubleSize);
             TradeConstructor = GetTickConstructor<Trade>(ref DoubleSize);
             BarConstructor = GetBarConstructor();
+            SizeHandler = GetSizeGetter();
         }
 
 #if DEBUG
@@ -191,11 +276,13 @@ namespace OpenQuant
             legs?.Add(leg);
         }
 
-        private static readonly bool DoubleSize;
+        public static readonly bool DoubleSize;
+        private static readonly FastConstructorHandler TickConstructor;
         private static readonly FastConstructorHandler AskConstructor;
         private static readonly FastConstructorHandler BidConstructor;
         private static readonly FastConstructorHandler TradeConstructor;
         private static readonly FastConstructorHandler BarConstructor;
+        private static readonly FastInvokeHandler SizeHandler;
 
         public static T NewTick<T>(
             DateTime dateTime,
@@ -206,6 +293,8 @@ namespace OpenQuant
             double size) where T : Tick
         {
             FastConstructorHandler handler = null;
+            if (typeof(T) == typeof(Tick))
+                handler = TickConstructor;
             if (typeof(T) == typeof(Ask))
                 handler = AskConstructor;
             if (typeof(T) == typeof(Bid))
@@ -230,18 +319,34 @@ namespace OpenQuant
         {
             if (DoubleSize) {
                 return (Bar)BarConstructor?.Invoke(
-                    openDateTime, closeDateTime, 
-                    providerId, instrumentId, 
+                    openDateTime, closeDateTime,
+                    providerId, instrumentId,
                     type, size,
-                    open, high, low, close, 
+                    open, high, low, close,
                     volume, openInt);
             }
             return (Bar)BarConstructor?.Invoke(
-                openDateTime, closeDateTime, 
-                providerId, instrumentId, 
+                openDateTime, closeDateTime,
+                providerId, instrumentId,
                 type, size,
-                open, high, low, close, 
+                open, high, low, close,
                 (long)volume, openInt);
+        }
+
+        public static double GetDoubleSize(Tick tick)
+        {
+            if (DoubleSize) {
+                return (double)SizeHandler(tick, new object[] { });
+            }
+            return GetIntSize(tick);
+        }
+
+        public static int GetIntSize(Tick tick)
+        {
+            if (DoubleSize) {
+                return (int)GetDoubleSize(tick);
+            }
+            return (int)SizeHandler(tick, new object[] { });
         }
     }
 }

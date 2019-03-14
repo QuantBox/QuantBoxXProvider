@@ -33,11 +33,62 @@ namespace QuantBox
                             var modifyTime = e.DateTime.AddMilliseconds(-span.Milliseconds);
                             switch (e.TypeId) {
                                 case DataObjectType.Ask:
-                                    return new Ask(modifyTime, tick.ProviderId, tick.InstrumentId, tick.Price, tick.Size);
+                                    if (OpenQuant.Helper.DoubleSize) {
+                                        return OpenQuant.Helper.NewTick<Ask>(
+                                            modifyTime,
+                                            modifyTime,
+                                            tick.ProviderId,
+                                            tick.InstrumentId,
+                                            tick.Price,
+                                            OpenQuant.Helper.GetDoubleSize(tick));
+                                    }
+                                    else {
+                                        return OpenQuant.Helper.NewTick<Ask>(
+                                            modifyTime,
+                                            modifyTime,
+                                            tick.ProviderId,
+                                            tick.InstrumentId,
+                                            tick.Price,
+                                            OpenQuant.Helper.GetIntSize(tick));
+                                    }
                                 case DataObjectType.Bid:
-                                    return new Bid(modifyTime, tick.ProviderId, tick.InstrumentId, tick.Price, tick.Size);
+                                    if (OpenQuant.Helper.DoubleSize) {
+                                        return OpenQuant.Helper.NewTick<Bid>(
+                                            modifyTime,
+                                            modifyTime,
+                                            tick.ProviderId,
+                                            tick.InstrumentId,
+                                            tick.Price,
+                                            OpenQuant.Helper.GetDoubleSize(tick));
+                                    }
+                                    else {
+                                        return OpenQuant.Helper.NewTick<Bid>(
+                                            modifyTime,
+                                            modifyTime,
+                                            tick.ProviderId,
+                                            tick.InstrumentId,
+                                            tick.Price,
+                                            OpenQuant.Helper.GetIntSize(tick));
+                                    }
                                 case DataObjectType.Trade:
-                                    return new Trade(modifyTime, tick.ProviderId, tick.InstrumentId, tick.Price, tick.Size);
+                                    if (OpenQuant.Helper.DoubleSize) {
+                                        return OpenQuant.Helper.NewTick<Trade>(
+                                            modifyTime,
+                                            modifyTime,
+                                            tick.ProviderId,
+                                            tick.InstrumentId,
+                                            tick.Price,
+                                            OpenQuant.Helper.GetDoubleSize(tick));
+                                    }
+                                    else {
+                                        return OpenQuant.Helper.NewTick<Trade>(
+                                            modifyTime,
+                                            modifyTime,
+                                            tick.ProviderId,
+                                            tick.InstrumentId,
+                                            tick.Price,
+                                            OpenQuant.Helper.GetIntSize(tick));
+                                    }
                             }
                         }
                     }

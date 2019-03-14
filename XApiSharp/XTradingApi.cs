@@ -15,7 +15,6 @@ namespace QuantBox.XApi
     public class XTradingApi : IXSpi, IDisposable
     {
         private IXApi _api;
-        private readonly object _instance;
 
         #region Response Handler
 
@@ -93,15 +92,16 @@ namespace QuantBox.XApi
 
         public XTradingApi(string path)
         {
+            object instance;
             if (XApiHelper.IsManagedAssembly(path)) {
                 FileType = XApiFileType.Managed;
-                _instance = ManagedManager.GetInstance(path);
+                instance = ManagedManager.GetInstance(path);
             }
             else {
                 FileType = XApiFileType.Managed;
-                _instance = new Nactive.XApi(path);
+                instance = new Nactive.XApi(path);
             }
-            _api = (IXApi)_instance;
+            _api = (IXApi)instance;
             _api.RegisterSpi(this);
         }
 
@@ -111,15 +111,11 @@ namespace QuantBox.XApi
             _api.RegisterSpi(this);
         }
 
-        ~XTradingApi()
-        {
-            Dispose();
-        }
-
         public void Dispose()
         {
             _api?.Release();
             _api = null;
+            GC.SuppressFinalize(this);
         }
 
         #region Connection & Query

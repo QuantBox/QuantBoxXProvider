@@ -66,6 +66,18 @@ namespace QuantBox
             return IsEndPoint(time.Hours, time.Minutes, time.Seconds);
         }
 
+        //判断是否是集合竞价时间集合竞价时间规则为：
+        //有夜盘的，夜盘开盘前5分钟的前4分钟；
+        //无夜盘的，日盘开盘前5分钟的前4分钟；
+        public bool IsAggregateAuctionTime(TimeSpan time)
+        {
+            var openTime = NightOpenTime != TimeSpan.Zero ? NightOpenTime : OpenTime;
+            var startAuction = openTime - new TimeSpan(0, 4, -30);
+            var endAuction = openTime - new TimeSpan(0, 0, 30);
+
+            return time > startAuction && time < endAuction;
+        }
+
         public void AddRange(TimeRange range)
         {
             _ranges.Add(range);

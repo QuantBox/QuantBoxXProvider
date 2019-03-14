@@ -54,7 +54,7 @@ namespace QuantBox
         [Category("服务端信息")]
         [DataMember]
         public string BrokerID { get; set; }
-
+        
         [Category("客户端认证")]
         [DataMember]
         public string UserProductInfo { get; set; }
@@ -66,6 +66,11 @@ namespace QuantBox
         [Category("服务端信息")]
         [DataMember]
         public string Address { get; set; }
+
+        [Category("服务端信息")]
+        [Description("连接的是否是模拟交易系统")]
+        [DataMember]
+        public bool SimulationSystem { get; set;}
 
         [Category("配置信息")]
         [Editor(typeof(FileNameEditor), typeof(UITypeEditor))]

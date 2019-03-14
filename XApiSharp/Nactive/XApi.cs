@@ -144,15 +144,11 @@ namespace QuantBox.XApi.Nactive
             Dispose();
         }
 
-        ~XApi()
-        {
-            Dispose();
-        }
-
         public void Dispose()
         {
             _proxy?.Dispose();
             _proxy = null;
+            GC.SuppressFinalize(this);
         }
 
         public string ApiVersion => Marshal.PtrToStringAnsi(_proxy.XRequest(RequestType.GetApiVersion));

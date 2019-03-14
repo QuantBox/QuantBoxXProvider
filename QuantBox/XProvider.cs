@@ -1,13 +1,12 @@
-﻿using System;
+﻿using NLog;
+using QuantBox.XApi;
+using SmartQuant;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing.Design;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
-using NLog;
-using QuantBox.XApi;
-using SmartQuant;
 using InstrumentType = SmartQuant.InstrumentType;
 
 namespace QuantBox
@@ -35,6 +34,7 @@ namespace QuantBox
         private readonly SubscribeManager _subscribeManager;
         private readonly ConnectManager _connectManager;
         private readonly IEventEmitter _emitter;
+        private ICommissionProvider _commissionProvider;
 
         internal Logger Logger;
         internal TraderClient Trader;
@@ -152,6 +152,11 @@ namespace QuantBox
             return new XTradingApi(GetApiPath(path));
         }
 
+        protected virtual ServerInfoField GetServerInfo(ServerInfo info)
+        {
+            return info.Get();
+        }
+
         protected internal virtual ServerInfoField GetServerInfo(int index, ApiType type)
         {
             if (!string.IsNullOrEmpty(_currentServer)) {
@@ -160,17 +165,27 @@ namespace QuantBox
             if (index < 0 || index >= Settings.Servers.Count) {
                 return null;
             }
-            return Settings.Servers[index].Get();
+            return GetServerInfo(Settings.Servers[index]);
         }
 
         protected virtual ServerInfoField GetServerInfo(string key, ApiType type)
         {
             foreach (var server in Settings.Servers) {
                 if (server.Name == key && (server.Type | type) == type) {
-                    return server.Get();
+                    return GetServerInfo(server);
                 }
             }
             return null;
+        }
+
+        protected virtual UserInfoField GetUserInfo(UserInfo user)
+        {
+            var info = user.Get();
+            if (!string.IsNullOrEmpty(_currentUserId)) {
+                info.UserID = _currentUserId;
+                info.Password = _currentUserPassword;
+            }
+            return info;
         }
 
         protected internal virtual UserInfoField GetUserInfo(int index)
@@ -178,12 +193,7 @@ namespace QuantBox
             if (index < 0 || index >= Settings.Users.Count) {
                 return null;
             }
-            var info = Settings.Users[index].Get();
-            if (!string.IsNullOrEmpty(_currentUserId)) {
-                info.UserID = _currentUserId;
-                info.Password = _currentUserPassword;
-            }
-            return info;
+            return GetUserInfo(Settings.Users[index]);
         }
 
         protected virtual XProviderSettings LoadSettings()
@@ -315,20 +325,17 @@ namespace QuantBox
             EmitError(errorId, errorId, errorMsg);
         }
 
-        private void InitCalendar()
-        {
-
-        }
-
         internal void OnClientConnected(XApiClient client)
         {
             if (client == Market) {
-                TradingCalendar.Instance.Init(Market.TradingDay);
+                if (!ConnectTrader) {
+                    TradingCalendar.Instance.Init(DateTime.Today);
+                }
                 _subscribeManager.Resubscribe();
             }
 
             if (client == Trader) {
-                TradingCalendar.Instance.Init(Market.TradingDay);
+                TradingCalendar.Instance.Init(Trader.TradingDay);
             }
 
             _connectManager.Post(new OnClientConnected());
@@ -498,6 +505,16 @@ namespace QuantBox
             _currentServer = server;
             _currentUserId = userId;
             _currentUserPassword = password;
+        }
+
+        public void SetCommissionProvider(ICommissionProvider commissionProvider)
+        {
+            _commissionProvider = commissionProvider;
+        }
+
+        public double GetCommission(ExecutionReport report)
+        {
+            return _commissionProvider?.GetCommission(report) ?? 0;
         }
 
         public override void Send(ExecutionCommand command)

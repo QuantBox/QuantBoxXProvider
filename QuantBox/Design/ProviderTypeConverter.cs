@@ -14,7 +14,7 @@ namespace QuantBox.Design
         {
             _items.Add(-1, null);
             foreach (var provider in Framework.Current.ProviderManager.Providers) {
-                if (Filter(provider)) {
+                if (Filter(provider) && !_items.ContainsKey(provider.Id)) {
                     _items.Add(provider.Id, provider);
                 }
             }

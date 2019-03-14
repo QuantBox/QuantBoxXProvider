@@ -159,6 +159,16 @@ namespace QuantBox
                 report.DateTime = trade.UpdateTime();
                 report.LastPx = trade.Price;
                 report.LastQty = trade.Qty;
+
+                if (Math.Abs(trade.Commission) < double.Epsilon)
+                {
+                    report.Commission = _provider.GetCommission(report);
+                }
+                else
+                {
+                    report.Commission = trade.Commission;
+                }
+
                 _provider.OnMessage(report);
                 if (status == OrderStatus.Filled) {
                     _map.RemoveFilled(trade.ID);

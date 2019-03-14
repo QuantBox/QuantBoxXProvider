@@ -59,8 +59,8 @@ namespace QuantBox
                 closeDateTime = openDateTime.AddSeconds(barSize);
             }
 
+            closeDateTime = FixCloseDateTime(closeDateTime);
             if (_framework.Mode == FrameworkMode.Realtime) {
-                closeDateTime = FixCloseDateTime(closeDateTime);
             }
         }
 
@@ -87,7 +87,13 @@ namespace QuantBox
                     if (_framework.Mode == FrameworkMode.Realtime) {
                         _delayedBarOpen = true;
                     }
-                    tick = new Tick(time, time, tick.ProviderId, tick.InstrumentId, tick.Price, tick.Size);
+
+                    if (_clockType == ClockType.Exchange) {
+                        tick.ExchangeDateTime = time;
+                    }
+                    else {
+                        tick.DateTime = time;
+                    }
                 }
             }
             return base.GetBarOpenDateTime(tick, _clockType);
@@ -104,12 +110,17 @@ namespace QuantBox
 
         private void RaiseBar()
         {
-            if (_framework.Mode == FrameworkMode.Realtime) {
-                bar.DateTime = FixCloseDateTime(_closeDateTime, false);
+            if (bar == null) {
+                return;
             }
-            else {
-                bar.DateTime = _closeDateTime;
-            }
+
+            bar.DateTime = FixCloseDateTime(_closeDateTime, false);
+            //if (_framework.Mode == FrameworkMode.Realtime) {
+                
+            //}
+            //else {
+            //    bar.DateTime = _closeDateTime;
+            //}
             EmitBar();
         }
 
@@ -126,7 +137,7 @@ namespace QuantBox
                 tick.InstrumentId,
                 barType,
                 barSize,
-                tick.Price, tick.Price, tick.Price, tick.Price, tick.Size);
+                tick.Price, tick.Price, tick.Price, tick.Price, OpenQuant.Helper.GetDoubleSize(tick));
 
             if (!_delayedBarOpen) {
                 EmitBarOpen();
@@ -146,12 +157,12 @@ namespace QuantBox
 
         protected override void OnData(DataObject obj)
         {
-            var tick = (Tick)obj;
             if (_framework == null) {
                 _framework = GetFramework();
             }
+            var tick = (Tick)obj;
             if (_enableLog && _framework.Mode == FrameworkMode.Realtime) {
-                _logger.Debug($"{tick.Price}, {tick.Size},{tick.DateTime: HH:mm:ss},{tick.ExchangeDateTime: HH:mm:ss}");
+                _logger.Debug($"{tick.Price}, {OpenQuant.Helper.GetIntSize(tick)},{tick.DateTime: HH:mm:ss},{tick.ExchangeDateTime: HH:mm:ss}");
             }
 
             if (bar != null) {
@@ -162,15 +173,17 @@ namespace QuantBox
 
                 if (_closeDateTime < tick.ExchangeDateTime) {
                     RaiseBar();
-                    if (tick.Size == 0) {
+                    if (OpenQuant.Helper.GetIntSize(tick) == 0) {
                         return;
                     }
                     CreateBar(tick);
                 }
                 base.OnData(tick);
+
                 if (_framework.Mode == FrameworkMode.Simulation) {
                     return;
                 }
+
                 if (_closeDateTime == tick.ExchangeDateTime) {
                     RaiseBar();
                 }
@@ -181,7 +194,7 @@ namespace QuantBox
                 }
             }
             else {
-                if (tick.Size == 0) {
+                if (OpenQuant.Helper.GetIntSize(tick) == 0) {
                     return;
                 }
                 CreateBar(tick);

@@ -22,6 +22,9 @@ namespace QuantBox
 
         private void TimerOnElapsed(object sender, ElapsedEventArgs e)
         {
+            if (!TradingCalendar.Instance.IsTradingDay(DateTime.Today)) {
+                return;
+            }
             if (Interlocked.Exchange(ref _inTimer, 1) != 0) {
                 return;
             }
