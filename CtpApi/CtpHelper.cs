@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QuantBox.Sfit.Api
 {
     public static class CtpHelper
     {
-        readonly static Dictionary<string, TimeSpan> _strTimeMap;
-        readonly static Dictionary<string, DateTime> _strDateMap;
-        readonly static string[] _timeStrMap;
-        readonly static string[] _dateStrMap;
-        readonly static int CatchYear = DateTime.Today.Year;
+        private static readonly Dictionary<string, TimeSpan> StrTimeMap;
+        private static readonly Dictionary<string, DateTime> StrDateMap;
+        private static readonly string[] TimeStrMap;
+        private static readonly string[] DateStrMap;
+        private static readonly int CatchYear = DateTime.Today.Year;
 
         public static DateTime StrToDate(string str)
         {
@@ -20,7 +17,7 @@ namespace QuantBox.Sfit.Api
             {
                 return DateTime.ParseExact(str, "yyyyMMdd", System.Globalization.CultureInfo.CurrentCulture);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return DateTime.Today;
             }
@@ -32,28 +29,28 @@ namespace QuantBox.Sfit.Api
             var endTime = new TimeSpan(23, 59, 59);
             var countTime = (int)((endTime - beginTime).TotalSeconds) + 1;
 
-            _strTimeMap = new Dictionary<string, TimeSpan>(countTime);
-            _timeStrMap = new string[countTime];
+            StrTimeMap = new Dictionary<string, TimeSpan>(countTime);
+            TimeStrMap = new string[countTime];
 
             for (var i = 0; i < countTime; i++) {
                 var time = beginTime.Add(TimeSpan.FromSeconds(i));
                 var str = time.ToString();
-                _strTimeMap.Add(str, time);
-                _timeStrMap[i] = str;
+                StrTimeMap.Add(str, time);
+                TimeStrMap[i] = str;
             }
 
             var beginDate = new DateTime(DateTime.Today.Year, 1, 1);
             var endDate = beginDate.AddYears(1);
             var countDate = (int)((endDate - beginDate).TotalDays);
 
-            _strDateMap = new Dictionary<string, DateTime>(countDate);
-            _dateStrMap = new string[countDate];
+            StrDateMap = new Dictionary<string, DateTime>(countDate);
+            DateStrMap = new string[countDate];
 
             for (var i = 0; i < countDate; i++) {
                 var date = beginDate.AddDays(i);
                 var str = date.ToString("yyyyMMdd");
-                _strDateMap.Add(str, date);
-                _dateStrMap[i] = str;
+                StrDateMap.Add(str, date);
+                DateStrMap[i] = str;
             }
         }
 
@@ -108,15 +105,14 @@ namespace QuantBox.Sfit.Api
 
         public static TimeSpan GetSpan(string time)
         {
-            TimeSpan span;
-            _strTimeMap.TryGetValue(time, out span);
+            StrTimeMap.TryGetValue(time, out var span);
             return span;
         }
 
         public static DateTime GetTime(string date, string time)
         {
             if (date.Length == 8 && time.Length == 8) {
-                var span = _strTimeMap[time];
+                var span = StrTimeMap[time];
                 return GetDate(date).Add(span);
             }
             return DateTime.MinValue;
@@ -125,14 +121,13 @@ namespace QuantBox.Sfit.Api
         public static DateTime GetDate(string date)
         {
             if (date.Length == 8) {
-                DateTime d;
-                if (_strDateMap.TryGetValue(date, out d)) {
+                if (StrDateMap.TryGetValue(date, out var d)) {
                     return d;
                 }
                 var yyyy = int.Parse(date.Substring(0, 4));
-                var MM = int.Parse(date.Substring(4, 2));
+                var mm = int.Parse(date.Substring(4, 2));
                 var dd = int.Parse(date.Substring(6, 2));
-                return new DateTime(yyyy, MM, dd);
+                return new DateTime(yyyy, mm, dd);
             }
             return DateTime.Today;
         }
@@ -140,14 +135,14 @@ namespace QuantBox.Sfit.Api
         public static string DateToStr(DateTime date)
         {
             if (date.Year == CatchYear) {
-                return _dateStrMap[date.DayOfYear -1];
+                return DateStrMap[date.DayOfYear -1];
             }
             return date.ToString("yyyyMMdd");
         }
 
         public static string TimeToStr(DateTime date)
         {
-            return _timeStrMap[date.Hour * 60 * 60 + date.Minute * 60 + date.Second];
+            return TimeStrMap[date.Hour * 60 * 60 + date.Minute * 60 + date.Second];
         }
     }
 }

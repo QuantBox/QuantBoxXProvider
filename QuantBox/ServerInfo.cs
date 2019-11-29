@@ -63,6 +63,10 @@ namespace QuantBox
         [DataMember]
         public string AuthCode { get; set; }
 
+        [Category("客户端认证")]
+        [DataMember]
+        public string AppId { get; set; }
+
         [Category("服务端信息")]
         [DataMember]
         public string Address { get; set; }
@@ -144,7 +148,7 @@ namespace QuantBox
         public static ServerInfo Load(JToken token)
         {
             var server = new ServerInfo();
-            Helper.LoadFromJson(server, typeof(ServerInfo), token);
+            QBHelper.LoadFromJson(server, typeof(ServerInfo), token);
             return server;
         }
     }

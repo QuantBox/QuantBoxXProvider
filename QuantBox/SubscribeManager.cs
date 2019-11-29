@@ -33,9 +33,7 @@ namespace QuantBox
                     if (_provider.IsConnected) {
                         DoSubscribe(sub.Instrument);
                     }
-                    if (!_instruments.ContainsKey(sub.Instrument.Id)) {
-                        _instruments.Add(sub.Instrument.Id, sub.Instrument);
-                    }
+                    _instruments[sub.Instrument.Id] = sub.Instrument;
                     break;
                 case EventType.OnUnsubscribe:
                     var unsub = (OnUnsubscribe)e;
@@ -50,7 +48,7 @@ namespace QuantBox
         public SubscribeManager(XProvider provider)
         {
             _provider = provider;
-            _action = new ActionBlock<Event>((Action<Event>)SubscribeAction);
+            _action = new ActionBlock<Event>(SubscribeAction);
         }
 
         public void Subscribe(Instrument inst)

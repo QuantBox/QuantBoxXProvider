@@ -1,101 +1,57 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using SmartQuant;
 
 namespace QuantBox
 {
-    internal class OrderMap
+    internal class OrderMap : IEnumerable<OrderRecord>
     {
         private readonly Dictionary<string, OrderRecord> _working = new Dictionary<string, OrderRecord>();
-        private readonly Dictionary<string, Order> _pendingNew = new Dictionary<string, Order>();
-        private readonly Dictionary<string, OrderRecord> _pendingCancel = new Dictionary<string, OrderRecord>();
-        private readonly Dictionary<int, string> _orderIds = new Dictionary<int, string>();
+        private readonly Dictionary<string, OrderRecord> _noSends = new Dictionary<string, OrderRecord>();
 
-        public void SetLocalId(string localId, Order order)
+        public void AddNewOrder(string id, Order order)
         {
-            _pendingNew.Add(localId, order);
-            _orderIds[order.Id] = localId;
-        }
-
-        public OrderRecord PendingToWorking(string localId, string orderId)
-        {
-            if (_pendingNew.TryGetValue(localId, out var order)) {
-                _pendingNew.Remove(localId);
-                var record = new OrderRecord(order);
-                _working.Add(orderId, record);
-                _orderIds[order.Id] = orderId;
-                return record;
+            var record = new OrderRecord(order);
+            _working.Add(id, record);
+            if (string.IsNullOrEmpty(order.ProviderOrderId)) {
+                _noSends.Add(id, record);
             }
-            return null;
         }
 
-        private bool TryPickWorking(string orderId, out OrderRecord record, bool remove = true)
+        public void RemoveNoSend(string id)
         {
-            if (_working.TryGetValue(orderId, out record)) {
-                if (remove) {
-                    _working.Remove(orderId);
-                    _orderIds.Remove(record.Order.Id);
-                }
-                return true;
-            }
-            return false;
+            _noSends.Remove(id);
         }
 
-        public bool TryPickLocal(string localId, out Order order)
-        {
-            if (_pendingNew.TryGetValue(localId, out order)) {
-                _pendingNew.Remove(localId);
-                _orderIds.Remove(order.Id);
-                return true;
-            }
-            return false;
-        }
-
-        public void AddCancelPending(Order order)
-        {
-            var key = _orderIds[order.Id];
-            if (!_working.TryGetValue(key, out var record)) {
-                record = new OrderRecord(order);
-            }
-            _pendingCancel[key] = record;
-        }
-
-        public void RemoveFilled(string id)
+        public void RemoveDone(string id)
         {
             _working.Remove(id);
         }
 
-        public bool TryPickCancelled(string id, out OrderRecord record)
+        public bool OrderExist(string id)
         {
-            return TryPickWorking(id, out record);
+            return TryGetOrder(id, out _);
         }
 
-        public bool TryPickCancelling(string id, out OrderRecord record)
+        public bool TryGetOrder(string id, out OrderRecord record)
         {
-            return TryPickWorking(id, out record, false);
+            return _working.TryGetValue(id, out record);
         }
 
-        public bool TryPeek(string id, out OrderRecord record)
+        public List<OrderRecord> GetNoSend()
         {
-            return TryPickWorking(id, out record, false);
+            return _noSends.Values.ToList();
         }
 
-        public bool TryPickRejected(string id, out OrderRecord record)
+        public IEnumerator<OrderRecord> GetEnumerator()
         {
-            return TryPickWorking(id, out record);
+            return _working.Values.GetEnumerator();
         }
 
-        public bool TryPickPendingCancel(string id, out OrderRecord record)
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            if (_pendingCancel.TryGetValue(id, out record)) {
-                _pendingCancel.Remove(id);
-                return true;
-            }
-            return false;
-        }
-
-        public bool TryGetOrderId(Order order, out string id)
-        {
-            return _orderIds.TryGetValue(order.Id, out id);
+            return GetEnumerator();
         }
     }
 }

@@ -3,22 +3,12 @@ using SmartQuant;
 
 namespace QuantBox
 {
-    internal class TraderClient : XApiClient
+    public class TraderClient : XApiClient
     {
-        protected override void OnRtnTrade(object sender, TradeField trade)
-        {
-            Provider.OnMessage(trade);
-        }
-
-        protected override void OnRtnOrder(object sender, OrderField order)
-        {
-            Provider.OnMessage(order);
-        }
-
         public static ApiType ApiType => ApiType.Trade;
 
-        public TraderClient(XProvider provider, ConnectionInfo info)
-            : base(provider, info)
+        public TraderClient(XProvider provider, ConnectionInfo info, IXSpi spi = null)
+            : base(provider, info, spi)
         {
         }
 
@@ -50,6 +40,20 @@ namespace QuantBox
         {
             if (Connected) {
                 Api.Query(QueryType.ReqQryInvestorPosition, null);
+            }
+        }
+
+        public void QueryOrders()
+        {
+            if (Connected) {
+                Api.Query(QueryType.ReqQryOrder, null);
+            }
+        }
+
+        public void QueryTrades()
+        {
+            if (Connected) {
+                Api.Query(QueryType.ReqQryTrade, null);
             }
         }
 

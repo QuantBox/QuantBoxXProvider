@@ -54,7 +54,7 @@ namespace QuantBox
         public static UserInfo Load(JToken token)
         {
             var user = new UserInfo();
-            Helper.LoadFromJson(user, typeof(UserInfo), token);
+            QBHelper.LoadFromJson(user, typeof(UserInfo), token);
             return user;
         }
     }

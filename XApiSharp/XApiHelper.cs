@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using Ideafixxxer.Generics;
 using QuantBox.XApi.Nactive;
 
@@ -222,10 +224,36 @@ namespace QuantBox.XApi
 
         public static DateTime ExchangeDateTime(this DepthMarketDataField field)
         {
-            if (field == null || field.UpdateTime <= 0) {
+            if (field == null || field.UpdateTime < 0) {
                 return DateTime.MaxValue;
             }
             return GetDateTime(field.ActionDay, field.UpdateTime, field.UpdateMillisec);
+        }
+
+        public static void SetExchangeDate(this DepthMarketDataField field, DateTime dateTime)
+        {
+            if (field == null) {
+                return;
+            }
+            field.ActionDay = dateTime.Year * 10000 + dateTime.Month * 100 + dateTime.Day;
+        }
+
+        public static void SetExchangeTime(this DepthMarketDataField field, TimeSpan dateTime)
+        {
+            if (field == null) {
+                return;
+            }
+            field.UpdateTime = dateTime.Hours * 10000 + dateTime.Minutes * 100 + dateTime.Seconds;
+            field.UpdateMillisec = dateTime.Milliseconds;
+        }
+
+        public static void SetExchangeDateTime(this DepthMarketDataField field, DateTime dateTime)
+        {
+            if (field == null) {
+                return;
+            }
+            SetExchangeDate(field, dateTime);
+            SetExchangeTime(field, dateTime.TimeOfDay);
         }
 
         public static DateTime UpdateTime(this TradeField field)
@@ -321,6 +349,16 @@ namespace QuantBox.XApi
                 default:
                     return false;
             }
+        }
+
+        public static string GetVersionString()
+        {
+            return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
+        }
+
+        public static string GetVersionString(Type type)
+        {
+            return FileVersionInfo.GetVersionInfo(type.Assembly.Location).FileVersion;
         }
     }
 }

@@ -17,5 +17,7 @@
 
         ReqQryHistoricalTicks,
         ReqQryHistoricalBars,
+
+        ReqError,
     }
 }

@@ -7,7 +7,7 @@ namespace QuantBox.XApi
 {
     public abstract class QueryManager<T>
     {
-        private struct QueryEvent<TResponse>
+        protected struct QueryEvent<TResponse>
         {
             public QueryType? Type { get; }
             public TResponse Response { get; }
@@ -28,41 +28,47 @@ namespace QuantBox.XApi
             }
         }
 
-        private readonly BlockingCollection<QueryEvent<T>> _queue;
+        private readonly BlockingCollection<QueryEvent<T>> _requests;
+        private readonly BlockingCollection<QueryEvent<T>> _responses;
+
         private readonly Task _task;
         private readonly CancellationTokenSource _cts;
+        private QueryEvent<T>? _lastQuery;
+        private int _tryCount;
+        private int _qryCount;
+        private Task _delayedTask;
 
-        private DateTime _lastQueryTime = DateTime.Now;
+        private void ResetQuery()
+        {
+            _lastQuery = null;
+            _tryCount = 0;
+        }
 
-        private void ProcessResponse(QueryEvent<T> e)
+        private bool ProcessResponse(QueryEvent<T> e)
         {
             switch (e.Type) {
+                case QueryType.ReqError:
+                    return ProcessError(e.Response);
                 case QueryType.ReqQryInstrument:
-                    ProcessInstrument(e.Response);
-                    break;
+                    return ProcessInstrument(e.Response);
                 case QueryType.ReqQryInvestorPosition:
-                    ProcessInvestorPosition(e.Response);
-                    break;
+                    return ProcessInvestorPosition(e.Response);
                 case QueryType.ReqQryTradingAccount:
-                    ProcessTradingAccount(e.Response);
-                    break;
+                    return ProcessTradingAccount(e.Response);
                 case QueryType.ReqQryOrder:
-                    ProcessOrder(e.Response);
-                    break;
+                    return ProcessOrder(e.Response);
+                case QueryType.ReqQryTrade:
+                    return ProcessTrade(e.Response);
                 case QueryType.ReqQryInstrumentCommissionRate:
-                    ProcessInstrumentCommissionRate(e.Response);
-                    break;
+                    return ProcessInstrumentCommissionRate(e.Response);
                 case QueryType.ReqQryInstrumentMarginRate:
-                    ProcessInstrumentMarginRate(e.Response);
-                    break;
+                    return ProcessInstrumentMarginRate(e.Response);
                 case QueryType.ReqQrySettlementInfo:
-                    ProcessSettlementInfo(e.Response);
-                    break;
+                    return ProcessSettlementInfo(e.Response);
                 case QueryType.ReqQryInvestor:
-                    ProcessInvestor(e.Response);
-                    break;
+                    return ProcessInvestor(e.Response);
                 default:
-                    return;
+                    return true;
             }
         }
 
@@ -86,6 +92,9 @@ namespace QuantBox.XApi
                 case QueryType.ReqQryOrder:
                     ret = QryOrder(e.Field);
                     break;
+                case QueryType.ReqQryTrade:
+                    ret = QryTrade(e.Field);
+                    break;
                 case QueryType.ReqQryInstrumentCommissionRate:
                     ret = QryInstrumentCommissionRate(e.Field);
                     break;
@@ -105,27 +114,25 @@ namespace QuantBox.XApi
                     return;
             }
             if (ret != 0) {
-                var wait = 1000 - (DateTime.Now - _lastQueryTime).Milliseconds;
-                if (wait > 0) {
-                    Thread.Sleep(wait);
-                }
-                _queue.Add(e);
+                DelayQuery(1000);
             }
-            _lastQueryTime = DateTime.Now;
         }
 
         private void TaskRun(CancellationToken ct)
         {
             try {
                 while (!ct.IsCancellationRequested) {
-                    if (!_queue.TryTake(out var e, -1, ct)) {
-                        continue;
+                    if (_lastQuery == null) {
+                        if (_requests.TryTake(out var e, 10, ct)) {
+                            ++_qryCount;
+                            _lastQuery = e;
+                            ProcessQuery(e);
+                        }
                     }
-                    if (e.Response == null) {
-                        ProcessQuery(e);
-                    }
-                    else {
-                        ProcessResponse(e);
+                    else if (_responses.TryTake(out var e, 10, ct)) {
+                        if (ProcessResponse(e)) {
+                            ResetQuery();
+                        }
                     }
                 }
             }
@@ -137,41 +144,73 @@ namespace QuantBox.XApi
         protected abstract int QryInvestorPosition(ReqQueryField field);
         protected abstract int QryTradingAccount(ReqQueryField field);
         protected abstract int QryOrder(ReqQueryField field);
+        protected abstract int QryTrade(ReqQueryField field);
         protected abstract int QryInstrumentCommissionRate(ReqQueryField field);
         protected abstract int QryInstrumentMarginRate(ReqQueryField field);
         protected abstract int QrySettlementInfo(ReqQueryField field);
         protected abstract int QryInvestor(ReqQueryField field);
         protected abstract int QryQuote(ReqQueryField field);
-        protected abstract void ProcessInstrument(T rsp);
-        protected abstract void ProcessInvestorPosition(T rsp);
-        protected abstract void ProcessTradingAccount(T rsp);
-        protected abstract void ProcessOrder(T rsp);
-        protected abstract void ProcessInstrumentCommissionRate(T rsp);
-        protected abstract void ProcessInstrumentMarginRate(T rsp);
-        protected abstract void ProcessSettlementInfo(T rsp);
-        protected abstract void ProcessInvestor(T rsp);
+        protected abstract bool ProcessInstrument(T rsp);
+        protected abstract bool ProcessInvestorPosition(T rsp);
+        protected abstract bool ProcessTradingAccount(T rsp);
+        protected abstract bool ProcessOrder(T rsp);
+        protected abstract bool ProcessTrade(T rsp);
+        protected abstract bool ProcessInstrumentCommissionRate(T rsp);
+        protected abstract bool ProcessInstrumentMarginRate(T rsp);
+        protected abstract bool ProcessSettlementInfo(T rsp);
+        protected abstract bool ProcessInvestor(T rsp);
+        protected abstract bool ProcessError(T rsp);
+
+        protected void QueryAgain()
+        {
+            ++_tryCount;
+            if (_tryCount > TryCountMax) {
+                ResetQuery();
+                return;
+            }
+            if (_lastQuery != null) {
+                ProcessQuery(_lastQuery.Value);
+            }
+        }
+
+        protected void DelayQuery(int millisecond)
+        {
+            _delayedTask = Task.Delay(millisecond, _cts.Token).ContinueWith((t) => {
+                if (t.IsCompleted) {
+                    QueryAgain();
+                }
+            });
+        }
 
         protected QueryManager()
         {
-            _queue = new BlockingCollection<QueryEvent<T>>();
+            _requests = new BlockingCollection<QueryEvent<T>>();
+            _responses = new BlockingCollection<QueryEvent<T>>();
+
             _cts = new CancellationTokenSource();
             _task = Task.Run(() => TaskRun(_cts.Token), _cts.Token);
         }
 
+        public int TryCountMax { get; set; } = 3;
+        public int MaxQueryQueue { get; private set; } = 1000;
+
         public void Post(QueryType type, ReqQueryField field = null)
         {
-            _queue.Add(new QueryEvent<T>(type, field));
+            if (_requests.Count < MaxQueryQueue) {
+                _requests.Add(new QueryEvent<T>(type, field));
+            }
         }
 
         public void Post(QueryType type, T rsp)
         {
-            _queue.Add(new QueryEvent<T>(type, rsp));
+            _responses.Add(new QueryEvent<T>(type, rsp));
         }
 
         public void Close()
         {
             _cts.Cancel();
             _task.Wait();
+            _delayedTask?.Wait();
         }
     }
 }

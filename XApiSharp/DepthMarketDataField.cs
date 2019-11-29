@@ -1,4 +1,7 @@
-﻿namespace QuantBox.XApi
+﻿using System;
+using System.Text;
+
+namespace QuantBox.XApi
 {
     public class DepthMarketDataField
     {
@@ -26,7 +29,7 @@
         /// 交易所代码
         /// </summary>
         public ExchangeType Exchange;
-        
+
         /// <summary>
         /// 最新价
         /// </summary>
@@ -47,7 +50,6 @@
         /// 当日均价
         /// </summary>
         public double AveragePrice;
-        
         /// <summary>
         /// 今开盘
         /// </summary>
@@ -93,8 +95,79 @@
         ///交易阶段类型
         public TradingPhaseType TradingPhase;
 
-        ///买档个数
+        /// <summary>
+        /// 买档
+        /// </summary>
         public DepthField[] Bids;
+        /// <summary>
+        /// 卖挡
+        /// </summary>
         public DepthField[] Asks;
+
+        public DepthMarketDataField Copy()
+        {
+            var field = (DepthMarketDataField)MemberwiseClone();
+            CopyDepthField(Bids, ref field.Bids);
+            CopyDepthField(Asks, ref field.Asks);
+            return field;
+
+            void CopyDepthField(DepthField[] src, ref DepthField[] dest)
+            {
+                if (src != null && src.Length > 0) {
+                    dest = new DepthField[src.Length];
+                    Array.Copy(src, 0, dest, 0, src.Length);
+                }
+                else {
+                    dest = new DepthField[0];
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            return new StringBuilder()
+                .Append($"{ActionDay} {UpdateTime}.{UpdateMillisec}").Append(", ")
+                .Append(InstrumentID).Append(", ")
+                .Append(LastPrice).Append(", ")
+                .Append(Volume).Append(", ")
+                .Append("bid:").Append(GetDepthField(Bids)).Append(", ")
+                .Append("ask:").Append(GetDepthField(Asks)).Append(", ")
+                .Append("turnover:").Append(Turnover).Append(", ")
+                .Append("open_interest:").Append(OpenInterest).Append(", ")
+                .ToString();
+
+            string GetDepthField(DepthField[] fields)
+            {
+                if (fields != null && fields.Length > 0) {
+                    return $"{fields[0].Price}, {fields[0].Size}";
+                }
+                return "0, 0";
+            }
+        }
+
+        public readonly static DepthMarketDataField Empty;
+        static DepthMarketDataField()
+        {
+            Empty = new DepthMarketDataField() {
+                OpenPrice = double.NaN,
+                ClosePrice = double.NaN,
+                UpperLimitPrice = double.NaN,
+                LowerLimitPrice = double.NaN,
+                SettlementPrice = double.NaN,
+                OpenInterest = double.NaN,
+                PreClosePrice = double.NaN,
+                PreSettlementPrice = double.NaN,
+                PreOpenInterest = double.NaN,
+                TradingPhase = TradingPhaseType.NoTrading,
+                LastPrice = double.NaN,
+                Volume = double.NaN,
+                Exchange = ExchangeType.Undefined,
+                Symbol = string.Empty,
+                ExchangeID = string.Empty,
+                InstrumentID = string.Empty,
+                Bids = new DepthField[0],
+                Asks = new DepthField[0]
+            };
+        }
     }
 }

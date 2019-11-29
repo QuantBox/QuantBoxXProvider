@@ -7,11 +7,6 @@ namespace QuantBox.Sfit.Api
         private CtpRequestFunc[] _handerList;
         private IntPtr _instance = IntPtr.Zero;
 
-        private void InitApi(string flowPath)
-        {
-            _instance = CtpMdNative.Create(flowPath);
-        }
-
         private void InitHandlerList()
         {
             int NullRequestHandler(ref CtpRequest req)
@@ -29,7 +24,7 @@ namespace QuantBox.Sfit.Api
             _handerList[CtpRequestType.ReqUserLogin] = DoReqUserLogin;
             _handerList[CtpRequestType.ReqUserLogout] = DoReqUserLogout;
         }
-
+        
         #region Native Response Handler
         private CtpMdNative.OnFrontConnected _cbOnFrontConnected;
         private CtpMdNative.OnFrontDisconnected _cbOnFrontDisconnected;
@@ -46,206 +41,211 @@ namespace QuantBox.Sfit.Api
 
         private void InitNativeCallback()
         {
-            _cbOnFrontConnected = NativeOnFrontConnected;
+            _cbOnFrontConnected = NativeOnFrontConnected; 
             CtpMdNative.SetOnFrontConnected(_instance, _cbOnFrontConnected);
-            _cbOnFrontDisconnected = NativeOnFrontDisconnected;
+            _cbOnFrontDisconnected = NativeOnFrontDisconnected; 
             CtpMdNative.SetOnFrontDisconnected(_instance, _cbOnFrontDisconnected);
-            _cbOnHeartBeatWarning = NativeOnHeartBeatWarning;
+            _cbOnHeartBeatWarning = NativeOnHeartBeatWarning; 
             CtpMdNative.SetOnHeartBeatWarning(_instance, _cbOnHeartBeatWarning);
-            _cbOnRspUserLogin = NativeOnRspUserLogin;
+            _cbOnRspUserLogin = NativeOnRspUserLogin; 
             CtpMdNative.SetOnRspUserLogin(_instance, _cbOnRspUserLogin);
-            _cbOnRspUserLogout = NativeOnRspUserLogout;
+            _cbOnRspUserLogout = NativeOnRspUserLogout; 
             CtpMdNative.SetOnRspUserLogout(_instance, _cbOnRspUserLogout);
-            _cbOnRspError = NativeOnRspError;
+            _cbOnRspError = NativeOnRspError; 
             CtpMdNative.SetOnRspError(_instance, _cbOnRspError);
-            _cbOnRspSubMarketData = NativeOnRspSubMarketData;
+            _cbOnRspSubMarketData = NativeOnRspSubMarketData; 
             CtpMdNative.SetOnRspSubMarketData(_instance, _cbOnRspSubMarketData);
-            _cbOnRspUnSubMarketData = NativeOnRspUnSubMarketData;
+            _cbOnRspUnSubMarketData = NativeOnRspUnSubMarketData; 
             CtpMdNative.SetOnRspUnSubMarketData(_instance, _cbOnRspUnSubMarketData);
-            _cbOnRspSubForQuoteRsp = NativeOnRspSubForQuoteRsp;
+            _cbOnRspSubForQuoteRsp = NativeOnRspSubForQuoteRsp; 
             CtpMdNative.SetOnRspSubForQuoteRsp(_instance, _cbOnRspSubForQuoteRsp);
-            _cbOnRspUnSubForQuoteRsp = NativeOnRspUnSubForQuoteRsp;
+            _cbOnRspUnSubForQuoteRsp = NativeOnRspUnSubForQuoteRsp; 
             CtpMdNative.SetOnRspUnSubForQuoteRsp(_instance, _cbOnRspUnSubForQuoteRsp);
-            _cbOnRtnDepthMarketData = NativeOnRtnDepthMarketData;
+            _cbOnRtnDepthMarketData = NativeOnRtnDepthMarketData; 
             CtpMdNative.SetOnRtnDepthMarketData(_instance, _cbOnRtnDepthMarketData);
-            _cbOnRtnForQuoteRsp = NativeOnRtnForQuoteRsp;
+            _cbOnRtnForQuoteRsp = NativeOnRtnForQuoteRsp; 
             CtpMdNative.SetOnRtnForQuoteRsp(_instance, _cbOnRtnForQuoteRsp);
         }
 
         ///当客户端与交易后台建立起通信连接时（还未登录前），该方法被调用。
-        private void NativeOnFrontConnected()
+ private void NativeOnFrontConnected()
         {
             var rsp = new CtpResponse();
             rsp.TypeId = CtpResponseType.OnFrontConnected;
-            ProcessResponse(ref rsp);
+ProcessResponse(ref rsp);
         }
-
+        
         ///当客户端与交易后台通信连接断开时，该方法被调用。当发生这个情况后，API会自动重新连接，客户端可不做处理。
-        ///@param nReason 错误原因
-        ///        0x1001 网络读失败
-        ///        0x1002 网络写失败
-        ///        0x2001 接收心跳超时
-        ///        0x2002 发送心跳失败
-        ///        0x2003 收到错误报文
-        private void NativeOnFrontDisconnected(int reason)
+///@param nReason 错误原因
+///        0x1001 网络读失败
+///        0x1002 网络写失败
+///        0x2001 接收心跳超时
+///        0x2002 发送心跳失败
+///        0x2003 收到错误报文
+ private void NativeOnFrontDisconnected(int reason)
         {
             var rsp = new CtpResponse();
             rsp.TypeId = CtpResponseType.OnFrontDisconnected;
-            rsp.Item1 = new CtpAny(reason);
-            ProcessResponse(ref rsp);
+rsp.Item1 = new CtpAny(reason);
+ProcessResponse(ref rsp);
         }
-
+        
         ///心跳超时警告。当长时间未收到报文时，该方法被调用。
-        ///@param nTimeLapse 距离上次接收报文的时间
-        private void NativeOnHeartBeatWarning(int timeLapse)
+///@param nTimeLapse 距离上次接收报文的时间
+ private void NativeOnHeartBeatWarning(int timeLapse)
         {
             var rsp = new CtpResponse();
             rsp.TypeId = CtpResponseType.OnHeartBeatWarning;
-            rsp.Item1 = new CtpAny(timeLapse);
-            ProcessResponse(ref rsp);
+rsp.Item1 = new CtpAny(timeLapse);
+ProcessResponse(ref rsp);
         }
-
+        
         ///登录请求响应
-        private void NativeOnRspUserLogin(CtpRspUserLogin rspUserLogin, CtpRspInfo rspInfo, int requestId, bool isLast)
+ private void NativeOnRspUserLogin(CtpRspUserLogin rspUserLogin,CtpRspInfo rspInfo,int requestId,bool isLast)
         {
             var rsp = new CtpResponse();
             rsp.TypeId = CtpResponseType.OnRspUserLogin;
-            rsp.Item1 = new CtpAny(rspUserLogin);
-            rsp.Item2 = rspInfo;
-            rsp.RequestID = requestId;
-            rsp.IsLast = isLast;
-            ProcessResponse(ref rsp);
+rsp.Item1 = new CtpAny(rspUserLogin);
+rsp.Item2 = rspInfo;
+rsp.RequestID = requestId;
+rsp.IsLast = isLast;
+ProcessResponse(ref rsp);
         }
-
+        
         ///登出请求响应
-        private void NativeOnRspUserLogout(CtpUserLogout userLogout, CtpRspInfo rspInfo, int requestId, bool isLast)
+ private void NativeOnRspUserLogout(CtpUserLogout userLogout,CtpRspInfo rspInfo,int requestId,bool isLast)
         {
             var rsp = new CtpResponse();
             rsp.TypeId = CtpResponseType.OnRspUserLogout;
-            rsp.Item1 = new CtpAny(userLogout);
-            rsp.Item2 = rspInfo;
-            rsp.RequestID = requestId;
-            rsp.IsLast = isLast;
-            ProcessResponse(ref rsp);
+rsp.Item1 = new CtpAny(userLogout);
+rsp.Item2 = rspInfo;
+rsp.RequestID = requestId;
+rsp.IsLast = isLast;
+ProcessResponse(ref rsp);
         }
-
+        
         ///错误应答
-        private void NativeOnRspError(CtpRspInfo rspInfo, int requestId, bool isLast)
+ private void NativeOnRspError(CtpRspInfo rspInfo,int requestId,bool isLast)
         {
             var rsp = new CtpResponse();
             rsp.TypeId = CtpResponseType.OnRspError;
-            rsp.Item1 = new CtpAny(rspInfo);
-            rsp.RequestID = requestId;
-            rsp.IsLast = isLast;
-            ProcessResponse(ref rsp);
+rsp.Item1 = new CtpAny(rspInfo);
+rsp.RequestID = requestId;
+rsp.IsLast = isLast;
+ProcessResponse(ref rsp);
         }
-
+        
         ///订阅行情应答
-        private void NativeOnRspSubMarketData(CtpSpecificInstrument specificInstrument, CtpRspInfo rspInfo, int requestId, bool isLast)
+ private void NativeOnRspSubMarketData(CtpSpecificInstrument specificInstrument,CtpRspInfo rspInfo,int requestId,bool isLast)
         {
             var rsp = new CtpResponse();
             rsp.TypeId = CtpResponseType.OnRspSubMarketData;
-            rsp.Item1 = new CtpAny(specificInstrument);
-            rsp.Item2 = rspInfo;
-            rsp.RequestID = requestId;
-            rsp.IsLast = isLast;
-            ProcessResponse(ref rsp);
+rsp.Item1 = new CtpAny(specificInstrument);
+rsp.Item2 = rspInfo;
+rsp.RequestID = requestId;
+rsp.IsLast = isLast;
+ProcessResponse(ref rsp);
         }
-
+        
         ///取消订阅行情应答
-        private void NativeOnRspUnSubMarketData(CtpSpecificInstrument specificInstrument, CtpRspInfo rspInfo, int requestId, bool isLast)
+ private void NativeOnRspUnSubMarketData(CtpSpecificInstrument specificInstrument,CtpRspInfo rspInfo,int requestId,bool isLast)
         {
             var rsp = new CtpResponse();
             rsp.TypeId = CtpResponseType.OnRspUnSubMarketData;
-            rsp.Item1 = new CtpAny(specificInstrument);
-            rsp.Item2 = rspInfo;
-            rsp.RequestID = requestId;
-            rsp.IsLast = isLast;
-            ProcessResponse(ref rsp);
+rsp.Item1 = new CtpAny(specificInstrument);
+rsp.Item2 = rspInfo;
+rsp.RequestID = requestId;
+rsp.IsLast = isLast;
+ProcessResponse(ref rsp);
         }
-
+        
         ///订阅询价应答
-        private void NativeOnRspSubForQuoteRsp(CtpSpecificInstrument specificInstrument, CtpRspInfo rspInfo, int requestId, bool isLast)
+ private void NativeOnRspSubForQuoteRsp(CtpSpecificInstrument specificInstrument,CtpRspInfo rspInfo,int requestId,bool isLast)
         {
             var rsp = new CtpResponse();
             rsp.TypeId = CtpResponseType.OnRspSubForQuoteRsp;
-            rsp.Item1 = new CtpAny(specificInstrument);
-            rsp.Item2 = rspInfo;
-            rsp.RequestID = requestId;
-            rsp.IsLast = isLast;
-            ProcessResponse(ref rsp);
+rsp.Item1 = new CtpAny(specificInstrument);
+rsp.Item2 = rspInfo;
+rsp.RequestID = requestId;
+rsp.IsLast = isLast;
+ProcessResponse(ref rsp);
         }
-
+        
         ///取消订阅询价应答
-        private void NativeOnRspUnSubForQuoteRsp(CtpSpecificInstrument specificInstrument, CtpRspInfo rspInfo, int requestId, bool isLast)
+ private void NativeOnRspUnSubForQuoteRsp(CtpSpecificInstrument specificInstrument,CtpRspInfo rspInfo,int requestId,bool isLast)
         {
             var rsp = new CtpResponse();
             rsp.TypeId = CtpResponseType.OnRspUnSubForQuoteRsp;
-            rsp.Item1 = new CtpAny(specificInstrument);
-            rsp.Item2 = rspInfo;
-            rsp.RequestID = requestId;
-            rsp.IsLast = isLast;
-            ProcessResponse(ref rsp);
+rsp.Item1 = new CtpAny(specificInstrument);
+rsp.Item2 = rspInfo;
+rsp.RequestID = requestId;
+rsp.IsLast = isLast;
+ProcessResponse(ref rsp);
         }
-
+        
         ///深度行情通知
-        private void NativeOnRtnDepthMarketData(CtpDepthMarketData depthMarketData)
+ private void NativeOnRtnDepthMarketData(CtpDepthMarketData depthMarketData)
         {
             var rsp = new CtpResponse();
             rsp.TypeId = CtpResponseType.OnRtnDepthMarketData;
-            rsp.Item1 = new CtpAny(depthMarketData);
-            ProcessResponse(ref rsp);
+rsp.Item1 = new CtpAny(depthMarketData);
+ProcessResponse(ref rsp);
         }
-
+        
         ///询价通知
-        private void NativeOnRtnForQuoteRsp(CtpForQuoteRsp forQuoteRsp)
+ private void NativeOnRtnForQuoteRsp(CtpForQuoteRsp forQuoteRsp)
         {
             var rsp = new CtpResponse();
             rsp.TypeId = CtpResponseType.OnRtnForQuoteRsp;
-            rsp.Item1 = new CtpAny(forQuoteRsp);
-            ProcessResponse(ref rsp);
+rsp.Item1 = new CtpAny(forQuoteRsp);
+ProcessResponse(ref rsp);
         }
-
+        
         #endregion
-
+        
         #region Request Handler
         private int DoSubscribeMarketData(ref CtpRequest req)
         {
             var data = req.Args.AsStringArray;
-            return CtpMdNative.SubscribeMarketData(_instance, data, data.Length);
+return CtpMdNative.SubscribeMarketData(_instance, data, data.Length);
         }
-
+        
         private int DoUnSubscribeMarketData(ref CtpRequest req)
         {
             var data = req.Args.AsStringArray;
-            return CtpMdNative.UnSubscribeMarketData(_instance, data, data.Length);
+return CtpMdNative.UnSubscribeMarketData(_instance, data, data.Length);
         }
-
+        
         private int DoSubscribeForQuoteRsp(ref CtpRequest req)
         {
             var data = req.Args.AsStringArray;
-            return CtpMdNative.SubscribeForQuoteRsp(_instance, data, data.Length);
+return CtpMdNative.SubscribeForQuoteRsp(_instance, data, data.Length);
         }
-
+        
         private int DoUnSubscribeForQuoteRsp(ref CtpRequest req)
         {
             var data = req.Args.AsStringArray;
-            return CtpMdNative.UnSubscribeForQuoteRsp(_instance, data, data.Length);
+return CtpMdNative.UnSubscribeForQuoteRsp(_instance, data, data.Length);
         }
-
+        
         private int DoReqUserLogin(ref CtpRequest req)
         {
             var data = req.Args.AsReqUserLogin;
-            return CtpMdNative.ReqUserLogin(_instance, data, req.RequestID);
+return CtpMdNative.ReqUserLogin(_instance, data, req.RequestID);
         }
-
+        
         private int DoReqUserLogout(ref CtpRequest req)
         {
             var data = req.Args.AsUserLogout;
-            return CtpMdNative.ReqUserLogout(_instance, data, req.RequestID);
+return CtpMdNative.ReqUserLogout(_instance, data, req.RequestID);
         }
-
+        
         #endregion
+
+        private void InitApi(string flowPath)
+        {
+            _instance = CtpMdNative.Create(flowPath);
+        }
 
         public CtpMdApi(string flowPath)
         {
@@ -258,8 +258,6 @@ namespace QuantBox.Sfit.Api
         {
             Release();
         }
-
-        public CtpRequestFunc[] ReqHandlerList { get { return _handerList; } }
 
         public virtual int ProcessRequest(ref CtpRequest req)
         {
@@ -278,12 +276,12 @@ namespace QuantBox.Sfit.Api
             CtpMdNative.Release(_instance);
             _instance = IntPtr.Zero;
         }
-
+        
         public int Join()
         {
             return CtpMdNative.Join(_instance);
         }
-
+        
         ///获取当前交易日
         ///@retrun 获取到的交易日
         ///@remark 只有登录成功后,才能得到正确的交易日
@@ -300,7 +298,6 @@ namespace QuantBox.Sfit.Api
         {
             CtpMdNative.RegisterFront(_instance, frontAddress);
         }
-
         ///注册名字服务器网络地址
         ///@param pszNsAddress：名字服务器网络地址。
         ///@remark 网络地址的格式为：“protocol://ipaddress:port”，如：”tcp://127.0.0.1:12001”。 
@@ -310,51 +307,60 @@ namespace QuantBox.Sfit.Api
         {
             CtpMdNative.RegisterNameServer(_instance, nsAddress);
         }
+        
+        ///注册名字服务器用户信息
+        ///@param fensUserInfo：用户信息。
+        public void RegisterFensUserInfo(CtpFensUserInfo fensUserInfo)
+        {
+            CtpMdNative.RegisterFensUserInfo(_instance, fensUserInfo);
+        }
+
+        public CtpRequestFunc[] ReqHandlerList => _handerList;
 
         ///订阅行情。
-        ///@param ppInstrumentID 合约ID  
-        ///@param nCount 要订阅/退订行情的合约个数
-        ///@remark 
-        public int SubscribeMarketData(string[] instrumentID, int count)
+///@param ppInstrumentID 合约ID  
+///@param nCount 要订阅/退订行情的合约个数
+///@remark 
+public int SubscribeMarketData(string[] instrumentID,int count)
         {
             return CtpMdNative.SubscribeMarketData(_instance, instrumentID, count);
         }
 
         ///退订行情。
-        ///@param ppInstrumentID 合约ID  
-        ///@param nCount 要订阅/退订行情的合约个数
-        ///@remark 
-        public int UnSubscribeMarketData(string[] instrumentID, int count)
+///@param ppInstrumentID 合约ID  
+///@param nCount 要订阅/退订行情的合约个数
+///@remark 
+public int UnSubscribeMarketData(string[] instrumentID,int count)
         {
             return CtpMdNative.UnSubscribeMarketData(_instance, instrumentID, count);
         }
 
         ///订阅询价。
-        ///@param ppInstrumentID 合约ID  
-        ///@param nCount 要订阅/退订行情的合约个数
-        ///@remark 
-        public int SubscribeForQuoteRsp(string[] instrumentID, int count)
+///@param ppInstrumentID 合约ID  
+///@param nCount 要订阅/退订行情的合约个数
+///@remark 
+public int SubscribeForQuoteRsp(string[] instrumentID,int count)
         {
             return CtpMdNative.SubscribeForQuoteRsp(_instance, instrumentID, count);
         }
 
         ///退订询价。
-        ///@param ppInstrumentID 合约ID  
-        ///@param nCount 要订阅/退订行情的合约个数
-        ///@remark 
-        public int UnSubscribeForQuoteRsp(string[] instrumentID, int count)
+///@param ppInstrumentID 合约ID  
+///@param nCount 要订阅/退订行情的合约个数
+///@remark 
+public int UnSubscribeForQuoteRsp(string[] instrumentID,int count)
         {
             return CtpMdNative.UnSubscribeForQuoteRsp(_instance, instrumentID, count);
         }
 
         ///用户登录请求
-        public int ReqUserLogin(CtpReqUserLogin reqUserLoginField, int requestId)
+public int ReqUserLogin(CtpReqUserLogin reqUserLoginField,int requestId)
         {
             return CtpMdNative.ReqUserLogin(_instance, reqUserLoginField, requestId);
         }
 
         ///登出请求
-        public int ReqUserLogout(CtpUserLogout userLogout, int requestId)
+public int ReqUserLogout(CtpUserLogout userLogout,int requestId)
         {
             return CtpMdNative.ReqUserLogout(_instance, userLogout, requestId);
         }

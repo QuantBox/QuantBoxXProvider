@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using NLog;
+using Skyline;
 using SmartQuant;
 
 namespace QuantBox
@@ -8,17 +9,15 @@ namespace QuantBox
     public class QBTimeBarFactoryItem : TimeBarFactoryItem
     {
         private const int OffsetSeconds = 1;
-        private const long MonthsBarSize = 2592000L;
 
         private DateTime _closeDateTime;
         private readonly ClockType _clockType;
         private readonly bool _enableLog;
         private readonly Logger _logger;
-        private TradingTimeRange _timeRange;
+        private TradingTimeRange _timeRanges;
         private Framework _framework;
         private bool _delayedBarOpen;
-        private TimeSpan _nightOpenTime;
-        private TimeSpan _openTime;
+        private double _turnover;
 
         public override BarFactoryItem Clone()
         {
@@ -52,7 +51,7 @@ namespace QuantBox
         private void GetOpenCloseDateTime(DataObject tick, out DateTime openDateTime, out DateTime closeDateTime)
         {
             openDateTime = GetBarOpenDateTime(tick);
-            if (barSize == MonthsBarSize) {
+            if (barSize == QuantBoxConst.MonthBarSize) {
                 closeDateTime = openDateTime.Date.AddMonths(1);
             }
             else {
@@ -75,12 +74,13 @@ namespace QuantBox
             if (IncludeFirstTick) {
                 var time = _clockType == ClockType.Exchange ? tick.ExchangeDateTime : tick.DateTime;
                 var timeChanged = false;
-                if (time.Hour == _openTime.Hours && time.Minute == _openTime.Minutes) {
-                    time = time.Date.Add(_timeRange.OpenTime.Add(TradingTimeManager.OffsetMinutes));
-                    timeChanged = true;
-                }
-                else if (time.Hour == _nightOpenTime.Hours && time.Minute == _nightOpenTime.Minutes) {
-                    time = time.Date.Add(_timeRange.NightOpenTime.Add(TradingTimeManager.OffsetMinutes));
+                if (_timeRanges.InFristMd(time.TimeOfDay)) {
+                    if (time.TimeOfDay > _timeRanges.CloseTime) {
+                        time = time.Date.Add(_timeRanges.NightOpenTime);
+                    }
+                    else {
+                        time = time.Date.Add(_timeRanges.OpenTime);
+                    }
                     timeChanged = true;
                 }
                 if (timeChanged) {
@@ -102,7 +102,7 @@ namespace QuantBox
         private DateTime FixCloseDateTime(DateTime dateTime, bool backwards = true)
         {
             var time = dateTime.TimeOfDay;
-            if (_timeRange.IsEndPoint(time.Hours, time.Minutes)) {
+            if (_timeRanges.IsEndPoint(time.Hours, time.Minutes)) {
                 return dateTime.AddSeconds(backwards ? OffsetSeconds : -OffsetSeconds);
             }
             return dateTime;
@@ -115,8 +115,9 @@ namespace QuantBox
             }
 
             bar.DateTime = FixCloseDateTime(_closeDateTime, false);
+            bar.SetTurnover(_turnover);
             //if (_framework.Mode == FrameworkMode.Realtime) {
-                
+
             //}
             //else {
             //    bar.DateTime = _closeDateTime;
@@ -138,7 +139,7 @@ namespace QuantBox
                 barType,
                 barSize,
                 tick.Price, tick.Price, tick.Price, tick.Price, OpenQuant.Helper.GetDoubleSize(tick));
-
+            _turnover = 0;
             if (!_delayedBarOpen) {
                 EmitBarOpen();
             }
@@ -150,9 +151,7 @@ namespace QuantBox
 
         private void LoadTradingTimeRange()
         {
-            _timeRange = TradingCalendar.Instance.GetTimeRange(instrument, DateTime.Today);
-            _nightOpenTime = _timeRange.NightOpenTime;
-            _openTime = _timeRange.OpenTime;
+            _timeRanges = TradingCalendar.Instance.GetTimeRange(instrument, DateTime.Today);
         }
 
         protected override void OnData(DataObject obj)
@@ -160,44 +159,45 @@ namespace QuantBox
             if (_framework == null) {
                 _framework = GetFramework();
             }
-            var tick = (Tick)obj;
+            var trade = (Trade)obj;
             if (_enableLog && _framework.Mode == FrameworkMode.Realtime) {
-                _logger.Debug($"{tick.Price}, {OpenQuant.Helper.GetIntSize(tick)},{tick.DateTime: HH:mm:ss},{tick.ExchangeDateTime: HH:mm:ss}");
+                _logger.Debug($"{trade.Price}, {OpenQuant.Helper.GetIntSize(trade)},{trade.DateTime: HH:mm:ss},{trade.ExchangeDateTime: HH:mm:ss}");
             }
 
             if (bar != null) {
-                if (_delayedBarOpen && bar.OpenDateTime <= tick.ExchangeDateTime) {
+                if (_delayedBarOpen && bar.OpenDateTime <= trade.ExchangeDateTime) {
                     _delayedBarOpen = false;
                     EmitBarOpen();
                 }
 
-                if (_closeDateTime < tick.ExchangeDateTime) {
+                if (_closeDateTime < trade.ExchangeDateTime) {
                     RaiseBar();
-                    if (OpenQuant.Helper.GetIntSize(tick) == 0) {
+                    if (OpenQuant.Helper.GetIntSize(trade) == 0) {
                         return;
                     }
-                    CreateBar(tick);
+                    CreateBar(trade);
                 }
-                base.OnData(tick);
+                base.OnData(trade);
+                _turnover += trade.GetTurnover();
 
                 if (_framework.Mode == FrameworkMode.Simulation) {
                     return;
                 }
 
-                if (_closeDateTime == tick.ExchangeDateTime) {
+                if (_closeDateTime == trade.ExchangeDateTime) {
                     RaiseBar();
                 }
                 else {
-                    if (obj is Trade trade && trade.GetClosePrice() > 0) {
+                    if (trade.GetClosePrice() > 0) {
                         RaiseBar();
                     }
                 }
             }
             else {
-                if (OpenQuant.Helper.GetIntSize(tick) == 0) {
+                if (OpenQuant.Helper.GetIntSize(trade) == 0) {
                     return;
                 }
-                CreateBar(tick);
+                CreateBar(trade);
             }
         }
     }

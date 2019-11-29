@@ -66,6 +66,11 @@ namespace QuantBox.Sfit.Api
 /// TThostFtdcInstrumentIDType 是基础类型
 
 ///<summary>
+///TFtdcInstrumentCodeType是一个合约标识码类型
+///</summary>
+/// TThostFtdcInstrumentCodeType 是基础类型
+
+///<summary>
 ///TFtdcMarketIDType是一个市场代码类型
 ///</summary>
 /// TThostFtdcMarketIDType 是基础类型
@@ -277,6 +282,14 @@ public static class CtpIdCardTypeType
     ///</summary>
     public const byte AccountsPermits = (byte)'J';
     ///<summary>
+    ///外国人永久居留证
+    ///</summary>
+    public const byte FrgPrmtRdCard = (byte)'K';
+    ///<summary>
+    ///资管产品备案函
+    ///</summary>
+    public const byte CptMngPrdLetter = (byte)'L';
+    ///<summary>
     ///其他证件
     ///</summary>
     public const byte OtherCard = (byte)'x';
@@ -344,7 +357,21 @@ public static class CtpInvestorRangeType
 ///<summary>
 ///TFtdcDepartmentRangeType是一个投资者范围类型
 ///</summary>
-/// TThostFtdcDepartmentRangeType 未被使用
+public static class CtpDepartmentRangeType
+{
+    ///<summary>
+    ///所有
+    ///</summary>
+    public const byte All = (byte)'1';
+    ///<summary>
+    ///组织架构
+    ///</summary>
+    public const byte Group = (byte)'2';
+    ///<summary>
+    ///单一投资者
+    ///</summary>
+    public const byte Single = (byte)'3';
+};
 
 ///<summary>
 ///TFtdcDataSyncStatusType是一个数据同步状态类型
@@ -646,6 +673,50 @@ public static class CtpBrokerFunctionCodeType
     ///预埋报单操作
     ///</summary>
     public const byte ParkedOrderAction = (byte)'L';
+    ///<summary>
+    ///资金不够仍允许行权
+    ///</summary>
+    public const byte ExecOrderNoCheck = (byte)'M';
+    ///<summary>
+    ///指定
+    ///</summary>
+    public const byte Designate = (byte)'N';
+    ///<summary>
+    ///证券处置
+    ///</summary>
+    public const byte StockDisposal = (byte)'O';
+    ///<summary>
+    ///席位资金预警
+    ///</summary>
+    public const byte BrokerDepositWarn = (byte)'Q';
+    ///<summary>
+    ///备兑不足预警
+    ///</summary>
+    public const byte CoverWarn = (byte)'S';
+    ///<summary>
+    ///行权试算
+    ///</summary>
+    public const byte PreExecOrder = (byte)'T';
+    ///<summary>
+    ///行权交收风险
+    ///</summary>
+    public const byte ExecOrderRisk = (byte)'P';
+    ///<summary>
+    ///持仓限额预警
+    ///</summary>
+    public const byte PosiLimitWarn = (byte)'U';
+    ///<summary>
+    ///持仓限额查询
+    ///</summary>
+    public const byte QryPosiLimit = (byte)'V';
+    ///<summary>
+    ///银期签到签退
+    ///</summary>
+    public const byte FBSign = (byte)'W';
+    ///<summary>
+    ///银期签约解约
+    ///</summary>
+    public const byte FBAccount = (byte)'X';
 };
 
 ///<summary>
@@ -924,6 +995,18 @@ public static class CtpHedgeFlagType
     ///套保
     ///</summary>
     public const byte Hedge = (byte)'3';
+    ///<summary>
+    ///做市商
+    ///</summary>
+    public const byte MarketMaker = (byte)'5';
+    ///<summary>
+    ///第一腿投机第二腿套保 大商所专用
+    ///</summary>
+    public const byte SpecHedge = (byte)'6';
+    ///<summary>
+    ///第一腿套保第二腿投机  大商所专用
+    ///</summary>
+    public const byte HedgeSpec = (byte)'7';
 };
 
 ///<summary>
@@ -948,6 +1031,10 @@ public static class CtpClientIDTypeType
     ///套保
     ///</summary>
     public const byte Hedge = (byte)'3';
+    ///<summary>
+    ///做市商
+    ///</summary>
+    public const byte MarketMaker = (byte)'5';
 };
 
 ///<summary>
@@ -1124,6 +1211,14 @@ public static class CtpOrderTypeType
     ///互换单
     ///</summary>
     public const byte Swap = (byte)'5';
+    ///<summary>
+    ///大宗交易成交衍生
+    ///</summary>
+    public const byte DeriveFromBlockTrade = (byte)'6';
+    ///<summary>
+    ///期转现成交衍生
+    ///</summary>
+    public const byte DeriveFromEFPTrade = (byte)'7';
 };
 
 ///<summary>
@@ -1325,6 +1420,10 @@ public static class CtpTradeTypeType
     ///组合衍生成交
     ///</summary>
     public const byte CombinationDerived = (byte)'4';
+    ///<summary>
+    ///大宗交易成交
+    ///</summary>
+    public const byte BlockTrade = (byte)'5';
 };
 
 ///<summary>
@@ -1344,6 +1443,10 @@ public static class CtpPriceSourceType
     ///卖委托价
     ///</summary>
     public const byte Sell = (byte)'2';
+    ///<summary>
+    ///场外成交价
+    ///</summary>
+    public const byte OTC = (byte)'3';
 };
 
 ///<summary>
@@ -1693,7 +1796,93 @@ public static class CtpInstStatusEnterReasonType
 ///<summary>
 ///TFtdcTradeParamIDType是一个交易系统参数代码类型
 ///</summary>
-/// TThostFtdcTradeParamIDType 未被使用
+public static class CtpTradeParamIDType
+{
+    ///<summary>
+    ///系统加密算法
+    ///</summary>
+    public const byte EncryptionStandard = (byte)'E';
+    ///<summary>
+    ///系统风险算法
+    ///</summary>
+    public const byte RiskMode = (byte)'R';
+    ///<summary>
+    ///系统风险算法是否全局 0-否 1-是
+    ///</summary>
+    public const byte RiskModeGlobal = (byte)'G';
+    ///<summary>
+    ///密码加密算法
+    ///</summary>
+    public const byte modeEncode = (byte)'P';
+    ///<summary>
+    ///价格小数位数参数
+    ///</summary>
+    public const byte tickMode = (byte)'T';
+    ///<summary>
+    ///用户最大会话数
+    ///</summary>
+    public const byte SingleUserSessionMaxNum = (byte)'S';
+    ///<summary>
+    ///最大连续登录失败数
+    ///</summary>
+    public const byte LoginFailMaxNum = (byte)'L';
+    ///<summary>
+    ///是否强制认证
+    ///</summary>
+    public const byte IsAuthForce = (byte)'A';
+    ///<summary>
+    ///是否冻结证券持仓
+    ///</summary>
+    public const byte IsPosiFreeze = (byte)'F';
+    ///<summary>
+    ///是否限仓
+    ///</summary>
+    public const byte IsPosiLimit = (byte)'M';
+    ///<summary>
+    ///郑商所询价时间间隔
+    ///</summary>
+    public const byte ForQuoteTimeInterval = (byte)'Q';
+    ///<summary>
+    ///是否期货限仓
+    ///</summary>
+    public const byte IsFuturePosiLimit = (byte)'B';
+    ///<summary>
+    ///是否期货下单频率限制
+    ///</summary>
+    public const byte IsFutureOrderFreq = (byte)'C';
+    ///<summary>
+    ///行权冻结是否计算盈利
+    ///</summary>
+    public const byte IsExecOrderProfit = (byte)'H';
+    ///<summary>
+    ///银期开户是否验证开户银行卡号是否是预留银行账户
+    ///</summary>
+    public const byte IsCheckBankAcc = (byte)'I';
+    ///<summary>
+    ///弱密码最后修改日期
+    ///</summary>
+    public const byte PasswordDeadLine = (byte)'J';
+    ///<summary>
+    ///强密码校验
+    ///</summary>
+    public const byte IsStrongPassword = (byte)'K';
+    ///<summary>
+    ///自有资金质押比
+    ///</summary>
+    public const byte BalanceMorgage = (byte)'a';
+    ///<summary>
+    ///最小密码长度
+    ///</summary>
+    public const byte MinPwdLen = (byte)'O';
+    ///<summary>
+    ///IP当日最大登陆失败次数
+    ///</summary>
+    public const byte LoginFailMaxNumForIP = (byte)'U';
+    ///<summary>
+    ///密码有效期
+    ///</summary>
+    public const byte PasswordPeriod = (byte)'V';
+};
 
 ///<summary>
 ///TFtdcSettlementParamValueType是一个参数代码值类型
@@ -2324,6 +2513,11 @@ public static class CtpUserTypeType
     ///</summary>
     public const byte SuperUser = (byte)'2';
 };
+
+///<summary>
+///TFtdcBranchIDType是一个营业部编号类型
+///</summary>
+/// TThostFtdcBranchIDType 是基础类型
 
 ///<summary>
 ///TFtdcRateTypeType是一个费率类型类型
@@ -4228,7 +4422,17 @@ public static class CtpOTPTypeType
 ///<summary>
 ///TFtdcAccountSourceTypeType是一个资金账户来源类型
 ///</summary>
-/// TThostFtdcAccountSourceTypeType 未被使用
+public static class CtpAccountSourceTypeType
+{
+    ///<summary>
+    ///银期同步
+    ///</summary>
+    public const byte FBTransfer = (byte)'0';
+    ///<summary>
+    ///手工录入
+    ///</summary>
+    public const byte ManualEntry = (byte)'1';
+};
 
 ///<summary>
 ///TFtdcCodeSourceTypeType是一个交易编码来源类型
@@ -4712,6 +4916,10 @@ public static class CtpMortgageFundUseRangeType
     ///用于手续费、盈亏、保证金
     ///</summary>
     public const byte All = (byte)'2';
+    ///<summary>
+    ///人民币方案3
+    ///</summary>
+    public const byte CNY3 = (byte)'3';
 };
 
 ///<summary>
@@ -5285,6 +5493,11 @@ public static class CtpCombinationTypeType
 };
 
 ///<summary>
+///TFtdcDceCombinationTypeType是一个组合类型类型
+///</summary>
+/// TThostFtdcDceCombinationTypeType 未被使用
+
+///<summary>
 ///TFtdcOptionRoyaltyPriceTypeType是一个期权权利金价格类型类型
 ///</summary>
 public static class CtpOptionRoyaltyPriceTypeType
@@ -5297,6 +5510,10 @@ public static class CtpOptionRoyaltyPriceTypeType
     ///开仓价
     ///</summary>
     public const byte OpenPrice = (byte)'4';
+    ///<summary>
+    ///最新价与昨结算价较大值
+    ///</summary>
+    public const byte MaxPreSettlementPrice = (byte)'5';
 };
 
 ///<summary>
@@ -5434,6 +5651,298 @@ public static class CtpCombDirectionType
 };
 
 ///<summary>
+///TFtdcStrikeOffsetTypeType是一个行权偏移类型类型
+///</summary>
+public static class CtpStrikeOffsetTypeType
+{
+    ///<summary>
+    ///实值额
+    ///</summary>
+    public const byte RealValue = (byte)'1';
+    ///<summary>
+    ///盈利额
+    ///</summary>
+    public const byte ProfitValue = (byte)'2';
+    ///<summary>
+    ///实值比例
+    ///</summary>
+    public const byte RealRatio = (byte)'3';
+    ///<summary>
+    ///盈利比例
+    ///</summary>
+    public const byte ProfitRatio = (byte)'4';
+};
+
+///<summary>
+///TFtdcReserveOpenAccStasType是一个预约开户状态类型
+///</summary>
+public static class CtpReserveOpenAccStasType
+{
+    ///<summary>
+    ///等待处理中
+    ///</summary>
+    public const byte Processing = (byte)'0';
+    ///<summary>
+    ///已撤销
+    ///</summary>
+    public const byte Cancelled = (byte)'1';
+    ///<summary>
+    ///已开户
+    ///</summary>
+    public const byte Opened = (byte)'2';
+    ///<summary>
+    ///无效请求
+    ///</summary>
+    public const byte Invalid = (byte)'3';
+};
+
+///<summary>
+///TFtdcLoginRemarkType是一个登录备注类型
+///</summary>
+/// TThostFtdcLoginRemarkType 是基础类型
+
+///<summary>
+///TFtdcInvestUnitIDType是一个投资单元代码类型
+///</summary>
+/// TThostFtdcInvestUnitIDType 是基础类型
+
+///<summary>
+///TFtdcBulletinIDType是一个公告编号类型
+///</summary>
+/// TThostFtdcBulletinIDType 是基础类型
+
+///<summary>
+///TFtdcNewsTypeType是一个公告类型类型
+///</summary>
+/// TThostFtdcNewsTypeType 是基础类型
+
+///<summary>
+///TFtdcNewsUrgencyType是一个紧急程度类型
+///</summary>
+/// TThostFtdcNewsUrgencyType 是基础类型
+
+///<summary>
+///TFtdcAbstractType是一个消息摘要类型
+///</summary>
+/// TThostFtdcAbstractType 是基础类型
+
+///<summary>
+///TFtdcComeFromType是一个消息来源类型
+///</summary>
+/// TThostFtdcComeFromType 是基础类型
+
+///<summary>
+///TFtdcURLLinkType是一个WEB地址类型
+///</summary>
+/// TThostFtdcURLLinkType 是基础类型
+
+///<summary>
+///TFtdcLongIndividualNameType是一个长个人姓名类型
+///</summary>
+/// TThostFtdcLongIndividualNameType 是基础类型
+
+///<summary>
+///TFtdcLongFBEBankAccountNameType是一个长换汇银行账户名类型
+///</summary>
+/// TThostFtdcLongFBEBankAccountNameType 是基础类型
+
+///<summary>
+///TFtdcDateTimeType是一个日期时间类型
+///</summary>
+/// TThostFtdcDateTimeType 是基础类型
+
+///<summary>
+///TFtdcWeakPasswordSourceType是一个弱密码来源类型
+///</summary>
+/// TThostFtdcWeakPasswordSourceType 未被使用
+
+///<summary>
+///TFtdcRandomStringType是一个随机串类型
+///</summary>
+/// TThostFtdcRandomStringType 是基础类型
+
+///<summary>
+///TFtdcOptSelfCloseFlagType是一个期权行权的头寸是否自对冲类型
+///</summary>
+public static class CtpOptSelfCloseFlagType
+{
+    ///<summary>
+    ///自对冲期权仓位
+    ///</summary>
+    public const byte CloseSelfOptionPosition = (byte)'1';
+    ///<summary>
+    ///保留期权仓位
+    ///</summary>
+    public const byte ReserveOptionPosition = (byte)'2';
+    ///<summary>
+    ///自对冲卖方履约后的期货仓位
+    ///</summary>
+    public const byte SellCloseSelfFuturePosition = (byte)'3';
+    ///<summary>
+    ///保留卖方履约后的期货仓位
+    ///</summary>
+    public const byte ReserveFuturePosition = (byte)'4';
+};
+
+///<summary>
+///TFtdcBizTypeType是一个业务类型类型
+///</summary>
+public static class CtpBizTypeType
+{
+    ///<summary>
+    ///期货
+    ///</summary>
+    public const byte Future = (byte)'1';
+    ///<summary>
+    ///证券
+    ///</summary>
+    public const byte Stock = (byte)'2';
+};
+
+///<summary>
+///TFtdcAppTypeType是一个用户App类型类型
+///</summary>
+public static class CtpAppTypeType
+{
+    ///<summary>
+    ///直连的投资者
+    ///</summary>
+    public const byte Investor = (byte)'1';
+    ///<summary>
+    ///为每个投资者都创建连接的中继
+    ///</summary>
+    public const byte InvestorRelay = (byte)'2';
+    ///<summary>
+    ///所有投资者共享一个操作员连接的中继
+    ///</summary>
+    public const byte OperatorRelay = (byte)'3';
+    ///<summary>
+    ///未知
+    ///</summary>
+    public const byte UnKnown = (byte)'4';
+};
+
+///<summary>
+///TFtdcAppIDType是一个App代码类型
+///</summary>
+/// TThostFtdcAppIDType 是基础类型
+
+///<summary>
+///TFtdcSystemInfoLenType是一个系统信息长度类型
+///</summary>
+/// TThostFtdcSystemInfoLenType 是基础类型
+
+///<summary>
+///TFtdcAdditionalInfoLenType是一个补充信息长度类型
+///</summary>
+/// TThostFtdcAdditionalInfoLenType 是基础类型
+
+///<summary>
+///TFtdcClientSystemInfoType是一个交易终端系统信息类型
+///</summary>
+/// TThostFtdcClientSystemInfoType 是基础类型
+
+///<summary>
+///TFtdcAdditionalInfoType是一个系统外部信息类型
+///</summary>
+/// TThostFtdcAdditionalInfoType 是基础类型
+
+///<summary>
+///TFtdcBase64ClientSystemInfoType是一个base64交易终端系统信息类型
+///</summary>
+/// TThostFtdcBase64ClientSystemInfoType 是基础类型
+
+///<summary>
+///TFtdcBase64AdditionalInfoType是一个base64系统外部信息类型
+///</summary>
+/// TThostFtdcBase64AdditionalInfoType 是基础类型
+
+///<summary>
+///TFtdcCurrentAuthMethodType是一个当前可用的认证模式，0代表无需认证模式 A从低位开始最后一位代表图片验证码，倒数第二位代表动态口令，倒数第三位代表短信验证码类型
+///</summary>
+/// TThostFtdcCurrentAuthMethodType 是基础类型
+
+///<summary>
+///TFtdcCaptchaInfoLenType是一个图片验证信息长度类型
+///</summary>
+/// TThostFtdcCaptchaInfoLenType 是基础类型
+
+///<summary>
+///TFtdcCaptchaInfoType是一个图片验证信息类型
+///</summary>
+/// TThostFtdcCaptchaInfoType 是基础类型
+
+///<summary>
+///TFtdcUserTextSeqType是一个用户短信验证码的编号类型
+///</summary>
+/// TThostFtdcUserTextSeqType 是基础类型
+
+///<summary>
+///TFtdcHandshakeDataType是一个握手数据内容类型
+///</summary>
+/// TThostFtdcHandshakeDataType 是基础类型
+
+///<summary>
+///TFtdcHandshakeDataLenType是一个握手数据内容长度类型
+///</summary>
+/// TThostFtdcHandshakeDataLenType 是基础类型
+
+///<summary>
+///TFtdcCryptoKeyVersionType是一个api与front通信密钥版本号类型
+///</summary>
+/// TThostFtdcCryptoKeyVersionType 是基础类型
+
+///<summary>
+///TFtdcRsaKeyVersionType是一个公钥版本号类型
+///</summary>
+/// TThostFtdcRsaKeyVersionType 是基础类型
+
+///<summary>
+///TFtdcSoftwareProviderIDType是一个交易软件商ID类型
+///</summary>
+/// TThostFtdcSoftwareProviderIDType 是基础类型
+
+///<summary>
+///TFtdcCollectTimeType是一个信息采集时间类型
+///</summary>
+/// TThostFtdcCollectTimeType 是基础类型
+
+///<summary>
+///TFtdcQueryFreqType是一个查询频率类型
+///</summary>
+/// TThostFtdcQueryFreqType 是基础类型
+
+///<summary>
+///TFtdcResponseValueType是一个应答类型类型
+///</summary>
+/// TThostFtdcResponseValueType 未被使用
+
+///<summary>
+///TFtdcOTCTradeTypeType是一个OTC成交类型类型
+///</summary>
+/// TThostFtdcOTCTradeTypeType 未被使用
+
+///<summary>
+///TFtdcMatchTypeType是一个期现风险匹配方式类型
+///</summary>
+/// TThostFtdcMatchTypeType 未被使用
+
+///<summary>
+///TFtdcOTCTraderIDType是一个OTC交易员代码类型
+///</summary>
+/// TThostFtdcOTCTraderIDType 是基础类型
+
+///<summary>
+///TFtdcRiskValueType是一个期货风险值类型
+///</summary>
+/// TThostFtdcRiskValueType 是基础类型
+
+///<summary>
+///TFtdcIDBNameType是一个握手数据内容类型
+///</summary>
+/// TThostFtdcIDBNameType 是基础类型
+
+///<summary>
 ///用户登录请求
 ///</summary>
 [DataContract]
@@ -5500,6 +6009,17 @@ public class CtpReqUserLogin
     [DataMember(Order = 10)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
     public string ClientIPAddress;
+    ///<summary>
+    ///登录备注
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 36)]
+    public string LoginRemark;
+    ///<summary>
+    ///终端IP端口
+    ///</summary>
+    [DataMember(Order = 12)]
+    public int ClientIPPort;
 
     public static byte[] GetData(CtpReqUserLogin obj)
     {
@@ -5515,8 +6035,10 @@ public class CtpReqUserLogin
             writer.Write(obj.MacAddress);
             writer.Write(obj.OneTimePassword);
             writer.Write(obj.ClientIPAddress);
+            writer.Write(obj.LoginRemark);
+            writer.Write(obj.ClientIPPort);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -5622,7 +6144,7 @@ public class CtpRspUserLogin
             writer.Write(obj.FFEXTime);
             writer.Write(obj.INETime);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -5653,7 +6175,7 @@ public class CtpUserLogout
             writer.Write(obj.BrokerID);
             writer.Write(obj.UserID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -5684,7 +6206,7 @@ public class CtpForceUserLogout
             writer.Write(obj.BrokerID);
             writer.Write(obj.UserID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -5719,6 +6241,12 @@ public class CtpReqAuthenticate
     [DataMember(Order = 4)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
     public string AuthCode;
+    ///<summary>
+    ///App代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 33)]
+    public string AppID;
 
     public static byte[] GetData(CtpReqAuthenticate obj)
     {
@@ -5728,8 +6256,9 @@ public class CtpReqAuthenticate
             writer.Write(obj.UserID);
             writer.Write(obj.UserProductInfo);
             writer.Write(obj.AuthCode);
+            writer.Write(obj.AppID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -5758,6 +6287,17 @@ public class CtpRspAuthenticate
     [DataMember(Order = 3)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
     public string UserProductInfo;
+    ///<summary>
+    ///App代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 33)]
+    public string AppID;
+    ///<summary>
+    ///App类型
+    ///</summary>
+    [DataMember(Order = 5)]
+    public byte AppType;
 
     public static byte[] GetData(CtpRspAuthenticate obj)
     {
@@ -5766,8 +6306,10 @@ public class CtpRspAuthenticate
             writer.Write(obj.BrokerID);
             writer.Write(obj.UserID);
             writer.Write(obj.UserProductInfo);
+            writer.Write(obj.AppID);
+            writer.Write(obj.AppType);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -5807,6 +6349,17 @@ public class CtpAuthenticationInfo
     ///</summary>
     [DataMember(Order = 5)]
     public int IsResult;
+    ///<summary>
+    ///App代码
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 33)]
+    public string AppID;
+    ///<summary>
+    ///App类型
+    ///</summary>
+    [DataMember(Order = 7)]
+    public byte AppType;
 
     public static byte[] GetData(CtpAuthenticationInfo obj)
     {
@@ -5817,8 +6370,123 @@ public class CtpAuthenticationInfo
             writer.Write(obj.UserProductInfo);
             writer.Write(obj.AuthInfo);
             writer.Write(obj.IsResult);
+            writer.Write(obj.AppID);
+            writer.Write(obj.AppType);
             return stream.ToArray();
-        }        
+        }
+    }
+};
+
+///<summary>
+///用户登录应答2
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpRspUserLogin2
+{
+    ///<summary>
+    ///交易日
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradingDay;
+    ///<summary>
+    ///登录成功时间
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string LoginTime;
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+    ///<summary>
+    ///交易系统名称
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string SystemName;
+    ///<summary>
+    ///前置编号
+    ///</summary>
+    [DataMember(Order = 6)]
+    public int FrontID;
+    ///<summary>
+    ///会话编号
+    ///</summary>
+    [DataMember(Order = 7)]
+    public int SessionID;
+    ///<summary>
+    ///最大报单引用
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string MaxOrderRef;
+    ///<summary>
+    ///上期所时间
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string SHFETime;
+    ///<summary>
+    ///大商所时间
+    ///</summary>
+    [DataMember(Order = 10)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string DCETime;
+    ///<summary>
+    ///郑商所时间
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string CZCETime;
+    ///<summary>
+    ///中金所时间
+    ///</summary>
+    [DataMember(Order = 12)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string FFEXTime;
+    ///<summary>
+    ///能源中心时间
+    ///</summary>
+    [DataMember(Order = 13)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string INETime;
+    ///<summary>
+    ///随机串
+    ///</summary>
+    [DataMember(Order = 14)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string RandomString;
+
+    public static byte[] GetData(CtpRspUserLogin2 obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.TradingDay);
+            writer.Write(obj.LoginTime);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.UserID);
+            writer.Write(obj.SystemName);
+            writer.Write(obj.FrontID);
+            writer.Write(obj.SessionID);
+            writer.Write(obj.MaxOrderRef);
+            writer.Write(obj.SHFETime);
+            writer.Write(obj.DCETime);
+            writer.Write(obj.CZCETime);
+            writer.Write(obj.FFEXTime);
+            writer.Write(obj.INETime);
+            writer.Write(obj.RandomString);
+            return stream.ToArray();
+        }
     }
 };
 
@@ -5924,7 +6592,7 @@ public class CtpTransferHeader
             writer.Write(obj.SessionID);
             writer.Write(obj.RequestID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -5980,7 +6648,7 @@ public class CtpTransferBankToFutureReq
             writer.Write(obj.CustFee);
             writer.Write(obj.CurrencyCode);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -6037,7 +6705,7 @@ public class CtpTransferBankToFutureRsp
             writer.Write(obj.CustFee);
             writer.Write(obj.CurrencyCode);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -6093,7 +6761,7 @@ public class CtpTransferFutureToBankReq
             writer.Write(obj.CustFee);
             writer.Write(obj.CurrencyCode);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -6150,7 +6818,7 @@ public class CtpTransferFutureToBankRsp
             writer.Write(obj.CustFee);
             writer.Write(obj.CurrencyCode);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -6194,7 +6862,7 @@ public class CtpTransferQryBankReq
             writer.Write(obj.FutureAccPwd);
             writer.Write(obj.CurrencyCode);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -6257,7 +6925,7 @@ public class CtpTransferQryBankRsp
             writer.Write(obj.FetchAmt);
             writer.Write(obj.CurrencyCode);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -6281,7 +6949,7 @@ public class CtpTransferQryDetailReq
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.FutureAccount);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -6392,7 +7060,7 @@ public class CtpTransferQryDetailRsp
             writer.Write(obj.TxAmount);
             writer.Write(obj.Flag);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -6422,7 +7090,7 @@ public class CtpRspInfo
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -6459,7 +7127,7 @@ public class CtpExchange
             writer.Write(obj.ExchangeName);
             writer.Write(obj.ExchangeProperty);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -6583,7 +7251,7 @@ public class CtpProduct
             writer.Write(obj.ExchangeProductID);
             writer.Write(obj.UnderlyingMultiple);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -6797,7 +7465,7 @@ public class CtpInstrument
             writer.Write(obj.UnderlyingMultiple);
             writer.Write(obj.CombinationType);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -6841,7 +7509,7 @@ public class CtpBroker
             writer.Write(obj.BrokerName);
             writer.Write(obj.IsActive);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -6899,7 +7567,7 @@ public class CtpTrader
             writer.Write(obj.InstallCount);
             writer.Write(obj.BrokerID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -7005,7 +7673,7 @@ public class CtpInvestor
             writer.Write(obj.CommModelID);
             writer.Write(obj.MarginModelID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -7050,6 +7718,23 @@ public class CtpTradingCode
     ///</summary>
     [DataMember(Order = 6)]
     public byte ClientIDType;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///业务类型
+    ///</summary>
+    [DataMember(Order = 8)]
+    public byte BizType;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpTradingCode obj)
     {
@@ -7061,8 +7746,11 @@ public class CtpTradingCode
             writer.Write(obj.ClientID);
             writer.Write(obj.IsActive);
             writer.Write(obj.ClientIDType);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.BizType);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -7106,7 +7794,7 @@ public class CtpPartBroker
             writer.Write(obj.ParticipantID);
             writer.Write(obj.IsActive);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -7150,7 +7838,7 @@ public class CtpSuperUser
             writer.Write(obj.Password);
             writer.Write(obj.IsActive);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -7180,7 +7868,7 @@ public class CtpSuperUserFunction
             writer.Write(obj.UserID);
             writer.Write(obj.FunctionCode);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -7218,7 +7906,7 @@ public class CtpInvestorGroup
             writer.Write(obj.InvestorGroupID);
             writer.Write(obj.InvestorGroupName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -7463,6 +8151,21 @@ public class CtpTradingAccount
     ///</summary>
     [DataMember(Order = 46)]
     public double SpecProductExchangeMargin;
+    ///<summary>
+    ///业务类型
+    ///</summary>
+    [DataMember(Order = 47)]
+    public byte BizType;
+    ///<summary>
+    ///延时换汇冻结金额
+    ///</summary>
+    [DataMember(Order = 48)]
+    public double FrozenSwap;
+    ///<summary>
+    ///剩余换汇额度
+    ///</summary>
+    [DataMember(Order = 49)]
+    public double RemainSwap;
 
     public static byte[] GetData(CtpTradingAccount obj)
     {
@@ -7514,8 +8217,11 @@ public class CtpTradingAccount
             writer.Write(obj.SpecProductCloseProfit);
             writer.Write(obj.SpecProductPositionProfitByAlg);
             writer.Write(obj.SpecProductExchangeMargin);
+            writer.Write(obj.BizType);
+            writer.Write(obj.FrozenSwap);
+            writer.Write(obj.RemainSwap);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -7745,6 +8451,28 @@ public class CtpInvestorPosition
     ///</summary>
     [DataMember(Order = 43)]
     public int AbandonFrozen;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 44)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///执行冻结的昨仓
+    ///</summary>
+    [DataMember(Order = 45)]
+    public int YdStrikeFrozen;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 46)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///大商所持仓成本差值，只有大商所使用
+    ///</summary>
+    [DataMember(Order = 47)]
+    public double PositionCostOffset;
 
     public static byte[] GetData(CtpInvestorPosition obj)
     {
@@ -7793,8 +8521,12 @@ public class CtpInvestorPosition
             writer.Write(obj.StrikeFrozen);
             writer.Write(obj.StrikeFrozenAmount);
             writer.Write(obj.AbandonFrozen);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.YdStrikeFrozen);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.PositionCostOffset);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -7858,6 +8590,18 @@ public class CtpInstrumentMarginRate
     ///</summary>
     [DataMember(Order = 10)]
     public int IsRelative;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 12)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpInstrumentMarginRate obj)
     {
@@ -7873,8 +8617,10 @@ public class CtpInstrumentMarginRate
             writer.Write(obj.ShortMarginRatioByMoney);
             writer.Write(obj.ShortMarginRatioByVolume);
             writer.Write(obj.IsRelative);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -7938,6 +8684,23 @@ public class CtpInstrumentCommissionRate
     ///</summary>
     [DataMember(Order = 10)]
     public double CloseTodayRatioByVolume;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///业务类型
+    ///</summary>
+    [DataMember(Order = 12)]
+    public byte BizType;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 13)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpInstrumentCommissionRate obj)
     {
@@ -7953,8 +8716,11 @@ public class CtpInstrumentCommissionRate
             writer.Write(obj.CloseRatioByVolume);
             writer.Write(obj.CloseTodayRatioByMoney);
             writer.Write(obj.CloseTodayRatioByVolume);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.BizType);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -8241,7 +9007,7 @@ public class CtpDepthMarketData
             writer.Write(obj.AveragePrice);
             writer.Write(obj.ActionDay);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -8291,7 +9057,7 @@ public class CtpInstrumentTradingRight
             writer.Write(obj.InvestorID);
             writer.Write(obj.TradingRight);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -8335,6 +9101,11 @@ public class CtpBrokerUser
     ///</summary>
     [DataMember(Order = 6)]
     public int IsUsingOTP;
+    ///<summary>
+    ///是否强制终端认证
+    ///</summary>
+    [DataMember(Order = 7)]
+    public int IsAuthForce;
 
     public static byte[] GetData(CtpBrokerUser obj)
     {
@@ -8346,8 +9117,9 @@ public class CtpBrokerUser
             writer.Write(obj.UserType);
             writer.Write(obj.IsActive);
             writer.Write(obj.IsUsingOTP);
+            writer.Write(obj.IsAuthForce);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -8376,6 +9148,30 @@ public class CtpBrokerUserPassword
     [DataMember(Order = 3)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
     public string Password;
+    ///<summary>
+    ///上次修改时间
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string LastUpdateTime;
+    ///<summary>
+    ///上次登陆时间
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string LastLoginTime;
+    ///<summary>
+    ///密码过期时间
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExpireDate;
+    ///<summary>
+    ///弱密码过期时间
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string WeakExpireDate;
 
     public static byte[] GetData(CtpBrokerUserPassword obj)
     {
@@ -8384,8 +9180,12 @@ public class CtpBrokerUserPassword
             writer.Write(obj.BrokerID);
             writer.Write(obj.UserID);
             writer.Write(obj.Password);
+            writer.Write(obj.LastUpdateTime);
+            writer.Write(obj.LastLoginTime);
+            writer.Write(obj.ExpireDate);
+            writer.Write(obj.WeakExpireDate);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -8422,7 +9222,7 @@ public class CtpBrokerUserFunction
             writer.Write(obj.UserID);
             writer.Write(obj.BrokerFunctionCode);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -8570,7 +9370,7 @@ public class CtpTraderOffer
             writer.Write(obj.MaxTradeID);
             writer.Write(obj.MaxOrderMessageReference);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -8615,6 +9415,18 @@ public class CtpSettlementInfo
     [DataMember(Order = 6)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 501)]
     public string Content;
+    ///<summary>
+    ///投资者帐号
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
 
     public static byte[] GetData(CtpSettlementInfo obj)
     {
@@ -8626,8 +9438,10 @@ public class CtpSettlementInfo
             writer.Write(obj.InvestorID);
             writer.Write(obj.SequenceNo);
             writer.Write(obj.Content);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -8707,7 +9521,7 @@ public class CtpInstrumentMarginRateAdjust
             writer.Write(obj.ShortMarginRatioByVolume);
             writer.Write(obj.IsRelative);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -8755,6 +9569,12 @@ public class CtpExchangeMarginRate
     ///</summary>
     [DataMember(Order = 7)]
     public double ShortMarginRatioByVolume;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
 
     public static byte[] GetData(CtpExchangeMarginRate obj)
     {
@@ -8767,8 +9587,9 @@ public class CtpExchangeMarginRate
             writer.Write(obj.LongMarginRatioByVolume);
             writer.Write(obj.ShortMarginRatioByMoney);
             writer.Write(obj.ShortMarginRatioByVolume);
+            writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -8877,7 +9698,7 @@ public class CtpExchangeMarginRateAdjust
             writer.Write(obj.NoShortMarginRatioByMoney);
             writer.Write(obj.NoShortMarginRatioByVolume);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -8927,7 +9748,7 @@ public class CtpExchangeRate
             writer.Write(obj.ToCurrencyID);
             writer.Write(obj.ExchangeRate);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -8957,7 +9778,7 @@ public class CtpSettlementRef
             writer.Write(obj.TradingDay);
             writer.Write(obj.SettlementID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -9001,7 +9822,7 @@ public class CtpCurrentTime
             writer.Write(obj.CurrMillisec);
             writer.Write(obj.ActionDay);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -9038,7 +9859,7 @@ public class CtpCommPhase
             writer.Write(obj.CommPhaseNo);
             writer.Write(obj.SystemID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -9114,11 +9935,11 @@ public class CtpLoginInfo
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
     public string SystemName;
     ///<summary>
-    ///密码
+    ///密码,已弃用
     ///</summary>
     [DataMember(Order = 12)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
-    public string Password;
+    public string PasswordDeprecated;
     ///<summary>
     ///最大报单引用
     ///</summary>
@@ -9167,6 +9988,23 @@ public class CtpLoginInfo
     [DataMember(Order = 20)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
     public string INETime;
+    ///<summary>
+    ///查询时是否需要流控
+    ///</summary>
+    [DataMember(Order = 21)]
+    public int IsQryControl;
+    ///<summary>
+    ///登录备注
+    ///</summary>
+    [DataMember(Order = 22)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 36)]
+    public string LoginRemark;
+    ///<summary>
+    ///密码
+    ///</summary>
+    [DataMember(Order = 23)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string Password;
 
     public static byte[] GetData(CtpLoginInfo obj)
     {
@@ -9183,7 +10021,7 @@ public class CtpLoginInfo
             writer.Write(obj.InterfaceProductInfo);
             writer.Write(obj.ProtocolInfo);
             writer.Write(obj.SystemName);
-            writer.Write(obj.Password);
+            writer.Write(obj.PasswordDeprecated);
             writer.Write(obj.MaxOrderRef);
             writer.Write(obj.SHFETime);
             writer.Write(obj.DCETime);
@@ -9192,8 +10030,11 @@ public class CtpLoginInfo
             writer.Write(obj.MacAddress);
             writer.Write(obj.OneTimePassword);
             writer.Write(obj.INETime);
+            writer.Write(obj.IsQryControl);
+            writer.Write(obj.LoginRemark);
+            writer.Write(obj.Password);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -9229,7 +10070,7 @@ public class CtpLogoutAll
             writer.Write(obj.SessionID);
             writer.Write(obj.SystemName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -9272,7 +10113,7 @@ public class CtpFrontStatus
             writer.Write(obj.LastReportTime);
             writer.Write(obj.IsActive);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -9317,7 +10158,7 @@ public class CtpUserPasswordUpdate
             writer.Write(obj.OldPassword);
             writer.Write(obj.NewPassword);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -9452,6 +10293,48 @@ public class CtpInputOrder
     ///</summary>
     [DataMember(Order = 23)]
     public int IsSwapOrder;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 24)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 25)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///资金账号
+    ///</summary>
+    [DataMember(Order = 26)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 27)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+    ///<summary>
+    ///交易编码
+    ///</summary>
+    [DataMember(Order = 28)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ClientID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 29)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 30)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpInputOrder obj)
     {
@@ -9480,8 +10363,15 @@ public class CtpInputOrder
             writer.Write(obj.RequestID);
             writer.Write(obj.UserForceClose);
             writer.Write(obj.IsSwapOrder);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
+            writer.Write(obj.ClientID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -9806,6 +10696,42 @@ public class CtpOrder
     ///</summary>
     [DataMember(Order = 57)]
     public int IsSwapOrder;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 58)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 59)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///资金账号
+    ///</summary>
+    [DataMember(Order = 60)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 61)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 62)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 63)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpOrder obj)
     {
@@ -9868,8 +10794,14 @@ public class CtpOrder
             writer.Write(obj.RelativeOrderSysID);
             writer.Write(obj.ZCETotalTradedVolume);
             writer.Write(obj.IsSwapOrder);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -10110,6 +11042,24 @@ public class CtpExchangeOrder
     ///</summary>
     [DataMember(Order = 42)]
     public int SequenceNo;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 43)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 44)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 45)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpExchangeOrder obj)
     {
@@ -10157,8 +11107,11 @@ public class CtpExchangeOrder
             writer.Write(obj.ActiveTraderID);
             writer.Write(obj.ClearingPartID);
             writer.Write(obj.SequenceNo);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -10222,7 +11175,7 @@ public class CtpExchangeOrderInsertError
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -10310,6 +11263,24 @@ public class CtpInputOrderAction
     [DataMember(Order = 14)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string InstrumentID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 15)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 16)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 17)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpInputOrderAction obj)
     {
@@ -10329,8 +11300,11 @@ public class CtpInputOrderAction
             writer.Write(obj.VolumeChange);
             writer.Write(obj.UserID);
             writer.Write(obj.InstrumentID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -10482,6 +11456,30 @@ public class CtpOrderAction
     [DataMember(Order = 25)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string InstrumentID;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 26)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 27)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 28)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 29)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpOrderAction obj)
     {
@@ -10512,8 +11510,12 @@ public class CtpOrderAction
             writer.Write(obj.UserID);
             writer.Write(obj.StatusMsg);
             writer.Write(obj.InstrumentID);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -10615,6 +11617,24 @@ public class CtpExchangeOrderAction
     [DataMember(Order = 16)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
     public string UserID;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 17)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 18)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 19)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpExchangeOrderAction obj)
     {
@@ -10636,8 +11656,11 @@ public class CtpExchangeOrderAction
             writer.Write(obj.BusinessUnit);
             writer.Write(obj.OrderActionStatus);
             writer.Write(obj.UserID);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -10708,7 +11731,7 @@ public class CtpExchangeOrderActionError
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -10869,7 +11892,7 @@ public class CtpExchangeTrade
             writer.Write(obj.SequenceNo);
             writer.Write(obj.TradeSource);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -11048,6 +12071,12 @@ public class CtpTrade
     ///</summary>
     [DataMember(Order = 30)]
     public byte TradeSource;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 31)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpTrade obj)
     {
@@ -11083,8 +12112,9 @@ public class CtpTrade
             writer.Write(obj.SettlementID);
             writer.Write(obj.BrokerOrderSeq);
             writer.Write(obj.TradeSource);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -11159,6 +12189,12 @@ public class CtpUserSession
     [DataMember(Order = 11)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
     public string MacAddress;
+    ///<summary>
+    ///登录备注
+    ///</summary>
+    [DataMember(Order = 12)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 36)]
+    public string LoginRemark;
 
     public static byte[] GetData(CtpUserSession obj)
     {
@@ -11175,8 +12211,9 @@ public class CtpUserSession
             writer.Write(obj.InterfaceProductInfo);
             writer.Write(obj.ProtocolInfo);
             writer.Write(obj.MacAddress);
+            writer.Write(obj.LoginRemark);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -11225,6 +12262,18 @@ public class CtpQueryMaxOrderVolume
     ///</summary>
     [DataMember(Order = 7)]
     public int MaxVolume;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQueryMaxOrderVolume obj)
     {
@@ -11237,8 +12286,10 @@ public class CtpQueryMaxOrderVolume
             writer.Write(obj.OffsetFlag);
             writer.Write(obj.HedgeFlag);
             writer.Write(obj.MaxVolume);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -11273,6 +12324,23 @@ public class CtpSettlementInfoConfirm
     [DataMember(Order = 4)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
     public string ConfirmTime;
+    ///<summary>
+    ///结算编号
+    ///</summary>
+    [DataMember(Order = 5)]
+    public int SettlementID;
+    ///<summary>
+    ///投资者帐号
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
 
     public static byte[] GetData(CtpSettlementInfoConfirm obj)
     {
@@ -11282,8 +12350,11 @@ public class CtpSettlementInfoConfirm
             writer.Write(obj.InvestorID);
             writer.Write(obj.ConfirmDate);
             writer.Write(obj.ConfirmTime);
+            writer.Write(obj.SettlementID);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -11340,7 +12411,7 @@ public class CtpSyncDeposit
             writer.Write(obj.IsForce);
             writer.Write(obj.CurrencyID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -11398,7 +12469,7 @@ public class CtpSyncFundMortgage
             writer.Write(obj.MortgageAmount);
             writer.Write(obj.ToCurrencyID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -11422,7 +12493,7 @@ public class CtpBrokerSync
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.BrokerID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -11528,7 +12599,7 @@ public class CtpSyncingInvestor
             writer.Write(obj.CommModelID);
             writer.Write(obj.MarginModelID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -11585,7 +12656,7 @@ public class CtpSyncingTradingCode
             writer.Write(obj.IsActive);
             writer.Write(obj.ClientIDType);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -11623,7 +12694,7 @@ public class CtpSyncingInvestorGroup
             writer.Write(obj.InvestorGroupID);
             writer.Write(obj.InvestorGroupName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -11868,6 +12939,16 @@ public class CtpSyncingTradingAccount
     ///</summary>
     [DataMember(Order = 46)]
     public double SpecProductExchangeMargin;
+    ///<summary>
+    ///延时换汇冻结金额
+    ///</summary>
+    [DataMember(Order = 47)]
+    public double FrozenSwap;
+    ///<summary>
+    ///剩余换汇额度
+    ///</summary>
+    [DataMember(Order = 48)]
+    public double RemainSwap;
 
     public static byte[] GetData(CtpSyncingTradingAccount obj)
     {
@@ -11919,8 +13000,10 @@ public class CtpSyncingTradingAccount
             writer.Write(obj.SpecProductCloseProfit);
             writer.Write(obj.SpecProductPositionProfitByAlg);
             writer.Write(obj.SpecProductExchangeMargin);
+            writer.Write(obj.FrozenSwap);
+            writer.Write(obj.RemainSwap);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12150,6 +13233,28 @@ public class CtpSyncingInvestorPosition
     ///</summary>
     [DataMember(Order = 43)]
     public int AbandonFrozen;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 44)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///执行冻结的昨仓
+    ///</summary>
+    [DataMember(Order = 45)]
+    public int YdStrikeFrozen;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 46)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///大商所持仓成本差值，只有大商所使用
+    ///</summary>
+    [DataMember(Order = 47)]
+    public double PositionCostOffset;
 
     public static byte[] GetData(CtpSyncingInvestorPosition obj)
     {
@@ -12198,8 +13303,12 @@ public class CtpSyncingInvestorPosition
             writer.Write(obj.StrikeFrozen);
             writer.Write(obj.StrikeFrozenAmount);
             writer.Write(obj.AbandonFrozen);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.YdStrikeFrozen);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.PositionCostOffset);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12279,7 +13388,7 @@ public class CtpSyncingInstrumentMarginRate
             writer.Write(obj.ShortMarginRatioByVolume);
             writer.Write(obj.IsRelative);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12359,7 +13468,7 @@ public class CtpSyncingInstrumentCommissionRate
             writer.Write(obj.CloseTodayRatioByMoney);
             writer.Write(obj.CloseTodayRatioByVolume);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12409,7 +13518,7 @@ public class CtpSyncingInstrumentTradingRight
             writer.Write(obj.InvestorID);
             writer.Write(obj.TradingRight);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12462,6 +13571,12 @@ public class CtpQryOrder
     [DataMember(Order = 7)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
     public string InsertTimeEnd;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryOrder obj)
     {
@@ -12474,8 +13589,9 @@ public class CtpQryOrder
             writer.Write(obj.OrderSysID);
             writer.Write(obj.InsertTimeStart);
             writer.Write(obj.InsertTimeEnd);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12528,6 +13644,12 @@ public class CtpQryTrade
     [DataMember(Order = 7)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
     public string TradeTimeEnd;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryTrade obj)
     {
@@ -12540,8 +13662,9 @@ public class CtpQryTrade
             writer.Write(obj.TradeID);
             writer.Write(obj.TradeTimeStart);
             writer.Write(obj.TradeTimeEnd);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12570,6 +13693,18 @@ public class CtpQryInvestorPosition
     [DataMember(Order = 3)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string InstrumentID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryInvestorPosition obj)
     {
@@ -12578,8 +13713,10 @@ public class CtpQryInvestorPosition
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             writer.Write(obj.InstrumentID);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12608,6 +13745,17 @@ public class CtpQryTradingAccount
     [DataMember(Order = 3)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
     public string CurrencyID;
+    ///<summary>
+    ///业务类型
+    ///</summary>
+    [DataMember(Order = 4)]
+    public byte BizType;
+    ///<summary>
+    ///投资者帐号
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
 
     public static byte[] GetData(CtpQryTradingAccount obj)
     {
@@ -12616,8 +13764,10 @@ public class CtpQryTradingAccount
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             writer.Write(obj.CurrencyID);
+            writer.Write(obj.BizType);
+            writer.Write(obj.AccountID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12648,7 +13798,7 @@ public class CtpQryInvestor
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12688,6 +13838,12 @@ public class CtpQryTradingCode
     ///</summary>
     [DataMember(Order = 5)]
     public byte ClientIDType;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryTradingCode obj)
     {
@@ -12698,8 +13854,9 @@ public class CtpQryTradingCode
             writer.Write(obj.ExchangeID);
             writer.Write(obj.ClientID);
             writer.Write(obj.ClientIDType);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12723,7 +13880,7 @@ public class CtpQryInvestorGroup
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.BrokerID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12757,6 +13914,18 @@ public class CtpQryInstrumentMarginRate
     ///</summary>
     [DataMember(Order = 4)]
     public byte HedgeFlag;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryInstrumentMarginRate obj)
     {
@@ -12766,8 +13935,10 @@ public class CtpQryInstrumentMarginRate
             writer.Write(obj.InvestorID);
             writer.Write(obj.InstrumentID);
             writer.Write(obj.HedgeFlag);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12796,6 +13967,18 @@ public class CtpQryInstrumentCommissionRate
     [DataMember(Order = 3)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string InstrumentID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryInstrumentCommissionRate obj)
     {
@@ -12804,8 +13987,10 @@ public class CtpQryInstrumentCommissionRate
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             writer.Write(obj.InstrumentID);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12843,7 +14028,7 @@ public class CtpQryInstrumentTradingRight
             writer.Write(obj.InvestorID);
             writer.Write(obj.InstrumentID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12867,7 +14052,7 @@ public class CtpQryBroker
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.BrokerID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12905,7 +14090,7 @@ public class CtpQryTrader
             writer.Write(obj.ParticipantID);
             writer.Write(obj.TraderID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12929,7 +14114,7 @@ public class CtpQrySuperUserFunction
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.UserID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -12972,7 +14157,7 @@ public class CtpQryUserSession
             writer.Write(obj.BrokerID);
             writer.Write(obj.UserID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13010,7 +14195,7 @@ public class CtpQryPartBroker
             writer.Write(obj.BrokerID);
             writer.Write(obj.ParticipantID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13033,7 +14218,7 @@ public class CtpQryFrontStatus
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.FrontID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13085,7 +14270,7 @@ public class CtpQryExchangeOrder
             writer.Write(obj.ExchangeID);
             writer.Write(obj.TraderID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13123,7 +14308,7 @@ public class CtpQryOrderAction
             writer.Write(obj.InvestorID);
             writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13168,7 +14353,7 @@ public class CtpQryExchangeOrderAction
             writer.Write(obj.ExchangeID);
             writer.Write(obj.TraderID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13192,7 +14377,7 @@ public class CtpQrySuperUser
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.UserID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13216,7 +14401,7 @@ public class CtpQryExchange
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13238,6 +14423,12 @@ public class CtpQryProduct
     ///</summary>
     [DataMember(Order = 2)]
     public byte ProductClass;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
 
     public static byte[] GetData(CtpQryProduct obj)
     {
@@ -13245,8 +14436,9 @@ public class CtpQryProduct
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.ProductID);
             writer.Write(obj.ProductClass);
+            writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13291,7 +14483,7 @@ public class CtpQryInstrument
             writer.Write(obj.ExchangeInstID);
             writer.Write(obj.ProductID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13308,14 +14500,21 @@ public class CtpQryDepthMarketData
     [DataMember(Order = 1)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string InstrumentID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
 
     public static byte[] GetData(CtpQryDepthMarketData obj)
     {
         using (var stream = new MemoryStream())
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.InstrumentID);
+            writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13346,7 +14545,7 @@ public class CtpQryBrokerUser
             writer.Write(obj.BrokerID);
             writer.Write(obj.UserID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13377,7 +14576,7 @@ public class CtpQryBrokerUserFunction
             writer.Write(obj.BrokerID);
             writer.Write(obj.UserID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13415,7 +14614,7 @@ public class CtpQryTraderOffer
             writer.Write(obj.ParticipantID);
             writer.Write(obj.TraderID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13446,7 +14645,7 @@ public class CtpQrySyncDeposit
             writer.Write(obj.BrokerID);
             writer.Write(obj.DepositSeqNo);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13475,6 +14674,18 @@ public class CtpQrySettlementInfo
     [DataMember(Order = 3)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
     public string TradingDay;
+    ///<summary>
+    ///投资者帐号
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
 
     public static byte[] GetData(CtpQrySettlementInfo obj)
     {
@@ -13483,8 +14694,10 @@ public class CtpQrySettlementInfo
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             writer.Write(obj.TradingDay);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13512,6 +14725,12 @@ public class CtpQryExchangeMarginRate
     ///</summary>
     [DataMember(Order = 3)]
     public byte HedgeFlag;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
 
     public static byte[] GetData(CtpQryExchangeMarginRate obj)
     {
@@ -13520,8 +14739,9 @@ public class CtpQryExchangeMarginRate
             writer.Write(obj.BrokerID);
             writer.Write(obj.InstrumentID);
             writer.Write(obj.HedgeFlag);
+            writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13558,7 +14778,7 @@ public class CtpQryExchangeMarginRateAdjust
             writer.Write(obj.InstrumentID);
             writer.Write(obj.HedgeFlag);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13596,7 +14816,7 @@ public class CtpQryExchangeRate
             writer.Write(obj.FromCurrencyID);
             writer.Write(obj.ToCurrencyID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13627,7 +14847,7 @@ public class CtpQrySyncFundMortgage
             writer.Write(obj.BrokerID);
             writer.Write(obj.MortgageSeqNo);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13706,7 +14926,7 @@ public class CtpQryHisOrder
             writer.Write(obj.TradingDay);
             writer.Write(obj.SettlementID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13768,7 +14988,7 @@ public class CtpOptionInstrMiniMargin
             writer.Write(obj.ValueMethod);
             writer.Write(obj.IsRelative);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13837,6 +15057,16 @@ public class CtpOptionInstrMarginAdjust
     ///</summary>
     [DataMember(Order = 11)]
     public int IsRelative;
+    ///<summary>
+    ///做市商空头保证金调整系数
+    ///</summary>
+    [DataMember(Order = 12)]
+    public double MShortMarginRatioByMoney;
+    ///<summary>
+    ///做市商空头保证金调整系数
+    ///</summary>
+    [DataMember(Order = 13)]
+    public double MShortMarginRatioByVolume;
 
     public static byte[] GetData(CtpOptionInstrMarginAdjust obj)
     {
@@ -13853,8 +15083,10 @@ public class CtpOptionInstrMarginAdjust
             writer.Write(obj.AShortMarginRatioByMoney);
             writer.Write(obj.AShortMarginRatioByVolume);
             writer.Write(obj.IsRelative);
+            writer.Write(obj.MShortMarginRatioByMoney);
+            writer.Write(obj.MShortMarginRatioByVolume);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -13928,6 +15160,18 @@ public class CtpOptionInstrCommRate
     ///</summary>
     [DataMember(Order = 12)]
     public double StrikeRatioByVolume;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 13)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 14)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpOptionInstrCommRate obj)
     {
@@ -13945,8 +15189,10 @@ public class CtpOptionInstrCommRate
             writer.Write(obj.CloseTodayRatioByVolume);
             writer.Write(obj.StrikeRatioByMoney);
             writer.Write(obj.StrikeRatioByVolume);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -14005,6 +15251,18 @@ public class CtpOptionInstrTradeCost
     ///</summary>
     [DataMember(Order = 9)]
     public double ExchMiniMargin;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 10)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpOptionInstrTradeCost obj)
     {
@@ -14019,8 +15277,10 @@ public class CtpOptionInstrTradeCost
             writer.Write(obj.Royalty);
             writer.Write(obj.ExchFixedMargin);
             writer.Write(obj.ExchMiniMargin);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -14064,6 +15324,18 @@ public class CtpQryOptionInstrTradeCost
     ///</summary>
     [DataMember(Order = 6)]
     public double UnderlyingPrice;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryOptionInstrTradeCost obj)
     {
@@ -14075,8 +15347,10 @@ public class CtpQryOptionInstrTradeCost
             writer.Write(obj.HedgeFlag);
             writer.Write(obj.InputPrice);
             writer.Write(obj.UnderlyingPrice);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -14105,6 +15379,18 @@ public class CtpQryOptionInstrCommRate
     [DataMember(Order = 3)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string InstrumentID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryOptionInstrCommRate obj)
     {
@@ -14113,8 +15399,10 @@ public class CtpQryOptionInstrCommRate
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             writer.Write(obj.InstrumentID);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -14151,7 +15439,7 @@ public class CtpIndexPrice
             writer.Write(obj.InstrumentID);
             writer.Write(obj.ClosePrice);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -14229,7 +15517,7 @@ public class CtpInputExecOrder
     [DataMember(Order = 12)]
     public byte PosiDirection;
     ///<summary>
-    ///期权行权后是否保留期货头寸的标记
+    ///期权行权后是否保留期货头寸的标记,该字段已废弃
     ///</summary>
     [DataMember(Order = 13)]
     public byte ReservePositionFlag;
@@ -14238,6 +15526,48 @@ public class CtpInputExecOrder
     ///</summary>
     [DataMember(Order = 14)]
     public byte CloseFlag;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 15)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 16)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///资金账号
+    ///</summary>
+    [DataMember(Order = 17)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 18)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+    ///<summary>
+    ///交易编码
+    ///</summary>
+    [DataMember(Order = 19)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ClientID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 20)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 21)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpInputExecOrder obj)
     {
@@ -14257,8 +15587,15 @@ public class CtpInputExecOrder
             writer.Write(obj.PosiDirection);
             writer.Write(obj.ReservePositionFlag);
             writer.Write(obj.CloseFlag);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
+            writer.Write(obj.ClientID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -14336,6 +15673,24 @@ public class CtpInputExecOrderAction
     [DataMember(Order = 12)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string InstrumentID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 13)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 14)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 15)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpInputExecOrderAction obj)
     {
@@ -14353,8 +15708,11 @@ public class CtpInputExecOrderAction
             writer.Write(obj.ActionFlag);
             writer.Write(obj.UserID);
             writer.Write(obj.InstrumentID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -14432,7 +15790,7 @@ public class CtpExecOrder
     [DataMember(Order = 12)]
     public byte PosiDirection;
     ///<summary>
-    ///期权行权后是否保留期货头寸的标记
+    ///期权行权后是否保留期货头寸的标记,该字段已废弃
     ///</summary>
     [DataMember(Order = 13)]
     public byte ReservePositionFlag;
@@ -14576,6 +15934,42 @@ public class CtpExecOrder
     ///</summary>
     [DataMember(Order = 38)]
     public int BrokerExecOrderSeq;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 39)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 40)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///资金账号
+    ///</summary>
+    [DataMember(Order = 41)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 42)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 43)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 44)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpExecOrder obj)
     {
@@ -14619,8 +16013,14 @@ public class CtpExecOrder
             writer.Write(obj.StatusMsg);
             writer.Write(obj.ActiveUserID);
             writer.Write(obj.BrokerExecOrderSeq);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -14767,6 +16167,30 @@ public class CtpExecOrderAction
     [DataMember(Order = 24)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string InstrumentID;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 25)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 26)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 27)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 28)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpExecOrderAction obj)
     {
@@ -14796,8 +16220,12 @@ public class CtpExecOrderAction
             writer.Write(obj.ActionType);
             writer.Write(obj.StatusMsg);
             writer.Write(obj.InstrumentID);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -14863,7 +16291,7 @@ public class CtpQryExecOrder
             writer.Write(obj.InsertTimeStart);
             writer.Write(obj.InsertTimeEnd);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -14911,7 +16339,7 @@ public class CtpExchangeExecOrder
     [DataMember(Order = 7)]
     public byte PosiDirection;
     ///<summary>
-    ///期权行权后是否保留期货头寸的标记
+    ///期权行权后是否保留期货头寸的标记,该字段已废弃
     ///</summary>
     [DataMember(Order = 8)]
     public byte ReservePositionFlag;
@@ -15022,6 +16450,24 @@ public class CtpExchangeExecOrder
     ///</summary>
     [DataMember(Order = 27)]
     public int SequenceNo;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 28)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 29)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 30)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpExchangeExecOrder obj)
     {
@@ -15054,8 +16500,11 @@ public class CtpExchangeExecOrder
             writer.Write(obj.ExecResult);
             writer.Write(obj.ClearingPartID);
             writer.Write(obj.SequenceNo);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -15107,7 +16556,7 @@ public class CtpQryExchangeExecOrder
             writer.Write(obj.ExchangeID);
             writer.Write(obj.TraderID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -15145,7 +16594,7 @@ public class CtpQryExecOrderAction
             writer.Write(obj.InvestorID);
             writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -15242,6 +16691,35 @@ public class CtpExchangeExecOrderAction
     ///</summary>
     [DataMember(Order = 15)]
     public byte ActionType;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 16)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 17)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 18)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+    ///<summary>
+    ///合约在交易所的代码
+    ///</summary>
+    [DataMember(Order = 19)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string ExchangeInstID;
+    ///<summary>
+    ///数量
+    ///</summary>
+    [DataMember(Order = 20)]
+    public int Volume;
 
     public static byte[] GetData(CtpExchangeExecOrderAction obj)
     {
@@ -15262,8 +16740,13 @@ public class CtpExchangeExecOrderAction
             writer.Write(obj.OrderActionStatus);
             writer.Write(obj.UserID);
             writer.Write(obj.ActionType);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
+            writer.Write(obj.ExchangeInstID);
+            writer.Write(obj.Volume);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -15308,7 +16791,7 @@ public class CtpQryExchangeExecOrderAction
             writer.Write(obj.ExchangeID);
             writer.Write(obj.TraderID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -15386,7 +16869,7 @@ public class CtpErrExecOrder
     [DataMember(Order = 12)]
     public byte PosiDirection;
     ///<summary>
-    ///期权行权后是否保留期货头寸的标记
+    ///期权行权后是否保留期货头寸的标记,该字段已废弃
     ///</summary>
     [DataMember(Order = 13)]
     public byte ReservePositionFlag;
@@ -15396,14 +16879,56 @@ public class CtpErrExecOrder
     [DataMember(Order = 14)]
     public byte CloseFlag;
     ///<summary>
-    ///错误代码
+    ///交易所代码
     ///</summary>
     [DataMember(Order = 15)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 16)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///资金账号
+    ///</summary>
+    [DataMember(Order = 17)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 18)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+    ///<summary>
+    ///交易编码
+    ///</summary>
+    [DataMember(Order = 19)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ClientID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 20)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 21)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+    ///<summary>
+    ///错误代码
+    ///</summary>
+    [DataMember(Order = 22)]
     public int ErrorID;
     ///<summary>
     ///错误信息
     ///</summary>
-    [DataMember(Order = 16)]
+    [DataMember(Order = 23)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
     public string ErrorMsg;
 
@@ -15425,10 +16950,17 @@ public class CtpErrExecOrder
             writer.Write(obj.PosiDirection);
             writer.Write(obj.ReservePositionFlag);
             writer.Write(obj.CloseFlag);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
+            writer.Write(obj.ClientID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -15459,7 +16991,7 @@ public class CtpQryErrExecOrder
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -15538,14 +17070,32 @@ public class CtpErrExecOrderAction
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string InstrumentID;
     ///<summary>
-    ///错误代码
+    ///投资单元代码
     ///</summary>
     [DataMember(Order = 13)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 14)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 15)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+    ///<summary>
+    ///错误代码
+    ///</summary>
+    [DataMember(Order = 16)]
     public int ErrorID;
     ///<summary>
     ///错误信息
     ///</summary>
-    [DataMember(Order = 14)]
+    [DataMember(Order = 17)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
     public string ErrorMsg;
 
@@ -15565,10 +17115,13 @@ public class CtpErrExecOrderAction
             writer.Write(obj.ActionFlag);
             writer.Write(obj.UserID);
             writer.Write(obj.InstrumentID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -15599,7 +17152,7 @@ public class CtpQryErrExecOrderAction
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -15655,7 +17208,7 @@ public class CtpOptionInstrTradingRight
             writer.Write(obj.Direction);
             writer.Write(obj.TradingRight);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -15699,7 +17252,7 @@ public class CtpQryOptionInstrTradingRight
             writer.Write(obj.InstrumentID);
             writer.Write(obj.Direction);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -15740,6 +17293,30 @@ public class CtpInputForQuote
     [DataMember(Order = 5)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
     public string UserID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpInputForQuote obj)
     {
@@ -15750,8 +17327,12 @@ public class CtpInputForQuote
             writer.Write(obj.InstrumentID);
             writer.Write(obj.ForQuoteRef);
             writer.Write(obj.UserID);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -15877,6 +17458,24 @@ public class CtpForQuote
     ///</summary>
     [DataMember(Order = 20)]
     public int BrokerForQutoSeq;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 21)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 22)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 23)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpForQuote obj)
     {
@@ -15902,8 +17501,11 @@ public class CtpForQuote
             writer.Write(obj.StatusMsg);
             writer.Write(obj.ActiveUserID);
             writer.Write(obj.BrokerForQutoSeq);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -15950,6 +17552,12 @@ public class CtpQryForQuote
     [DataMember(Order = 6)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
     public string InsertTimeEnd;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryForQuote obj)
     {
@@ -15961,8 +17569,9 @@ public class CtpQryForQuote
             writer.Write(obj.ExchangeID);
             writer.Write(obj.InsertTimeStart);
             writer.Write(obj.InsertTimeEnd);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -16031,6 +17640,18 @@ public class CtpExchangeForQuote
     ///</summary>
     [DataMember(Order = 10)]
     public byte ForQuoteStatus;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 12)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpExchangeForQuote obj)
     {
@@ -16046,8 +17667,10 @@ public class CtpExchangeForQuote
             writer.Write(obj.InsertDate);
             writer.Write(obj.InsertTime);
             writer.Write(obj.ForQuoteStatus);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -16099,7 +17722,7 @@ public class CtpQryExchangeForQuote
             writer.Write(obj.ExchangeID);
             writer.Write(obj.TraderID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -16209,6 +17832,36 @@ public class CtpInputQuote
     [DataMember(Order = 18)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
     public string ForQuoteSysID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 19)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 20)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///交易编码
+    ///</summary>
+    [DataMember(Order = 21)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ClientID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 22)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 23)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpInputQuote obj)
     {
@@ -16232,8 +17885,13 @@ public class CtpInputQuote
             writer.Write(obj.AskOrderRef);
             writer.Write(obj.BidOrderRef);
             writer.Write(obj.ForQuoteSysID);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.ClientID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -16311,6 +17969,30 @@ public class CtpInputQuoteAction
     [DataMember(Order = 12)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string InstrumentID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 13)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///交易编码
+    ///</summary>
+    [DataMember(Order = 14)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ClientID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 15)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 16)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpInputQuoteAction obj)
     {
@@ -16328,8 +18010,12 @@ public class CtpInputQuoteAction
             writer.Write(obj.ActionFlag);
             writer.Write(obj.UserID);
             writer.Write(obj.InstrumentID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.ClientID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -16586,6 +18272,42 @@ public class CtpQuote
     [DataMember(Order = 44)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
     public string ForQuoteSysID;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 45)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 46)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///资金账号
+    ///</summary>
+    [DataMember(Order = 47)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 48)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 49)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 50)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpQuote obj)
     {
@@ -16635,8 +18357,14 @@ public class CtpQuote
             writer.Write(obj.AskOrderRef);
             writer.Write(obj.BidOrderRef);
             writer.Write(obj.ForQuoteSysID);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -16778,6 +18506,30 @@ public class CtpQuoteAction
     [DataMember(Order = 23)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string InstrumentID;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 24)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 25)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 26)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 27)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpQuoteAction obj)
     {
@@ -16806,8 +18558,12 @@ public class CtpQuoteAction
             writer.Write(obj.UserID);
             writer.Write(obj.StatusMsg);
             writer.Write(obj.InstrumentID);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -16860,6 +18616,12 @@ public class CtpQryQuote
     [DataMember(Order = 7)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
     public string InsertTimeEnd;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryQuote obj)
     {
@@ -16872,8 +18634,9 @@ public class CtpQryQuote
             writer.Write(obj.QuoteSysID);
             writer.Write(obj.InsertTimeStart);
             writer.Write(obj.InsertTimeEnd);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -17055,6 +18818,24 @@ public class CtpExchangeQuote
     [DataMember(Order = 31)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
     public string ForQuoteSysID;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 32)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 33)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 34)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpExchangeQuote obj)
     {
@@ -17091,8 +18872,11 @@ public class CtpExchangeQuote
             writer.Write(obj.AskOrderSysID);
             writer.Write(obj.BidOrderSysID);
             writer.Write(obj.ForQuoteSysID);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -17144,7 +18928,7 @@ public class CtpQryExchangeQuote
             writer.Write(obj.ExchangeID);
             writer.Write(obj.TraderID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -17182,7 +18966,7 @@ public class CtpQryQuoteAction
             writer.Write(obj.InvestorID);
             writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -17274,6 +19058,18 @@ public class CtpExchangeQuoteAction
     [DataMember(Order = 14)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
     public string UserID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 15)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 16)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpExchangeQuoteAction obj)
     {
@@ -17293,8 +19089,10 @@ public class CtpExchangeQuoteAction
             writer.Write(obj.BusinessUnit);
             writer.Write(obj.OrderActionStatus);
             writer.Write(obj.UserID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -17339,7 +19137,7 @@ public class CtpQryExchangeQuoteAction
             writer.Write(obj.ExchangeID);
             writer.Write(obj.TraderID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -17389,7 +19187,7 @@ public class CtpOptionInstrDelta
             writer.Write(obj.InvestorID);
             writer.Write(obj.Delta);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -17448,7 +19246,7 @@ public class CtpForQuoteRsp
             writer.Write(obj.ActionDay);
             writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -17487,6 +19285,11 @@ public class CtpStrikeOffset
     ///</summary>
     [DataMember(Order = 5)]
     public double Offset;
+    ///<summary>
+    ///执行偏移类型
+    ///</summary>
+    [DataMember(Order = 6)]
+    public byte OffsetType;
 
     public static byte[] GetData(CtpStrikeOffset obj)
     {
@@ -17497,8 +19300,9 @@ public class CtpStrikeOffset
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             writer.Write(obj.Offset);
+            writer.Write(obj.OffsetType);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -17536,7 +19340,7 @@ public class CtpQryStrikeOffset
             writer.Write(obj.InvestorID);
             writer.Write(obj.InstrumentID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -17591,6 +19395,24 @@ public class CtpInputBatchOrderAction
     [DataMember(Order = 8)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
     public string UserID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 10)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpInputBatchOrderAction obj)
     {
@@ -17604,8 +19426,11 @@ public class CtpInputBatchOrderAction
             writer.Write(obj.SessionID);
             writer.Write(obj.ExchangeID);
             writer.Write(obj.UserID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -17718,6 +19543,24 @@ public class CtpBatchOrderAction
     [DataMember(Order = 18)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
     public string StatusMsg;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 19)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 20)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 21)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpBatchOrderAction obj)
     {
@@ -17741,8 +19584,11 @@ public class CtpBatchOrderAction
             writer.Write(obj.OrderActionStatus);
             writer.Write(obj.UserID);
             writer.Write(obj.StatusMsg);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -17817,6 +19663,18 @@ public class CtpExchangeBatchOrderAction
     [DataMember(Order = 11)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
     public string UserID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 12)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 13)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpExchangeBatchOrderAction obj)
     {
@@ -17833,8 +19691,10 @@ public class CtpExchangeBatchOrderAction
             writer.Write(obj.BusinessUnit);
             writer.Write(obj.OrderActionStatus);
             writer.Write(obj.UserID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -17872,7 +19732,7 @@ public class CtpQryBatchOrderAction
             writer.Write(obj.InvestorID);
             writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -17900,6 +19760,12 @@ public class CtpCombInstrumentGuard
     ///</summary>
     [DataMember(Order = 3)]
     public double GuarantRatio;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
 
     public static byte[] GetData(CtpCombInstrumentGuard obj)
     {
@@ -17908,8 +19774,9 @@ public class CtpCombInstrumentGuard
             writer.Write(obj.BrokerID);
             writer.Write(obj.InstrumentID);
             writer.Write(obj.GuarantRatio);
+            writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -17932,6 +19799,12 @@ public class CtpQryCombInstrumentGuard
     [DataMember(Order = 2)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string InstrumentID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
 
     public static byte[] GetData(CtpQryCombInstrumentGuard obj)
     {
@@ -17939,8 +19812,9 @@ public class CtpQryCombInstrumentGuard
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.BrokerID);
             writer.Write(obj.InstrumentID);
+            writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -18001,6 +19875,30 @@ public class CtpInputCombAction
     ///</summary>
     [DataMember(Order = 9)]
     public byte HedgeFlag;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 10)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 12)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 13)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpInputCombAction obj)
     {
@@ -18015,8 +19913,12 @@ public class CtpInputCombAction
             writer.Write(obj.Volume);
             writer.Write(obj.CombDirection);
             writer.Write(obj.HedgeFlag);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -18166,6 +20068,36 @@ public class CtpCombAction
     [DataMember(Order = 25)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
     public string StatusMsg;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 26)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 27)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+    ///<summary>
+    ///组合编号
+    ///</summary>
+    [DataMember(Order = 28)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string ComTradeID;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 29)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 30)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpCombAction obj)
     {
@@ -18196,8 +20128,13 @@ public class CtpCombAction
             writer.Write(obj.SessionID);
             writer.Write(obj.UserProductInfo);
             writer.Write(obj.StatusMsg);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
+            writer.Write(obj.ComTradeID);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -18232,6 +20169,12 @@ public class CtpQryCombAction
     [DataMember(Order = 4)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
     public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryCombAction obj)
     {
@@ -18241,8 +20184,9 @@ public class CtpQryCombAction
             writer.Write(obj.InvestorID);
             writer.Write(obj.InstrumentID);
             writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -18340,6 +20284,30 @@ public class CtpExchangeCombAction
     ///</summary>
     [DataMember(Order = 16)]
     public int SequenceNo;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 17)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 18)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+    ///<summary>
+    ///组合编号
+    ///</summary>
+    [DataMember(Order = 19)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string ComTradeID;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 20)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
 
     public static byte[] GetData(CtpExchangeCombAction obj)
     {
@@ -18361,8 +20329,12 @@ public class CtpExchangeCombAction
             writer.Write(obj.TradingDay);
             writer.Write(obj.SettlementID);
             writer.Write(obj.SequenceNo);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
+            writer.Write(obj.ComTradeID);
+            writer.Write(obj.BranchID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -18414,7 +20386,7 @@ public class CtpQryExchangeCombAction
             writer.Write(obj.ExchangeID);
             writer.Write(obj.TraderID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -18442,6 +20414,12 @@ public class CtpProductExchRate
     ///</summary>
     [DataMember(Order = 3)]
     public double ExchangeRate;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
 
     public static byte[] GetData(CtpProductExchRate obj)
     {
@@ -18450,8 +20428,9 @@ public class CtpProductExchRate
             writer.Write(obj.ProductID);
             writer.Write(obj.QuoteCurrencyID);
             writer.Write(obj.ExchangeRate);
+            writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -18468,14 +20447,21 @@ public class CtpQryProductExchRate
     [DataMember(Order = 1)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string ProductID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
 
     public static byte[] GetData(CtpQryProductExchRate obj)
     {
         using (var stream = new MemoryStream())
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.ProductID);
+            writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -18513,7 +20499,7 @@ public class CtpQryForQuoteParam
             writer.Write(obj.InstrumentID);
             writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -18563,7 +20549,2095 @@ public class CtpForQuoteParam
             writer.Write(obj.LastPrice);
             writer.Write(obj.PriceInterval);
             return stream.ToArray();
-        }        
+        }
+    }
+};
+
+///<summary>
+///当前做市商期权合约手续费的详细内容
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpMMOptionInstrCommRate
+{
+    ///<summary>
+    ///合约代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string InstrumentID;
+    ///<summary>
+    ///投资者范围
+    ///</summary>
+    [DataMember(Order = 2)]
+    public byte InvestorRange;
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///开仓手续费率
+    ///</summary>
+    [DataMember(Order = 5)]
+    public double OpenRatioByMoney;
+    ///<summary>
+    ///开仓手续费
+    ///</summary>
+    [DataMember(Order = 6)]
+    public double OpenRatioByVolume;
+    ///<summary>
+    ///平仓手续费率
+    ///</summary>
+    [DataMember(Order = 7)]
+    public double CloseRatioByMoney;
+    ///<summary>
+    ///平仓手续费
+    ///</summary>
+    [DataMember(Order = 8)]
+    public double CloseRatioByVolume;
+    ///<summary>
+    ///平今手续费率
+    ///</summary>
+    [DataMember(Order = 9)]
+    public double CloseTodayRatioByMoney;
+    ///<summary>
+    ///平今手续费
+    ///</summary>
+    [DataMember(Order = 10)]
+    public double CloseTodayRatioByVolume;
+    ///<summary>
+    ///执行手续费率
+    ///</summary>
+    [DataMember(Order = 11)]
+    public double StrikeRatioByMoney;
+    ///<summary>
+    ///执行手续费
+    ///</summary>
+    [DataMember(Order = 12)]
+    public double StrikeRatioByVolume;
+
+    public static byte[] GetData(CtpMMOptionInstrCommRate obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.InstrumentID);
+            writer.Write(obj.InvestorRange);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.OpenRatioByMoney);
+            writer.Write(obj.OpenRatioByVolume);
+            writer.Write(obj.CloseRatioByMoney);
+            writer.Write(obj.CloseRatioByVolume);
+            writer.Write(obj.CloseTodayRatioByMoney);
+            writer.Write(obj.CloseTodayRatioByVolume);
+            writer.Write(obj.StrikeRatioByMoney);
+            writer.Write(obj.StrikeRatioByVolume);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///做市商期权手续费率查询
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpQryMMOptionInstrCommRate
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///合约代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string InstrumentID;
+
+    public static byte[] GetData(CtpQryMMOptionInstrCommRate obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.InstrumentID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///做市商合约手续费率
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpMMInstrumentCommissionRate
+{
+    ///<summary>
+    ///合约代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string InstrumentID;
+    ///<summary>
+    ///投资者范围
+    ///</summary>
+    [DataMember(Order = 2)]
+    public byte InvestorRange;
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///开仓手续费率
+    ///</summary>
+    [DataMember(Order = 5)]
+    public double OpenRatioByMoney;
+    ///<summary>
+    ///开仓手续费
+    ///</summary>
+    [DataMember(Order = 6)]
+    public double OpenRatioByVolume;
+    ///<summary>
+    ///平仓手续费率
+    ///</summary>
+    [DataMember(Order = 7)]
+    public double CloseRatioByMoney;
+    ///<summary>
+    ///平仓手续费
+    ///</summary>
+    [DataMember(Order = 8)]
+    public double CloseRatioByVolume;
+    ///<summary>
+    ///平今手续费率
+    ///</summary>
+    [DataMember(Order = 9)]
+    public double CloseTodayRatioByMoney;
+    ///<summary>
+    ///平今手续费
+    ///</summary>
+    [DataMember(Order = 10)]
+    public double CloseTodayRatioByVolume;
+
+    public static byte[] GetData(CtpMMInstrumentCommissionRate obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.InstrumentID);
+            writer.Write(obj.InvestorRange);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.OpenRatioByMoney);
+            writer.Write(obj.OpenRatioByVolume);
+            writer.Write(obj.CloseRatioByMoney);
+            writer.Write(obj.CloseRatioByVolume);
+            writer.Write(obj.CloseTodayRatioByMoney);
+            writer.Write(obj.CloseTodayRatioByVolume);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///查询做市商合约手续费率
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpQryMMInstrumentCommissionRate
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///合约代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string InstrumentID;
+
+    public static byte[] GetData(CtpQryMMInstrumentCommissionRate obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.InstrumentID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///当前报单手续费的详细内容
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpInstrumentOrderCommRate
+{
+    ///<summary>
+    ///合约代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string InstrumentID;
+    ///<summary>
+    ///投资者范围
+    ///</summary>
+    [DataMember(Order = 2)]
+    public byte InvestorRange;
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///投机套保标志
+    ///</summary>
+    [DataMember(Order = 5)]
+    public byte HedgeFlag;
+    ///<summary>
+    ///报单手续费
+    ///</summary>
+    [DataMember(Order = 6)]
+    public double OrderCommByVolume;
+    ///<summary>
+    ///撤单手续费
+    ///</summary>
+    [DataMember(Order = 7)]
+    public double OrderActionCommByVolume;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+
+    public static byte[] GetData(CtpInstrumentOrderCommRate obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.InstrumentID);
+            writer.Write(obj.InvestorRange);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.HedgeFlag);
+            writer.Write(obj.OrderCommByVolume);
+            writer.Write(obj.OrderActionCommByVolume);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///报单手续费率查询
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpQryInstrumentOrderCommRate
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///合约代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string InstrumentID;
+
+    public static byte[] GetData(CtpQryInstrumentOrderCommRate obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.InstrumentID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///交易参数
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpTradeParam
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///参数代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    public byte TradeParamID;
+    ///<summary>
+    ///参数代码值
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+    public string TradeParamValue;
+    ///<summary>
+    ///备注
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string Memo;
+
+    public static byte[] GetData(CtpTradeParam obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.TradeParamID);
+            writer.Write(obj.TradeParamValue);
+            writer.Write(obj.Memo);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///合约保证金率调整
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpInstrumentMarginRateUL
+{
+    ///<summary>
+    ///合约代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string InstrumentID;
+    ///<summary>
+    ///投资者范围
+    ///</summary>
+    [DataMember(Order = 2)]
+    public byte InvestorRange;
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///投机套保标志
+    ///</summary>
+    [DataMember(Order = 5)]
+    public byte HedgeFlag;
+    ///<summary>
+    ///多头保证金率
+    ///</summary>
+    [DataMember(Order = 6)]
+    public double LongMarginRatioByMoney;
+    ///<summary>
+    ///多头保证金费
+    ///</summary>
+    [DataMember(Order = 7)]
+    public double LongMarginRatioByVolume;
+    ///<summary>
+    ///空头保证金率
+    ///</summary>
+    [DataMember(Order = 8)]
+    public double ShortMarginRatioByMoney;
+    ///<summary>
+    ///空头保证金费
+    ///</summary>
+    [DataMember(Order = 9)]
+    public double ShortMarginRatioByVolume;
+
+    public static byte[] GetData(CtpInstrumentMarginRateUL obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.InstrumentID);
+            writer.Write(obj.InvestorRange);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.HedgeFlag);
+            writer.Write(obj.LongMarginRatioByMoney);
+            writer.Write(obj.LongMarginRatioByVolume);
+            writer.Write(obj.ShortMarginRatioByMoney);
+            writer.Write(obj.ShortMarginRatioByVolume);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///期货持仓限制参数
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpFutureLimitPosiParam
+{
+    ///<summary>
+    ///投资者范围
+    ///</summary>
+    [DataMember(Order = 1)]
+    public byte InvestorRange;
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///产品代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string ProductID;
+    ///<summary>
+    ///当日投机开仓数量限制
+    ///</summary>
+    [DataMember(Order = 5)]
+    public int SpecOpenVolume;
+    ///<summary>
+    ///当日套利开仓数量限制
+    ///</summary>
+    [DataMember(Order = 6)]
+    public int ArbiOpenVolume;
+    ///<summary>
+    ///当日投机+套利开仓数量限制
+    ///</summary>
+    [DataMember(Order = 7)]
+    public int OpenVolume;
+
+    public static byte[] GetData(CtpFutureLimitPosiParam obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.InvestorRange);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.ProductID);
+            writer.Write(obj.SpecOpenVolume);
+            writer.Write(obj.ArbiOpenVolume);
+            writer.Write(obj.OpenVolume);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///禁止登录IP
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpLoginForbiddenIP
+{
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+
+    public static byte[] GetData(CtpLoginForbiddenIP obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.IPAddress);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///IP列表
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpIPList
+{
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///是否白名单
+    ///</summary>
+    [DataMember(Order = 2)]
+    public int IsWhite;
+
+    public static byte[] GetData(CtpIPList obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.IsWhite);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///输入的期权自对冲
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpInputOptionSelfClose
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///合约代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string InstrumentID;
+    ///<summary>
+    ///期权自对冲引用
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string OptionSelfCloseRef;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+    ///<summary>
+    ///数量
+    ///</summary>
+    [DataMember(Order = 6)]
+    public int Volume;
+    ///<summary>
+    ///请求编号
+    ///</summary>
+    [DataMember(Order = 7)]
+    public int RequestID;
+    ///<summary>
+    ///业务单元
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string BusinessUnit;
+    ///<summary>
+    ///投机套保标志
+    ///</summary>
+    [DataMember(Order = 9)]
+    public byte HedgeFlag;
+    ///<summary>
+    ///期权行权的头寸是否自对冲
+    ///</summary>
+    [DataMember(Order = 10)]
+    public byte OptSelfCloseFlag;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 12)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///资金账号
+    ///</summary>
+    [DataMember(Order = 13)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 14)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+    ///<summary>
+    ///交易编码
+    ///</summary>
+    [DataMember(Order = 15)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ClientID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 16)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 17)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+
+    public static byte[] GetData(CtpInputOptionSelfClose obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.InstrumentID);
+            writer.Write(obj.OptionSelfCloseRef);
+            writer.Write(obj.UserID);
+            writer.Write(obj.Volume);
+            writer.Write(obj.RequestID);
+            writer.Write(obj.BusinessUnit);
+            writer.Write(obj.HedgeFlag);
+            writer.Write(obj.OptSelfCloseFlag);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
+            writer.Write(obj.ClientID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///输入期权自对冲操作
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpInputOptionSelfCloseAction
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///期权自对冲操作引用
+    ///</summary>
+    [DataMember(Order = 3)]
+    public int OptionSelfCloseActionRef;
+    ///<summary>
+    ///期权自对冲引用
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string OptionSelfCloseRef;
+    ///<summary>
+    ///请求编号
+    ///</summary>
+    [DataMember(Order = 5)]
+    public int RequestID;
+    ///<summary>
+    ///前置编号
+    ///</summary>
+    [DataMember(Order = 6)]
+    public int FrontID;
+    ///<summary>
+    ///会话编号
+    ///</summary>
+    [DataMember(Order = 7)]
+    public int SessionID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///期权自对冲操作编号
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string OptionSelfCloseSysID;
+    ///<summary>
+    ///操作标志
+    ///</summary>
+    [DataMember(Order = 10)]
+    public byte ActionFlag;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+    ///<summary>
+    ///合约代码
+    ///</summary>
+    [DataMember(Order = 12)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string InstrumentID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 13)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 14)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 15)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+
+    public static byte[] GetData(CtpInputOptionSelfCloseAction obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.OptionSelfCloseActionRef);
+            writer.Write(obj.OptionSelfCloseRef);
+            writer.Write(obj.RequestID);
+            writer.Write(obj.FrontID);
+            writer.Write(obj.SessionID);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.OptionSelfCloseSysID);
+            writer.Write(obj.ActionFlag);
+            writer.Write(obj.UserID);
+            writer.Write(obj.InstrumentID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///期权自对冲
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpOptionSelfClose
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///合约代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string InstrumentID;
+    ///<summary>
+    ///期权自对冲引用
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string OptionSelfCloseRef;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+    ///<summary>
+    ///数量
+    ///</summary>
+    [DataMember(Order = 6)]
+    public int Volume;
+    ///<summary>
+    ///请求编号
+    ///</summary>
+    [DataMember(Order = 7)]
+    public int RequestID;
+    ///<summary>
+    ///业务单元
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string BusinessUnit;
+    ///<summary>
+    ///投机套保标志
+    ///</summary>
+    [DataMember(Order = 9)]
+    public byte HedgeFlag;
+    ///<summary>
+    ///期权行权的头寸是否自对冲
+    ///</summary>
+    [DataMember(Order = 10)]
+    public byte OptSelfCloseFlag;
+    ///<summary>
+    ///本地期权自对冲编号
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string OptionSelfCloseLocalID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 12)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///会员代码
+    ///</summary>
+    [DataMember(Order = 13)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ParticipantID;
+    ///<summary>
+    ///客户代码
+    ///</summary>
+    [DataMember(Order = 14)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ClientID;
+    ///<summary>
+    ///合约在交易所的代码
+    ///</summary>
+    [DataMember(Order = 15)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string ExchangeInstID;
+    ///<summary>
+    ///交易所交易员代码
+    ///</summary>
+    [DataMember(Order = 16)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string TraderID;
+    ///<summary>
+    ///安装编号
+    ///</summary>
+    [DataMember(Order = 17)]
+    public int InstallID;
+    ///<summary>
+    ///期权自对冲提交状态
+    ///</summary>
+    [DataMember(Order = 18)]
+    public byte OrderSubmitStatus;
+    ///<summary>
+    ///报单提示序号
+    ///</summary>
+    [DataMember(Order = 19)]
+    public int NotifySequence;
+    ///<summary>
+    ///交易日
+    ///</summary>
+    [DataMember(Order = 20)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradingDay;
+    ///<summary>
+    ///结算编号
+    ///</summary>
+    [DataMember(Order = 21)]
+    public int SettlementID;
+    ///<summary>
+    ///期权自对冲编号
+    ///</summary>
+    [DataMember(Order = 22)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string OptionSelfCloseSysID;
+    ///<summary>
+    ///报单日期
+    ///</summary>
+    [DataMember(Order = 23)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string InsertDate;
+    ///<summary>
+    ///插入时间
+    ///</summary>
+    [DataMember(Order = 24)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string InsertTime;
+    ///<summary>
+    ///撤销时间
+    ///</summary>
+    [DataMember(Order = 25)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string CancelTime;
+    ///<summary>
+    ///自对冲结果
+    ///</summary>
+    [DataMember(Order = 26)]
+    public byte ExecResult;
+    ///<summary>
+    ///结算会员编号
+    ///</summary>
+    [DataMember(Order = 27)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ClearingPartID;
+    ///<summary>
+    ///序号
+    ///</summary>
+    [DataMember(Order = 28)]
+    public int SequenceNo;
+    ///<summary>
+    ///前置编号
+    ///</summary>
+    [DataMember(Order = 29)]
+    public int FrontID;
+    ///<summary>
+    ///会话编号
+    ///</summary>
+    [DataMember(Order = 30)]
+    public int SessionID;
+    ///<summary>
+    ///用户端产品信息
+    ///</summary>
+    [DataMember(Order = 31)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string UserProductInfo;
+    ///<summary>
+    ///状态信息
+    ///</summary>
+    [DataMember(Order = 32)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
+    public string StatusMsg;
+    ///<summary>
+    ///操作用户代码
+    ///</summary>
+    [DataMember(Order = 33)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string ActiveUserID;
+    ///<summary>
+    ///经纪公司报单编号
+    ///</summary>
+    [DataMember(Order = 34)]
+    public int BrokerOptionSelfCloseSeq;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 35)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 36)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///资金账号
+    ///</summary>
+    [DataMember(Order = 37)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 38)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 39)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 40)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+
+    public static byte[] GetData(CtpOptionSelfClose obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.InstrumentID);
+            writer.Write(obj.OptionSelfCloseRef);
+            writer.Write(obj.UserID);
+            writer.Write(obj.Volume);
+            writer.Write(obj.RequestID);
+            writer.Write(obj.BusinessUnit);
+            writer.Write(obj.HedgeFlag);
+            writer.Write(obj.OptSelfCloseFlag);
+            writer.Write(obj.OptionSelfCloseLocalID);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.ParticipantID);
+            writer.Write(obj.ClientID);
+            writer.Write(obj.ExchangeInstID);
+            writer.Write(obj.TraderID);
+            writer.Write(obj.InstallID);
+            writer.Write(obj.OrderSubmitStatus);
+            writer.Write(obj.NotifySequence);
+            writer.Write(obj.TradingDay);
+            writer.Write(obj.SettlementID);
+            writer.Write(obj.OptionSelfCloseSysID);
+            writer.Write(obj.InsertDate);
+            writer.Write(obj.InsertTime);
+            writer.Write(obj.CancelTime);
+            writer.Write(obj.ExecResult);
+            writer.Write(obj.ClearingPartID);
+            writer.Write(obj.SequenceNo);
+            writer.Write(obj.FrontID);
+            writer.Write(obj.SessionID);
+            writer.Write(obj.UserProductInfo);
+            writer.Write(obj.StatusMsg);
+            writer.Write(obj.ActiveUserID);
+            writer.Write(obj.BrokerOptionSelfCloseSeq);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///期权自对冲操作
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpOptionSelfCloseAction
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///期权自对冲操作引用
+    ///</summary>
+    [DataMember(Order = 3)]
+    public int OptionSelfCloseActionRef;
+    ///<summary>
+    ///期权自对冲引用
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string OptionSelfCloseRef;
+    ///<summary>
+    ///请求编号
+    ///</summary>
+    [DataMember(Order = 5)]
+    public int RequestID;
+    ///<summary>
+    ///前置编号
+    ///</summary>
+    [DataMember(Order = 6)]
+    public int FrontID;
+    ///<summary>
+    ///会话编号
+    ///</summary>
+    [DataMember(Order = 7)]
+    public int SessionID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///期权自对冲操作编号
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string OptionSelfCloseSysID;
+    ///<summary>
+    ///操作标志
+    ///</summary>
+    [DataMember(Order = 10)]
+    public byte ActionFlag;
+    ///<summary>
+    ///操作日期
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ActionDate;
+    ///<summary>
+    ///操作时间
+    ///</summary>
+    [DataMember(Order = 12)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ActionTime;
+    ///<summary>
+    ///交易所交易员代码
+    ///</summary>
+    [DataMember(Order = 13)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string TraderID;
+    ///<summary>
+    ///安装编号
+    ///</summary>
+    [DataMember(Order = 14)]
+    public int InstallID;
+    ///<summary>
+    ///本地期权自对冲编号
+    ///</summary>
+    [DataMember(Order = 15)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string OptionSelfCloseLocalID;
+    ///<summary>
+    ///操作本地编号
+    ///</summary>
+    [DataMember(Order = 16)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string ActionLocalID;
+    ///<summary>
+    ///会员代码
+    ///</summary>
+    [DataMember(Order = 17)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ParticipantID;
+    ///<summary>
+    ///客户代码
+    ///</summary>
+    [DataMember(Order = 18)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ClientID;
+    ///<summary>
+    ///业务单元
+    ///</summary>
+    [DataMember(Order = 19)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string BusinessUnit;
+    ///<summary>
+    ///报单操作状态
+    ///</summary>
+    [DataMember(Order = 20)]
+    public byte OrderActionStatus;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 21)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+    ///<summary>
+    ///状态信息
+    ///</summary>
+    [DataMember(Order = 22)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
+    public string StatusMsg;
+    ///<summary>
+    ///合约代码
+    ///</summary>
+    [DataMember(Order = 23)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string InstrumentID;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 24)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 25)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 26)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 27)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+
+    public static byte[] GetData(CtpOptionSelfCloseAction obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.OptionSelfCloseActionRef);
+            writer.Write(obj.OptionSelfCloseRef);
+            writer.Write(obj.RequestID);
+            writer.Write(obj.FrontID);
+            writer.Write(obj.SessionID);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.OptionSelfCloseSysID);
+            writer.Write(obj.ActionFlag);
+            writer.Write(obj.ActionDate);
+            writer.Write(obj.ActionTime);
+            writer.Write(obj.TraderID);
+            writer.Write(obj.InstallID);
+            writer.Write(obj.OptionSelfCloseLocalID);
+            writer.Write(obj.ActionLocalID);
+            writer.Write(obj.ParticipantID);
+            writer.Write(obj.ClientID);
+            writer.Write(obj.BusinessUnit);
+            writer.Write(obj.OrderActionStatus);
+            writer.Write(obj.UserID);
+            writer.Write(obj.StatusMsg);
+            writer.Write(obj.InstrumentID);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///期权自对冲查询
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpQryOptionSelfClose
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///合约代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string InstrumentID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///期权自对冲编号
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string OptionSelfCloseSysID;
+    ///<summary>
+    ///开始时间
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string InsertTimeStart;
+    ///<summary>
+    ///结束时间
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string InsertTimeEnd;
+
+    public static byte[] GetData(CtpQryOptionSelfClose obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.InstrumentID);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.OptionSelfCloseSysID);
+            writer.Write(obj.InsertTimeStart);
+            writer.Write(obj.InsertTimeEnd);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///交易所期权自对冲信息
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpExchangeOptionSelfClose
+{
+    ///<summary>
+    ///数量
+    ///</summary>
+    [DataMember(Order = 1)]
+    public int Volume;
+    ///<summary>
+    ///请求编号
+    ///</summary>
+    [DataMember(Order = 2)]
+    public int RequestID;
+    ///<summary>
+    ///业务单元
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string BusinessUnit;
+    ///<summary>
+    ///投机套保标志
+    ///</summary>
+    [DataMember(Order = 4)]
+    public byte HedgeFlag;
+    ///<summary>
+    ///期权行权的头寸是否自对冲
+    ///</summary>
+    [DataMember(Order = 5)]
+    public byte OptSelfCloseFlag;
+    ///<summary>
+    ///本地期权自对冲编号
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string OptionSelfCloseLocalID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///会员代码
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ParticipantID;
+    ///<summary>
+    ///客户代码
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ClientID;
+    ///<summary>
+    ///合约在交易所的代码
+    ///</summary>
+    [DataMember(Order = 10)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string ExchangeInstID;
+    ///<summary>
+    ///交易所交易员代码
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string TraderID;
+    ///<summary>
+    ///安装编号
+    ///</summary>
+    [DataMember(Order = 12)]
+    public int InstallID;
+    ///<summary>
+    ///期权自对冲提交状态
+    ///</summary>
+    [DataMember(Order = 13)]
+    public byte OrderSubmitStatus;
+    ///<summary>
+    ///报单提示序号
+    ///</summary>
+    [DataMember(Order = 14)]
+    public int NotifySequence;
+    ///<summary>
+    ///交易日
+    ///</summary>
+    [DataMember(Order = 15)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradingDay;
+    ///<summary>
+    ///结算编号
+    ///</summary>
+    [DataMember(Order = 16)]
+    public int SettlementID;
+    ///<summary>
+    ///期权自对冲编号
+    ///</summary>
+    [DataMember(Order = 17)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string OptionSelfCloseSysID;
+    ///<summary>
+    ///报单日期
+    ///</summary>
+    [DataMember(Order = 18)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string InsertDate;
+    ///<summary>
+    ///插入时间
+    ///</summary>
+    [DataMember(Order = 19)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string InsertTime;
+    ///<summary>
+    ///撤销时间
+    ///</summary>
+    [DataMember(Order = 20)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string CancelTime;
+    ///<summary>
+    ///自对冲结果
+    ///</summary>
+    [DataMember(Order = 21)]
+    public byte ExecResult;
+    ///<summary>
+    ///结算会员编号
+    ///</summary>
+    [DataMember(Order = 22)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ClearingPartID;
+    ///<summary>
+    ///序号
+    ///</summary>
+    [DataMember(Order = 23)]
+    public int SequenceNo;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 24)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 25)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 26)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+
+    public static byte[] GetData(CtpExchangeOptionSelfClose obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.Volume);
+            writer.Write(obj.RequestID);
+            writer.Write(obj.BusinessUnit);
+            writer.Write(obj.HedgeFlag);
+            writer.Write(obj.OptSelfCloseFlag);
+            writer.Write(obj.OptionSelfCloseLocalID);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.ParticipantID);
+            writer.Write(obj.ClientID);
+            writer.Write(obj.ExchangeInstID);
+            writer.Write(obj.TraderID);
+            writer.Write(obj.InstallID);
+            writer.Write(obj.OrderSubmitStatus);
+            writer.Write(obj.NotifySequence);
+            writer.Write(obj.TradingDay);
+            writer.Write(obj.SettlementID);
+            writer.Write(obj.OptionSelfCloseSysID);
+            writer.Write(obj.InsertDate);
+            writer.Write(obj.InsertTime);
+            writer.Write(obj.CancelTime);
+            writer.Write(obj.ExecResult);
+            writer.Write(obj.ClearingPartID);
+            writer.Write(obj.SequenceNo);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///期权自对冲操作查询
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpQryOptionSelfCloseAction
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+
+    public static byte[] GetData(CtpQryOptionSelfCloseAction obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.ExchangeID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///交易所期权自对冲操作
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpExchangeOptionSelfCloseAction
+{
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///期权自对冲操作编号
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string OptionSelfCloseSysID;
+    ///<summary>
+    ///操作标志
+    ///</summary>
+    [DataMember(Order = 3)]
+    public byte ActionFlag;
+    ///<summary>
+    ///操作日期
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ActionDate;
+    ///<summary>
+    ///操作时间
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ActionTime;
+    ///<summary>
+    ///交易所交易员代码
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string TraderID;
+    ///<summary>
+    ///安装编号
+    ///</summary>
+    [DataMember(Order = 7)]
+    public int InstallID;
+    ///<summary>
+    ///本地期权自对冲编号
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string OptionSelfCloseLocalID;
+    ///<summary>
+    ///操作本地编号
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string ActionLocalID;
+    ///<summary>
+    ///会员代码
+    ///</summary>
+    [DataMember(Order = 10)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ParticipantID;
+    ///<summary>
+    ///客户代码
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ClientID;
+    ///<summary>
+    ///业务单元
+    ///</summary>
+    [DataMember(Order = 12)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string BusinessUnit;
+    ///<summary>
+    ///报单操作状态
+    ///</summary>
+    [DataMember(Order = 13)]
+    public byte OrderActionStatus;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 14)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 15)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 16)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 17)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+    ///<summary>
+    ///合约在交易所的代码
+    ///</summary>
+    [DataMember(Order = 18)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string ExchangeInstID;
+    ///<summary>
+    ///期权行权的头寸是否自对冲
+    ///</summary>
+    [DataMember(Order = 19)]
+    public byte OptSelfCloseFlag;
+
+    public static byte[] GetData(CtpExchangeOptionSelfCloseAction obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.OptionSelfCloseSysID);
+            writer.Write(obj.ActionFlag);
+            writer.Write(obj.ActionDate);
+            writer.Write(obj.ActionTime);
+            writer.Write(obj.TraderID);
+            writer.Write(obj.InstallID);
+            writer.Write(obj.OptionSelfCloseLocalID);
+            writer.Write(obj.ActionLocalID);
+            writer.Write(obj.ParticipantID);
+            writer.Write(obj.ClientID);
+            writer.Write(obj.BusinessUnit);
+            writer.Write(obj.OrderActionStatus);
+            writer.Write(obj.UserID);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
+            writer.Write(obj.ExchangeInstID);
+            writer.Write(obj.OptSelfCloseFlag);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///延时换汇同步
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpSyncDelaySwap
+{
+    ///<summary>
+    ///换汇流水号
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 15)]
+    public string DelaySwapSeqNo;
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///源币种
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string FromCurrencyID;
+    ///<summary>
+    ///源金额
+    ///</summary>
+    [DataMember(Order = 5)]
+    public double FromAmount;
+    ///<summary>
+    ///源换汇冻结金额(可用冻结)
+    ///</summary>
+    [DataMember(Order = 6)]
+    public double FromFrozenSwap;
+    ///<summary>
+    ///源剩余换汇额度(可提冻结)
+    ///</summary>
+    [DataMember(Order = 7)]
+    public double FromRemainSwap;
+    ///<summary>
+    ///目标币种
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string ToCurrencyID;
+    ///<summary>
+    ///目标金额
+    ///</summary>
+    [DataMember(Order = 9)]
+    public double ToAmount;
+
+    public static byte[] GetData(CtpSyncDelaySwap obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.DelaySwapSeqNo);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.FromCurrencyID);
+            writer.Write(obj.FromAmount);
+            writer.Write(obj.FromFrozenSwap);
+            writer.Write(obj.FromRemainSwap);
+            writer.Write(obj.ToCurrencyID);
+            writer.Write(obj.ToAmount);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///查询延时换汇同步
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpQrySyncDelaySwap
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///延时换汇流水号
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 15)]
+    public string DelaySwapSeqNo;
+
+    public static byte[] GetData(CtpQrySyncDelaySwap obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.DelaySwapSeqNo);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///投资单元
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpInvestUnit
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///投资者单元名称
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
+    public string InvestorUnitName;
+    ///<summary>
+    ///投资者分组代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorGroupID;
+    ///<summary>
+    ///手续费率模板代码
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string CommModelID;
+    ///<summary>
+    ///保证金率模板代码
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string MarginModelID;
+    ///<summary>
+    ///资金账号
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+
+    public static byte[] GetData(CtpInvestUnit obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.InvestorUnitName);
+            writer.Write(obj.InvestorGroupID);
+            writer.Write(obj.CommModelID);
+            writer.Write(obj.MarginModelID);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///查询投资单元
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpQryInvestUnit
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+
+    public static byte[] GetData(CtpQryInvestUnit obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.InvestUnitID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///二级代理商资金校验模式
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpSecAgentCheckMode
+{
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///币种
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+    ///<summary>
+    ///境外中介机构资金帐号
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string BrokerSecAgentID;
+    ///<summary>
+    ///是否需要校验自己的资金账户
+    ///</summary>
+    [DataMember(Order = 5)]
+    public int CheckSelfAccount;
+
+    public static byte[] GetData(CtpSecAgentCheckMode obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.CurrencyID);
+            writer.Write(obj.BrokerSecAgentID);
+            writer.Write(obj.CheckSelfAccount);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///二级代理商信息
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpSecAgentTradeInfo
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///境外中介机构资金帐号
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string BrokerSecAgentID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+    ///<summary>
+    ///二级代理商姓名
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
+
+    public static byte[] GetData(CtpSecAgentTradeInfo obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.BrokerSecAgentID);
+            writer.Write(obj.InvestorID);
+            writer.Write(obj.LongCustomerName);
+            return stream.ToArray();
+        }
     }
 };
 
@@ -18724,7 +22798,7 @@ public class CtpMarketData
             writer.Write(obj.UpdateMillisec);
             writer.Write(obj.ActionDay);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -18772,7 +22846,7 @@ public class CtpMarketDataBase
             writer.Write(obj.PreOpenInterest);
             writer.Write(obj.PreDelta);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -18837,7 +22911,7 @@ public class CtpMarketDataStatic
             writer.Write(obj.SettlementPrice);
             writer.Write(obj.CurrDelta);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -18878,7 +22952,7 @@ public class CtpMarketDataLastMatch
             writer.Write(obj.Turnover);
             writer.Write(obj.OpenInterest);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -18919,7 +22993,7 @@ public class CtpMarketDataBestPrice
             writer.Write(obj.AskPrice1);
             writer.Write(obj.AskVolume1);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -18960,7 +23034,7 @@ public class CtpMarketDataBid23
             writer.Write(obj.BidPrice3);
             writer.Write(obj.BidVolume3);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19001,7 +23075,7 @@ public class CtpMarketDataAsk23
             writer.Write(obj.AskPrice3);
             writer.Write(obj.AskVolume3);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19042,7 +23116,7 @@ public class CtpMarketDataBid45
             writer.Write(obj.BidPrice5);
             writer.Write(obj.BidVolume5);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19083,7 +23157,7 @@ public class CtpMarketDataAsk45
             writer.Write(obj.AskPrice5);
             writer.Write(obj.AskVolume5);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19127,7 +23201,7 @@ public class CtpMarketDataUpdateTime
             writer.Write(obj.UpdateMillisec);
             writer.Write(obj.ActionDay);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19151,7 +23225,7 @@ public class CtpMarketDataExchange
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19175,7 +23249,7 @@ public class CtpSpecificInstrument
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.InstrumentID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19245,7 +23319,7 @@ public class CtpInstrumentStatus
             writer.Write(obj.EnterTime);
             writer.Write(obj.EnterReason);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19276,7 +23350,7 @@ public class CtpQryInstrumentStatus
             writer.Write(obj.ExchangeID);
             writer.Write(obj.ExchangeInstID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19321,7 +23395,7 @@ public class CtpInvestorAccount
             writer.Write(obj.AccountID);
             writer.Write(obj.CurrencyID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19372,7 +23446,7 @@ public class CtpPositionProfitAlgorithm
             writer.Write(obj.Memo);
             writer.Write(obj.CurrencyID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19415,7 +23489,7 @@ public class CtpDiscount
             writer.Write(obj.InvestorID);
             writer.Write(obj.Discount);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19446,7 +23520,7 @@ public class CtpQryTransferBank
             writer.Write(obj.BankID);
             writer.Write(obj.BankBrchID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19490,7 +23564,7 @@ public class CtpTransferBank
             writer.Write(obj.BankName);
             writer.Write(obj.IsActive);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19519,6 +23593,18 @@ public class CtpQryInvestorPositionDetail
     [DataMember(Order = 3)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string InstrumentID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryInvestorPositionDetail obj)
     {
@@ -19527,8 +23613,10 @@ public class CtpQryInvestorPositionDetail
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             writer.Write(obj.InstrumentID);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19677,6 +23765,17 @@ public class CtpInvestorPositionDetail
     ///</summary>
     [DataMember(Order = 26)]
     public double CloseAmount;
+    ///<summary>
+    ///按照时间顺序平仓的笔数,大商所专用
+    ///</summary>
+    [DataMember(Order = 27)]
+    public int TimeFirstVolume;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 28)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpInvestorPositionDetail obj)
     {
@@ -19708,8 +23807,10 @@ public class CtpInvestorPositionDetail
             writer.Write(obj.SettlementPrice);
             writer.Write(obj.CloseVolume);
             writer.Write(obj.CloseAmount);
+            writer.Write(obj.TimeFirstVolume);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19754,7 +23855,7 @@ public class CtpTradingAccountPassword
             writer.Write(obj.Password);
             writer.Write(obj.CurrencyID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19902,7 +24003,7 @@ public class CtpMDTraderOffer
             writer.Write(obj.MaxTradeID);
             writer.Write(obj.MaxOrderMessageReference);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19940,7 +24041,7 @@ public class CtpQryMDTraderOffer
             writer.Write(obj.ParticipantID);
             writer.Write(obj.TraderID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -19964,7 +24065,7 @@ public class CtpQryNotice
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.BrokerID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20002,7 +24103,7 @@ public class CtpNotice
             writer.Write(obj.Content);
             writer.Write(obj.SequenceLabel);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20045,7 +24146,7 @@ public class CtpUserRight
             writer.Write(obj.UserRightType);
             writer.Write(obj.IsForbidden);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20068,6 +24169,18 @@ public class CtpQrySettlementInfoConfirm
     [DataMember(Order = 2)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
     public string InvestorID;
+    ///<summary>
+    ///投资者帐号
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
 
     public static byte[] GetData(CtpQrySettlementInfoConfirm obj)
     {
@@ -20075,8 +24188,10 @@ public class CtpQrySettlementInfoConfirm
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20100,7 +24215,7 @@ public class CtpLoadSettlementInfo
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.BrokerID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20179,7 +24294,7 @@ public class CtpBrokerWithdrawAlgorithm
             writer.Write(obj.FundMortgageRatio);
             writer.Write(obj.BalanceAlgorithm);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20224,7 +24339,7 @@ public class CtpTradingAccountPasswordUpdateV1
             writer.Write(obj.OldPassword);
             writer.Write(obj.NewPassword);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20276,7 +24391,7 @@ public class CtpTradingAccountPasswordUpdate
             writer.Write(obj.NewPassword);
             writer.Write(obj.CurrencyID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20313,7 +24428,7 @@ public class CtpQryCombinationLeg
             writer.Write(obj.LegID);
             writer.Write(obj.LegInstrumentID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20337,7 +24452,7 @@ public class CtpQrySyncStatus
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.TradingDay);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20392,7 +24507,7 @@ public class CtpCombinationLeg
             writer.Write(obj.LegMultiple);
             writer.Write(obj.ImplyLevel);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20422,7 +24537,7 @@ public class CtpSyncStatus
             writer.Write(obj.TradingDay);
             writer.Write(obj.DataSyncStatus);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20453,7 +24568,7 @@ public class CtpQryLinkMan
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20551,7 +24666,7 @@ public class CtpLinkMan
             writer.Write(obj.UOAZipCode);
             writer.Write(obj.PersonFullName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20588,7 +24703,7 @@ public class CtpQryBrokerUserEvent
             writer.Write(obj.UserID);
             writer.Write(obj.UserEventType);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20666,7 +24781,7 @@ public class CtpBrokerUserEvent
             writer.Write(obj.InvestorID);
             writer.Write(obj.InstrumentID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20704,7 +24819,7 @@ public class CtpQryContractBank
             writer.Write(obj.BankID);
             writer.Write(obj.BankBrchID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20749,7 +24864,7 @@ public class CtpContractBank
             writer.Write(obj.BankBrchID);
             writer.Write(obj.BankName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -20869,6 +24984,12 @@ public class CtpInvestorPositionCombineDetail
     ///</summary>
     [DataMember(Order = 20)]
     public int TradeGroupID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 21)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpInvestorPositionCombineDetail obj)
     {
@@ -20894,8 +25015,9 @@ public class CtpInvestorPositionCombineDetail
             writer.Write(obj.LegMultiple);
             writer.Write(obj.CombInstrumentID);
             writer.Write(obj.TradeGroupID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21063,6 +25185,42 @@ public class CtpParkedOrder
     ///</summary>
     [DataMember(Order = 29)]
     public int IsSwapOrder;
+    ///<summary>
+    ///资金账号
+    ///</summary>
+    [DataMember(Order = 30)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 31)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+    ///<summary>
+    ///交易编码
+    ///</summary>
+    [DataMember(Order = 32)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ClientID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 33)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 34)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 35)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpParkedOrder obj)
     {
@@ -21097,8 +25255,14 @@ public class CtpParkedOrder
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
             writer.Write(obj.IsSwapOrder);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
+            writer.Write(obj.ClientID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21213,6 +25377,24 @@ public class CtpParkedOrderAction
     [DataMember(Order = 19)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
     public string ErrorMsg;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 20)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 21)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 22)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpParkedOrderAction obj)
     {
@@ -21237,8 +25419,11 @@ public class CtpParkedOrderAction
             writer.Write(obj.Status);
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21273,6 +25458,12 @@ public class CtpQryParkedOrder
     [DataMember(Order = 4)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
     public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryParkedOrder obj)
     {
@@ -21282,8 +25473,9 @@ public class CtpQryParkedOrder
             writer.Write(obj.InvestorID);
             writer.Write(obj.InstrumentID);
             writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21318,6 +25510,12 @@ public class CtpQryParkedOrderAction
     [DataMember(Order = 4)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
     public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryParkedOrderAction obj)
     {
@@ -21327,8 +25525,9 @@ public class CtpQryParkedOrderAction
             writer.Write(obj.InvestorID);
             writer.Write(obj.InstrumentID);
             writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21357,6 +25556,12 @@ public class CtpRemoveParkedOrder
     [DataMember(Order = 3)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
     public string ParkedOrderID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpRemoveParkedOrder obj)
     {
@@ -21365,8 +25570,9 @@ public class CtpRemoveParkedOrder
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             writer.Write(obj.ParkedOrderID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21395,6 +25601,12 @@ public class CtpRemoveParkedOrderAction
     [DataMember(Order = 3)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
     public string ParkedOrderActionID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpRemoveParkedOrderAction obj)
     {
@@ -21403,8 +25615,9 @@ public class CtpRemoveParkedOrderAction
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             writer.Write(obj.ParkedOrderActionID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21460,7 +25673,7 @@ public class CtpInvestorWithdrawAlgorithm
             writer.Write(obj.CurrencyID);
             writer.Write(obj.FundMortgageRatio);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21489,6 +25702,18 @@ public class CtpQryInvestorPositionCombineDetail
     [DataMember(Order = 3)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string CombInstrumentID;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryInvestorPositionCombineDetail obj)
     {
@@ -21497,8 +25722,10 @@ public class CtpQryInvestorPositionCombineDetail
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             writer.Write(obj.CombInstrumentID);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21521,7 +25748,7 @@ public class CtpMarketDataAveragePrice
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.AveragePrice);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21559,7 +25786,7 @@ public class CtpVerifyInvestorPassword
             writer.Write(obj.InvestorID);
             writer.Write(obj.Password);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21611,7 +25838,7 @@ public class CtpUserIP
             writer.Write(obj.IPMask);
             writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21656,6 +25883,12 @@ public class CtpTradingNoticeInfo
     ///</summary>
     [DataMember(Order = 6)]
     public int SequenceNo;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpTradingNoticeInfo obj)
     {
@@ -21667,8 +25900,9 @@ public class CtpTradingNoticeInfo
             writer.Write(obj.FieldContent);
             writer.Write(obj.SequenceSeries);
             writer.Write(obj.SequenceNo);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21724,6 +25958,12 @@ public class CtpTradingNotice
     [DataMember(Order = 8)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 501)]
     public string FieldContent;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpTradingNotice obj)
     {
@@ -21737,8 +25977,9 @@ public class CtpTradingNotice
             writer.Write(obj.SendTime);
             writer.Write(obj.SequenceNo);
             writer.Write(obj.FieldContent);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21761,6 +26002,12 @@ public class CtpQryTradingNotice
     [DataMember(Order = 2)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
     public string InvestorID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryTradingNotice obj)
     {
@@ -21768,8 +26015,9 @@ public class CtpQryTradingNotice
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21800,7 +26048,7 @@ public class CtpQryErrOrder
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -21946,6 +26194,48 @@ public class CtpErrOrder
     ///</summary>
     [DataMember(Order = 25)]
     public int IsSwapOrder;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 26)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 27)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///资金账号
+    ///</summary>
+    [DataMember(Order = 28)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 29)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+    ///<summary>
+    ///交易编码
+    ///</summary>
+    [DataMember(Order = 30)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ClientID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 31)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 32)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpErrOrder obj)
     {
@@ -21976,8 +26266,15 @@ public class CtpErrOrder
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
             writer.Write(obj.IsSwapOrder);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
+            writer.Write(obj.ClientID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -22313,6 +26610,42 @@ public class CtpErrorConditionalOrder
     ///</summary>
     [DataMember(Order = 59)]
     public int IsSwapOrder;
+    ///<summary>
+    ///营业部编号
+    ///</summary>
+    [DataMember(Order = 60)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 61)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///资金账号
+    ///</summary>
+    [DataMember(Order = 62)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 63)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 64)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 65)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
 
     public static byte[] GetData(CtpErrorConditionalOrder obj)
     {
@@ -22377,8 +26710,14 @@ public class CtpErrorConditionalOrder
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
             writer.Write(obj.IsSwapOrder);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.CurrencyID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -22409,7 +26748,7 @@ public class CtpQryErrOrderAction
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -22562,14 +26901,38 @@ public class CtpErrOrderAction
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string InstrumentID;
     ///<summary>
-    ///错误代码
+    ///营业部编号
     ///</summary>
     [DataMember(Order = 26)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BranchID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 27)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 28)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 29)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+    ///<summary>
+    ///错误代码
+    ///</summary>
+    [DataMember(Order = 30)]
     public int ErrorID;
     ///<summary>
     ///错误信息
     ///</summary>
-    [DataMember(Order = 27)]
+    [DataMember(Order = 31)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
     public string ErrorMsg;
 
@@ -22602,10 +26965,14 @@ public class CtpErrOrderAction
             writer.Write(obj.UserID);
             writer.Write(obj.StatusMsg);
             writer.Write(obj.InstrumentID);
+            writer.Write(obj.BranchID);
+            writer.Write(obj.InvestUnitID);
+            writer.Write(obj.IPAddress);
+            writer.Write(obj.MacAddress);
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -22629,7 +26996,7 @@ public class CtpQryExchangeSequence
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -22665,7 +27032,7 @@ public class CtpExchangeSequence
             writer.Write(obj.SequenceNo);
             writer.Write(obj.MarketStatus);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -22719,6 +27086,18 @@ public class CtpQueryMaxOrderVolumeWithPrice
     ///</summary>
     [DataMember(Order = 8)]
     public double Price;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 10)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQueryMaxOrderVolumeWithPrice obj)
     {
@@ -22732,8 +27111,10 @@ public class CtpQueryMaxOrderVolumeWithPrice
             writer.Write(obj.HedgeFlag);
             writer.Write(obj.MaxVolume);
             writer.Write(obj.Price);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -22762,6 +27143,12 @@ public class CtpQryBrokerTradingParams
     [DataMember(Order = 3)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
     public string CurrencyID;
+    ///<summary>
+    ///投资者帐号
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
 
     public static byte[] GetData(CtpQryBrokerTradingParams obj)
     {
@@ -22770,8 +27157,9 @@ public class CtpQryBrokerTradingParams
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             writer.Write(obj.CurrencyID);
+            writer.Write(obj.AccountID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -22820,6 +27208,12 @@ public class CtpBrokerTradingParams
     ///</summary>
     [DataMember(Order = 7)]
     public byte OptionRoyaltyPriceType;
+    ///<summary>
+    ///投资者帐号
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
 
     public static byte[] GetData(CtpBrokerTradingParams obj)
     {
@@ -22832,8 +27226,9 @@ public class CtpBrokerTradingParams
             writer.Write(obj.AvailIncludeCloseProfit);
             writer.Write(obj.CurrencyID);
             writer.Write(obj.OptionRoyaltyPriceType);
+            writer.Write(obj.AccountID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -22871,7 +27266,7 @@ public class CtpQryBrokerTradingAlgos
             writer.Write(obj.ExchangeID);
             writer.Write(obj.InstrumentID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -22927,7 +27322,7 @@ public class CtpBrokerTradingAlgos
             writer.Write(obj.FindMarginRateAlgoID);
             writer.Write(obj.HandleTradingAccountAlgoID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -22958,7 +27353,7 @@ public class CtpQueryBrokerDeposit
             writer.Write(obj.BrokerID);
             writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23057,7 +27452,7 @@ public class CtpBrokerDeposit
             writer.Write(obj.Reserve);
             writer.Write(obj.FrozenMargin);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23081,7 +27476,7 @@ public class CtpQryCFMMCBrokerKey
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.BrokerID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23145,7 +27540,7 @@ public class CtpCFMMCBrokerKey
             writer.Write(obj.CurrentKey);
             writer.Write(obj.KeyKind);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23196,7 +27591,7 @@ public class CtpCFMMCTradingAccountKey
             writer.Write(obj.KeyID);
             writer.Write(obj.CurrentKey);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23227,7 +27622,7 @@ public class CtpQryCFMMCTradingAccountKey
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23297,7 +27692,7 @@ public class CtpBrokerUserOTPParam
             writer.Write(obj.LastSuccess);
             writer.Write(obj.OTPType);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23348,7 +27743,7 @@ public class CtpManualSyncBrokerUserOTP
             writer.Write(obj.FirstOTP);
             writer.Write(obj.SecondOTP);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23386,7 +27781,7 @@ public class CtpCommRateModel
             writer.Write(obj.CommModelID);
             writer.Write(obj.CommModelName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23417,7 +27812,7 @@ public class CtpQryCommRateModel
             writer.Write(obj.BrokerID);
             writer.Write(obj.CommModelID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23455,7 +27850,7 @@ public class CtpMarginModel
             writer.Write(obj.MarginModelID);
             writer.Write(obj.MarginModelName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23486,7 +27881,7 @@ public class CtpQryMarginModel
             writer.Write(obj.BrokerID);
             writer.Write(obj.MarginModelID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23542,6 +27937,12 @@ public class CtpEWarrantOffset
     ///</summary>
     [DataMember(Order = 8)]
     public int Volume;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpEWarrantOffset obj)
     {
@@ -23555,8 +27956,9 @@ public class CtpEWarrantOffset
             writer.Write(obj.Direction);
             writer.Write(obj.HedgeFlag);
             writer.Write(obj.Volume);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23591,6 +27993,12 @@ public class CtpQryEWarrantOffset
     [DataMember(Order = 4)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
     public string InstrumentID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryEWarrantOffset obj)
     {
@@ -23600,8 +28008,9 @@ public class CtpQryEWarrantOffset
             writer.Write(obj.InvestorID);
             writer.Write(obj.ExchangeID);
             writer.Write(obj.InstrumentID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23635,6 +28044,18 @@ public class CtpQryInvestorProductGroupMargin
     ///</summary>
     [DataMember(Order = 4)]
     public byte HedgeFlag;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQryInvestorProductGroupMargin obj)
     {
@@ -23644,8 +28065,10 @@ public class CtpQryInvestorProductGroupMargin
             writer.Write(obj.InvestorID);
             writer.Write(obj.ProductGroupID);
             writer.Write(obj.HedgeFlag);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23795,6 +28218,18 @@ public class CtpInvestorProductGroupMargin
     ///</summary>
     [DataMember(Order = 27)]
     public byte HedgeFlag;
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 28)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 29)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpInvestorProductGroupMargin obj)
     {
@@ -23827,8 +28262,10 @@ public class CtpInvestorProductGroupMargin
             writer.Write(obj.LongExchOffsetAmount);
             writer.Write(obj.ShortExchOffsetAmount);
             writer.Write(obj.HedgeFlag);
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23851,6 +28288,12 @@ public class CtpQueryCFMMCTradingAccountToken
     [DataMember(Order = 2)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
     public string InvestorID;
+    ///<summary>
+    ///投资单元代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
+    public string InvestUnitID;
 
     public static byte[] GetData(CtpQueryCFMMCTradingAccountToken obj)
     {
@@ -23858,8 +28301,9 @@ public class CtpQueryCFMMCTradingAccountToken
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.BrokerID);
             writer.Write(obj.InvestorID);
+            writer.Write(obj.InvestUnitID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23910,7 +28354,7 @@ public class CtpCFMMCTradingAccountToken
             writer.Write(obj.KeyID);
             writer.Write(obj.Token);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23941,7 +28385,7 @@ public class CtpQryProductGroup
             writer.Write(obj.ProductID);
             writer.Write(obj.ExchangeID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -23979,7 +28423,154 @@ public class CtpProductGroup
             writer.Write(obj.ExchangeID);
             writer.Write(obj.ProductGroupID);
             return stream.ToArray();
-        }        
+        }
+    }
+};
+
+///<summary>
+///交易所公告
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpBulletin
+{
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///交易日
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradingDay;
+    ///<summary>
+    ///公告编号
+    ///</summary>
+    [DataMember(Order = 3)]
+    public int BulletinID;
+    ///<summary>
+    ///序列号
+    ///</summary>
+    [DataMember(Order = 4)]
+    public int SequenceNo;
+    ///<summary>
+    ///公告类型
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 3)]
+    public string NewsType;
+    ///<summary>
+    ///紧急程度
+    ///</summary>
+    [DataMember(Order = 6)]
+    public sbyte NewsUrgency;
+    ///<summary>
+    ///发送时间
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string SendTime;
+    ///<summary>
+    ///消息摘要
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
+    public string Abstract;
+    ///<summary>
+    ///消息来源
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string ComeFrom;
+    ///<summary>
+    ///消息正文
+    ///</summary>
+    [DataMember(Order = 10)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 501)]
+    public string Content;
+    ///<summary>
+    ///WEB地址
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 201)]
+    public string URLLink;
+    ///<summary>
+    ///市场代码
+    ///</summary>
+    [DataMember(Order = 12)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string MarketID;
+
+    public static byte[] GetData(CtpBulletin obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.TradingDay);
+            writer.Write(obj.BulletinID);
+            writer.Write(obj.SequenceNo);
+            writer.Write(obj.NewsType);
+            writer.Write(obj.NewsUrgency);
+            writer.Write(obj.SendTime);
+            writer.Write(obj.Abstract);
+            writer.Write(obj.ComeFrom);
+            writer.Write(obj.Content);
+            writer.Write(obj.URLLink);
+            writer.Write(obj.MarketID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///查询交易所公告
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpQryBulletin
+{
+    ///<summary>
+    ///交易所代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ExchangeID;
+    ///<summary>
+    ///公告编号
+    ///</summary>
+    [DataMember(Order = 2)]
+    public int BulletinID;
+    ///<summary>
+    ///序列号
+    ///</summary>
+    [DataMember(Order = 3)]
+    public int SequenceNo;
+    ///<summary>
+    ///公告类型
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 3)]
+    public string NewsType;
+    ///<summary>
+    ///紧急程度
+    ///</summary>
+    [DataMember(Order = 5)]
+    public sbyte NewsUrgency;
+
+    public static byte[] GetData(CtpQryBulletin obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.ExchangeID);
+            writer.Write(obj.BulletinID);
+            writer.Write(obj.SequenceNo);
+            writer.Write(obj.NewsType);
+            writer.Write(obj.NewsUrgency);
+            return stream.ToArray();
+        }
     }
 };
 
@@ -24239,6 +28830,12 @@ public class CtpReqOpenAccount
     [DataMember(Order = 44)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
     public string UserID;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 45)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpReqOpenAccount obj)
     {
@@ -24288,8 +28885,9 @@ public class CtpReqOpenAccount
             writer.Write(obj.OperNo);
             writer.Write(obj.TID);
             writer.Write(obj.UserID);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -24549,6 +29147,12 @@ public class CtpReqCancelAccount
     [DataMember(Order = 44)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
     public string UserID;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 45)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpReqCancelAccount obj)
     {
@@ -24598,8 +29202,9 @@ public class CtpReqCancelAccount
             writer.Write(obj.OperNo);
             writer.Write(obj.TID);
             writer.Write(obj.UserID);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -24837,6 +29442,12 @@ public class CtpReqChangeAccount
     [DataMember(Order = 40)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 36)]
     public string Digest;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 41)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpReqChangeAccount obj)
     {
@@ -24882,8 +29493,9 @@ public class CtpReqChangeAccount
             writer.Write(obj.SecuPwdFlag);
             writer.Write(obj.TID);
             writer.Write(obj.Digest);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -25132,6 +29744,12 @@ public class CtpReqTransfer
     ///</summary>
     [DataMember(Order = 43)]
     public byte TransferStatus;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 44)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpReqTransfer obj)
     {
@@ -25180,8 +29798,9 @@ public class CtpReqTransfer
             writer.Write(obj.RequestID);
             writer.Write(obj.TID);
             writer.Write(obj.TransferStatus);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -25441,6 +30060,12 @@ public class CtpRspTransfer
     [DataMember(Order = 45)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
     public string ErrorMsg;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 46)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpRspTransfer obj)
     {
@@ -25491,8 +30116,9 @@ public class CtpRspTransfer
             writer.Write(obj.TransferStatus);
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -25777,6 +30403,12 @@ public class CtpReqRepeal
     ///</summary>
     [DataMember(Order = 50)]
     public byte TransferStatus;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 51)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpReqRepeal obj)
     {
@@ -25832,8 +30464,9 @@ public class CtpReqRepeal
             writer.Write(obj.RequestID);
             writer.Write(obj.TID);
             writer.Write(obj.TransferStatus);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -26129,6 +30762,12 @@ public class CtpRspRepeal
     [DataMember(Order = 52)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
     public string ErrorMsg;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 53)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpRspRepeal obj)
     {
@@ -26186,8 +30825,9 @@ public class CtpRspRepeal
             writer.Write(obj.TransferStatus);
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -26400,6 +31040,12 @@ public class CtpReqQueryAccount
     ///</summary>
     [DataMember(Order = 36)]
     public int TID;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 37)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpReqQueryAccount obj)
     {
@@ -26441,8 +31087,9 @@ public class CtpReqQueryAccount
             writer.Write(obj.OperNo);
             writer.Write(obj.RequestID);
             writer.Write(obj.TID);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -26665,6 +31312,12 @@ public class CtpRspQueryAccount
     ///</summary>
     [DataMember(Order = 38)]
     public double BankFetchAmount;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 39)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpRspQueryAccount obj)
     {
@@ -26708,8 +31361,9 @@ public class CtpRspQueryAccount
             writer.Write(obj.TID);
             writer.Write(obj.BankUseAmount);
             writer.Write(obj.BankFetchAmount);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -26867,7 +31521,7 @@ public class CtpFutureSignIO
             writer.Write(obj.RequestID);
             writer.Write(obj.TID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -27052,7 +31706,7 @@ public class CtpRspFutureSignIn
             writer.Write(obj.PinKey);
             writer.Write(obj.MacKey);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -27210,7 +31864,7 @@ public class CtpReqFutureSignOut
             writer.Write(obj.RequestID);
             writer.Write(obj.TID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -27381,7 +32035,7 @@ public class CtpRspFutureSignOut
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -27540,6 +32194,12 @@ public class CtpReqQueryTradeResultBySerial
     [DataMember(Order = 26)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 36)]
     public string Digest;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 27)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpReqQueryTradeResultBySerial obj)
     {
@@ -27571,8 +32231,9 @@ public class CtpReqQueryTradeResultBySerial
             writer.Write(obj.CurrencyID);
             writer.Write(obj.TradeAmount);
             writer.Write(obj.Digest);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -27764,7 +32425,7 @@ public class CtpRspQueryTradeResultBySerial
             writer.Write(obj.TradeAmount);
             writer.Write(obj.Digest);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -27875,7 +32536,7 @@ public class CtpReqDayEndFileReady
             writer.Write(obj.FileBusinessCode);
             writer.Write(obj.Digest);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -27906,7 +32567,7 @@ public class CtpReturnResult
             writer.Write(obj.ReturnCode);
             writer.Write(obj.DescrInfoForReturnCode);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -28051,7 +32712,7 @@ public class CtpVerifyFuturePassword
             writer.Write(obj.TID);
             writer.Write(obj.CurrencyID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -28084,6 +32745,12 @@ public class CtpVerifyCustInfo
     ///</summary>
     [DataMember(Order = 4)]
     public byte CustType;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpVerifyCustInfo obj)
     {
@@ -28093,8 +32760,9 @@ public class CtpVerifyCustInfo
             writer.Write(obj.IdCardType);
             writer.Write(obj.IdentifiedCardNo);
             writer.Write(obj.CustType);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -28145,6 +32813,12 @@ public class CtpVerifyFuturePasswordAndCustInfo
     [DataMember(Order = 7)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
     public string CurrencyID;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpVerifyFuturePasswordAndCustInfo obj)
     {
@@ -28157,8 +32831,9 @@ public class CtpVerifyFuturePasswordAndCustInfo
             writer.Write(obj.AccountID);
             writer.Write(obj.Password);
             writer.Write(obj.CurrencyID);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -28222,7 +32897,7 @@ public class CtpDepositResultInform
             writer.Write(obj.ReturnCode);
             writer.Write(obj.DescrInfoForReturnCode);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -28373,7 +33048,7 @@ public class CtpReqSyncKey
             writer.Write(obj.RequestID);
             writer.Write(obj.TID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -28537,7 +33212,7 @@ public class CtpRspSyncKey
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -28771,6 +33446,12 @@ public class CtpNotifyQueryAccount
     [DataMember(Order = 40)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
     public string ErrorMsg;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 41)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpNotifyQueryAccount obj)
     {
@@ -28816,8 +33497,9 @@ public class CtpNotifyQueryAccount
             writer.Write(obj.BankFetchAmount);
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -29019,7 +33701,7 @@ public class CtpTransferSerial
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -29064,7 +33746,7 @@ public class CtpQryTransferSerial
             writer.Write(obj.BankID);
             writer.Write(obj.CurrencyID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -29249,7 +33931,7 @@ public class CtpNotifyFutureSignIn
             writer.Write(obj.PinKey);
             writer.Write(obj.MacKey);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -29420,7 +34102,7 @@ public class CtpNotifyFutureSignOut
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -29584,7 +34266,7 @@ public class CtpNotifySyncKey
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -29636,7 +34318,7 @@ public class CtpQryAccountregister
             writer.Write(obj.BankBranchID);
             writer.Write(obj.CurrencyID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -29744,6 +34426,12 @@ public class CtpAccountregister
     ///</summary>
     [DataMember(Order = 17)]
     public byte BankAccType;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 18)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpAccountregister obj)
     {
@@ -29766,8 +34454,9 @@ public class CtpAccountregister
             writer.Write(obj.TID);
             writer.Write(obj.CustType);
             writer.Write(obj.BankAccType);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -30038,6 +34727,12 @@ public class CtpOpenAccount
     [DataMember(Order = 46)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
     public string ErrorMsg;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 47)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpOpenAccount obj)
     {
@@ -30089,8 +34784,9 @@ public class CtpOpenAccount
             writer.Write(obj.UserID);
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -30361,6 +35057,12 @@ public class CtpCancelAccount
     [DataMember(Order = 46)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
     public string ErrorMsg;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 47)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpCancelAccount obj)
     {
@@ -30412,8 +35114,9 @@ public class CtpCancelAccount
             writer.Write(obj.UserID);
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -30662,6 +35365,12 @@ public class CtpChangeAccount
     [DataMember(Order = 42)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
     public string ErrorMsg;
+    ///<summary>
+    ///长客户姓名
+    ///</summary>
+    [DataMember(Order = 43)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string LongCustomerName;
 
     public static byte[] GetData(CtpChangeAccount obj)
     {
@@ -30709,8 +35418,9 @@ public class CtpChangeAccount
             writer.Write(obj.Digest);
             writer.Write(obj.ErrorID);
             writer.Write(obj.ErrorMsg);
+            writer.Write(obj.LongCustomerName);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -30762,7 +35472,7 @@ public class CtpSecAgentACIDMap
             writer.Write(obj.CurrencyID);
             writer.Write(obj.BrokerSecAgentID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -30807,7 +35517,7 @@ public class CtpQrySecAgentACIDMap
             writer.Write(obj.AccountID);
             writer.Write(obj.CurrencyID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -30844,7 +35554,7 @@ public class CtpUserRightsAssign
             writer.Write(obj.UserID);
             writer.Write(obj.DRIdentityID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -30880,7 +35590,7 @@ public class CtpBrokerUserRightAssign
             writer.Write(obj.DRIdentityID);
             writer.Write(obj.Tradeable);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -30923,7 +35633,7 @@ public class CtpDRTransfer
             writer.Write(obj.OrigBrokerID);
             writer.Write(obj.DestBrokerID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -30960,7 +35670,7 @@ public class CtpFensUserInfo
             writer.Write(obj.UserID);
             writer.Write(obj.LoginMode);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -30983,7 +35693,7 @@ public class CtpCurrTransferIdentity
         using (var writer = new BinaryWriter(stream)) {
             writer.Write(obj.IdentityID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -31021,7 +35731,7 @@ public class CtpLoginForbiddenUser
             writer.Write(obj.UserID);
             writer.Write(obj.IPAddress);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -31052,7 +35762,7 @@ public class CtpQryLoginForbiddenUser
             writer.Write(obj.BrokerID);
             writer.Write(obj.UserID);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -31089,7 +35799,7 @@ public class CtpMulticastGroupInfo
             writer.Write(obj.GroupPort);
             writer.Write(obj.SourceIP);
             return stream.ToArray();
-        }        
+        }
     }
 };
 
@@ -31133,7 +35843,1594 @@ public class CtpTradingAccountReserve
             writer.Write(obj.Reserve);
             writer.Write(obj.CurrencyID);
             return stream.ToArray();
-        }        
+        }
+    }
+};
+
+///<summary>
+///查询禁止登录IP
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpQryLoginForbiddenIP
+{
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+
+    public static byte[] GetData(CtpQryLoginForbiddenIP obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.IPAddress);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///查询IP列表
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpQryIPList
+{
+    ///<summary>
+    ///IP地址
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string IPAddress;
+
+    public static byte[] GetData(CtpQryIPList obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.IPAddress);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///查询用户下单权限分配表
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpQryUserRightsAssign
+{
+    ///<summary>
+    ///应用单元代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+
+    public static byte[] GetData(CtpQryUserRightsAssign obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.UserID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///银期预约开户确认请求
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpReserveOpenAccountConfirm
+{
+    ///<summary>
+    ///业务功能码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 7)]
+    public string TradeCode;
+    ///<summary>
+    ///银行代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string BankID;
+    ///<summary>
+    ///银行分支机构代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 5)]
+    public string BankBranchID;
+    ///<summary>
+    ///期商代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///期商分支机构代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string BrokerBranchID;
+    ///<summary>
+    ///交易日期
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradeDate;
+    ///<summary>
+    ///交易时间
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradeTime;
+    ///<summary>
+    ///银行流水号
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string BankSerial;
+    ///<summary>
+    ///交易系统日期
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradingDay;
+    ///<summary>
+    ///银期平台消息流水号
+    ///</summary>
+    [DataMember(Order = 10)]
+    public int PlateSerial;
+    ///<summary>
+    ///最后分片标志
+    ///</summary>
+    [DataMember(Order = 11)]
+    public byte LastFragment;
+    ///<summary>
+    ///会话号
+    ///</summary>
+    [DataMember(Order = 12)]
+    public int SessionID;
+    ///<summary>
+    ///客户姓名
+    ///</summary>
+    [DataMember(Order = 13)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string CustomerName;
+    ///<summary>
+    ///证件类型
+    ///</summary>
+    [DataMember(Order = 14)]
+    public byte IdCardType;
+    ///<summary>
+    ///证件号码
+    ///</summary>
+    [DataMember(Order = 15)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 51)]
+    public string IdentifiedCardNo;
+    ///<summary>
+    ///性别
+    ///</summary>
+    [DataMember(Order = 16)]
+    public byte Gender;
+    ///<summary>
+    ///国家代码
+    ///</summary>
+    [DataMember(Order = 17)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string CountryCode;
+    ///<summary>
+    ///客户类型
+    ///</summary>
+    [DataMember(Order = 18)]
+    public byte CustType;
+    ///<summary>
+    ///地址
+    ///</summary>
+    [DataMember(Order = 19)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 101)]
+    public string Address;
+    ///<summary>
+    ///邮编
+    ///</summary>
+    [DataMember(Order = 20)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 7)]
+    public string ZipCode;
+    ///<summary>
+    ///电话号码
+    ///</summary>
+    [DataMember(Order = 21)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string Telephone;
+    ///<summary>
+    ///手机
+    ///</summary>
+    [DataMember(Order = 22)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MobilePhone;
+    ///<summary>
+    ///传真
+    ///</summary>
+    [DataMember(Order = 23)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string Fax;
+    ///<summary>
+    ///电子邮件
+    ///</summary>
+    [DataMember(Order = 24)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string EMail;
+    ///<summary>
+    ///资金账户状态
+    ///</summary>
+    [DataMember(Order = 25)]
+    public byte MoneyAccountStatus;
+    ///<summary>
+    ///银行帐号
+    ///</summary>
+    [DataMember(Order = 26)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string BankAccount;
+    ///<summary>
+    ///银行密码
+    ///</summary>
+    [DataMember(Order = 27)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string BankPassWord;
+    ///<summary>
+    ///安装编号
+    ///</summary>
+    [DataMember(Order = 28)]
+    public int InstallID;
+    ///<summary>
+    ///验证客户证件号码标志
+    ///</summary>
+    [DataMember(Order = 29)]
+    public byte VerifyCertNoFlag;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 30)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+    ///<summary>
+    ///摘要
+    ///</summary>
+    [DataMember(Order = 31)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 36)]
+    public string Digest;
+    ///<summary>
+    ///银行帐号类型
+    ///</summary>
+    [DataMember(Order = 32)]
+    public byte BankAccType;
+    ///<summary>
+    ///期货公司银行编码
+    ///</summary>
+    [DataMember(Order = 33)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 33)]
+    public string BrokerIDByBank;
+    ///<summary>
+    ///交易ID
+    ///</summary>
+    [DataMember(Order = 34)]
+    public int TID;
+    ///<summary>
+    ///投资者帐号
+    ///</summary>
+    [DataMember(Order = 35)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///期货密码
+    ///</summary>
+    [DataMember(Order = 36)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string Password;
+    ///<summary>
+    ///预约开户银行流水号
+    ///</summary>
+    [DataMember(Order = 37)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string BankReserveOpenSeq;
+    ///<summary>
+    ///预约开户日期
+    ///</summary>
+    [DataMember(Order = 38)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string BookDate;
+    ///<summary>
+    ///预约开户验证密码
+    ///</summary>
+    [DataMember(Order = 39)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string BookPsw;
+    ///<summary>
+    ///错误代码
+    ///</summary>
+    [DataMember(Order = 40)]
+    public int ErrorID;
+    ///<summary>
+    ///错误信息
+    ///</summary>
+    [DataMember(Order = 41)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
+    public string ErrorMsg;
+
+    public static byte[] GetData(CtpReserveOpenAccountConfirm obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.TradeCode);
+            writer.Write(obj.BankID);
+            writer.Write(obj.BankBranchID);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.BrokerBranchID);
+            writer.Write(obj.TradeDate);
+            writer.Write(obj.TradeTime);
+            writer.Write(obj.BankSerial);
+            writer.Write(obj.TradingDay);
+            writer.Write(obj.PlateSerial);
+            writer.Write(obj.LastFragment);
+            writer.Write(obj.SessionID);
+            writer.Write(obj.CustomerName);
+            writer.Write(obj.IdCardType);
+            writer.Write(obj.IdentifiedCardNo);
+            writer.Write(obj.Gender);
+            writer.Write(obj.CountryCode);
+            writer.Write(obj.CustType);
+            writer.Write(obj.Address);
+            writer.Write(obj.ZipCode);
+            writer.Write(obj.Telephone);
+            writer.Write(obj.MobilePhone);
+            writer.Write(obj.Fax);
+            writer.Write(obj.EMail);
+            writer.Write(obj.MoneyAccountStatus);
+            writer.Write(obj.BankAccount);
+            writer.Write(obj.BankPassWord);
+            writer.Write(obj.InstallID);
+            writer.Write(obj.VerifyCertNoFlag);
+            writer.Write(obj.CurrencyID);
+            writer.Write(obj.Digest);
+            writer.Write(obj.BankAccType);
+            writer.Write(obj.BrokerIDByBank);
+            writer.Write(obj.TID);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.Password);
+            writer.Write(obj.BankReserveOpenSeq);
+            writer.Write(obj.BookDate);
+            writer.Write(obj.BookPsw);
+            writer.Write(obj.ErrorID);
+            writer.Write(obj.ErrorMsg);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///银期预约开户
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpReserveOpenAccount
+{
+    ///<summary>
+    ///业务功能码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 7)]
+    public string TradeCode;
+    ///<summary>
+    ///银行代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string BankID;
+    ///<summary>
+    ///银行分支机构代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 5)]
+    public string BankBranchID;
+    ///<summary>
+    ///期商代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///期商分支机构代码
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string BrokerBranchID;
+    ///<summary>
+    ///交易日期
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradeDate;
+    ///<summary>
+    ///交易时间
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradeTime;
+    ///<summary>
+    ///银行流水号
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string BankSerial;
+    ///<summary>
+    ///交易系统日期
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradingDay;
+    ///<summary>
+    ///银期平台消息流水号
+    ///</summary>
+    [DataMember(Order = 10)]
+    public int PlateSerial;
+    ///<summary>
+    ///最后分片标志
+    ///</summary>
+    [DataMember(Order = 11)]
+    public byte LastFragment;
+    ///<summary>
+    ///会话号
+    ///</summary>
+    [DataMember(Order = 12)]
+    public int SessionID;
+    ///<summary>
+    ///客户姓名
+    ///</summary>
+    [DataMember(Order = 13)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 161)]
+    public string CustomerName;
+    ///<summary>
+    ///证件类型
+    ///</summary>
+    [DataMember(Order = 14)]
+    public byte IdCardType;
+    ///<summary>
+    ///证件号码
+    ///</summary>
+    [DataMember(Order = 15)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 51)]
+    public string IdentifiedCardNo;
+    ///<summary>
+    ///性别
+    ///</summary>
+    [DataMember(Order = 16)]
+    public byte Gender;
+    ///<summary>
+    ///国家代码
+    ///</summary>
+    [DataMember(Order = 17)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string CountryCode;
+    ///<summary>
+    ///客户类型
+    ///</summary>
+    [DataMember(Order = 18)]
+    public byte CustType;
+    ///<summary>
+    ///地址
+    ///</summary>
+    [DataMember(Order = 19)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 101)]
+    public string Address;
+    ///<summary>
+    ///邮编
+    ///</summary>
+    [DataMember(Order = 20)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 7)]
+    public string ZipCode;
+    ///<summary>
+    ///电话号码
+    ///</summary>
+    [DataMember(Order = 21)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string Telephone;
+    ///<summary>
+    ///手机
+    ///</summary>
+    [DataMember(Order = 22)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MobilePhone;
+    ///<summary>
+    ///传真
+    ///</summary>
+    [DataMember(Order = 23)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string Fax;
+    ///<summary>
+    ///电子邮件
+    ///</summary>
+    [DataMember(Order = 24)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string EMail;
+    ///<summary>
+    ///资金账户状态
+    ///</summary>
+    [DataMember(Order = 25)]
+    public byte MoneyAccountStatus;
+    ///<summary>
+    ///银行帐号
+    ///</summary>
+    [DataMember(Order = 26)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string BankAccount;
+    ///<summary>
+    ///银行密码
+    ///</summary>
+    [DataMember(Order = 27)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string BankPassWord;
+    ///<summary>
+    ///安装编号
+    ///</summary>
+    [DataMember(Order = 28)]
+    public int InstallID;
+    ///<summary>
+    ///验证客户证件号码标志
+    ///</summary>
+    [DataMember(Order = 29)]
+    public byte VerifyCertNoFlag;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 30)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+    ///<summary>
+    ///摘要
+    ///</summary>
+    [DataMember(Order = 31)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 36)]
+    public string Digest;
+    ///<summary>
+    ///银行帐号类型
+    ///</summary>
+    [DataMember(Order = 32)]
+    public byte BankAccType;
+    ///<summary>
+    ///期货公司银行编码
+    ///</summary>
+    [DataMember(Order = 33)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 33)]
+    public string BrokerIDByBank;
+    ///<summary>
+    ///交易ID
+    ///</summary>
+    [DataMember(Order = 34)]
+    public int TID;
+    ///<summary>
+    ///预约开户状态
+    ///</summary>
+    [DataMember(Order = 35)]
+    public byte ReserveOpenAccStas;
+    ///<summary>
+    ///错误代码
+    ///</summary>
+    [DataMember(Order = 36)]
+    public int ErrorID;
+    ///<summary>
+    ///错误信息
+    ///</summary>
+    [DataMember(Order = 37)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 81)]
+    public string ErrorMsg;
+
+    public static byte[] GetData(CtpReserveOpenAccount obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.TradeCode);
+            writer.Write(obj.BankID);
+            writer.Write(obj.BankBranchID);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.BrokerBranchID);
+            writer.Write(obj.TradeDate);
+            writer.Write(obj.TradeTime);
+            writer.Write(obj.BankSerial);
+            writer.Write(obj.TradingDay);
+            writer.Write(obj.PlateSerial);
+            writer.Write(obj.LastFragment);
+            writer.Write(obj.SessionID);
+            writer.Write(obj.CustomerName);
+            writer.Write(obj.IdCardType);
+            writer.Write(obj.IdentifiedCardNo);
+            writer.Write(obj.Gender);
+            writer.Write(obj.CountryCode);
+            writer.Write(obj.CustType);
+            writer.Write(obj.Address);
+            writer.Write(obj.ZipCode);
+            writer.Write(obj.Telephone);
+            writer.Write(obj.MobilePhone);
+            writer.Write(obj.Fax);
+            writer.Write(obj.EMail);
+            writer.Write(obj.MoneyAccountStatus);
+            writer.Write(obj.BankAccount);
+            writer.Write(obj.BankPassWord);
+            writer.Write(obj.InstallID);
+            writer.Write(obj.VerifyCertNoFlag);
+            writer.Write(obj.CurrencyID);
+            writer.Write(obj.Digest);
+            writer.Write(obj.BankAccType);
+            writer.Write(obj.BrokerIDByBank);
+            writer.Write(obj.TID);
+            writer.Write(obj.ReserveOpenAccStas);
+            writer.Write(obj.ErrorID);
+            writer.Write(obj.ErrorMsg);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///银行账户属性
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpAccountProperty
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者帐号
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string AccountID;
+    ///<summary>
+    ///银行统一标识类型
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string BankID;
+    ///<summary>
+    ///银行账户
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string BankAccount;
+    ///<summary>
+    ///银行账户的开户人名称
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 101)]
+    public string OpenName;
+    ///<summary>
+    ///银行账户的开户行
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 101)]
+    public string OpenBank;
+    ///<summary>
+    ///是否活跃
+    ///</summary>
+    [DataMember(Order = 7)]
+    public int IsActive;
+    ///<summary>
+    ///账户来源
+    ///</summary>
+    [DataMember(Order = 8)]
+    public byte AccountSourceType;
+    ///<summary>
+    ///开户日期
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string OpenDate;
+    ///<summary>
+    ///注销日期
+    ///</summary>
+    [DataMember(Order = 10)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string CancelDate;
+    ///<summary>
+    ///录入员代码
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 65)]
+    public string OperatorID;
+    ///<summary>
+    ///录入日期
+    ///</summary>
+    [DataMember(Order = 12)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string OperateDate;
+    ///<summary>
+    ///录入时间
+    ///</summary>
+    [DataMember(Order = 13)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string OperateTime;
+    ///<summary>
+    ///币种代码
+    ///</summary>
+    [DataMember(Order = 14)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+    public string CurrencyID;
+
+    public static byte[] GetData(CtpAccountProperty obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.AccountID);
+            writer.Write(obj.BankID);
+            writer.Write(obj.BankAccount);
+            writer.Write(obj.OpenName);
+            writer.Write(obj.OpenBank);
+            writer.Write(obj.IsActive);
+            writer.Write(obj.AccountSourceType);
+            writer.Write(obj.OpenDate);
+            writer.Write(obj.CancelDate);
+            writer.Write(obj.OperatorID);
+            writer.Write(obj.OperateDate);
+            writer.Write(obj.OperateTime);
+            writer.Write(obj.CurrencyID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///查询当前交易中心
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpQryCurrDRIdentity
+{
+    ///<summary>
+    ///交易中心代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    public int DRIdentityID;
+
+    public static byte[] GetData(CtpQryCurrDRIdentity obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.DRIdentityID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///当前交易中心
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpCurrDRIdentity
+{
+    ///<summary>
+    ///交易中心代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    public int DRIdentityID;
+
+    public static byte[] GetData(CtpCurrDRIdentity obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.DRIdentityID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///查询二级代理商资金校验模式
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpQrySecAgentCheckMode
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+
+    public static byte[] GetData(CtpQrySecAgentCheckMode obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.InvestorID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///查询二级代理商信息
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpQrySecAgentTradeInfo
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///境外中介机构资金帐号
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string BrokerSecAgentID;
+
+    public static byte[] GetData(CtpQrySecAgentTradeInfo obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.BrokerSecAgentID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///用户系统信息
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpUserSystemInfo
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+    ///<summary>
+    ///用户端系统内部信息长度
+    ///</summary>
+    [DataMember(Order = 3)]
+    public int ClientSystemInfoLen;
+    ///<summary>
+    ///用户端系统内部信息
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 273)]
+    public byte[] ClientSystemInfo;
+    ///<summary>
+    ///用户公网IP
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string ClientPublicIP;
+    ///<summary>
+    ///终端IP端口
+    ///</summary>
+    [DataMember(Order = 6)]
+    public int ClientIPPort;
+    ///<summary>
+    ///登录成功时间
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string ClientLoginTime;
+    ///<summary>
+    ///App代码
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 33)]
+    public string ClientAppID;
+
+    public static byte[] GetData(CtpUserSystemInfo obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.UserID);
+            writer.Write(obj.ClientSystemInfoLen);
+            writer.Write(obj.ClientSystemInfo);
+            writer.Write(obj.ClientPublicIP);
+            writer.Write(obj.ClientIPPort);
+            writer.Write(obj.ClientLoginTime);
+            writer.Write(obj.ClientAppID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///用户发出获取安全安全登陆方法请求
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpReqUserAuthMethod
+{
+    ///<summary>
+    ///交易日
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradingDay;
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+
+    public static byte[] GetData(CtpReqUserAuthMethod obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.TradingDay);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.UserID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///用户发出获取安全安全登陆方法回复
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpRspUserAuthMethod
+{
+    ///<summary>
+    ///当前可以用的认证模式
+    ///</summary>
+    [DataMember(Order = 1)]
+    public int UsableAuthMethod;
+
+    public static byte[] GetData(CtpRspUserAuthMethod obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.UsableAuthMethod);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///用户发出获取安全安全登陆方法请求
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpReqGenUserCaptcha
+{
+    ///<summary>
+    ///交易日
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradingDay;
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+
+    public static byte[] GetData(CtpReqGenUserCaptcha obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.TradingDay);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.UserID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///生成的图片验证码信息
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpRspGenUserCaptcha
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+    ///<summary>
+    ///图片信息长度
+    ///</summary>
+    [DataMember(Order = 3)]
+    public int CaptchaInfoLen;
+    ///<summary>
+    ///图片信息
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 2561)]
+    public string CaptchaInfo;
+
+    public static byte[] GetData(CtpRspGenUserCaptcha obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.UserID);
+            writer.Write(obj.CaptchaInfoLen);
+            writer.Write(obj.CaptchaInfo);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///用户发出获取安全安全登陆方法请求
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpReqGenUserText
+{
+    ///<summary>
+    ///交易日
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradingDay;
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+
+    public static byte[] GetData(CtpReqGenUserText obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.TradingDay);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.UserID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///短信验证码生成的回复
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpRspGenUserText
+{
+    ///<summary>
+    ///短信验证码序号
+    ///</summary>
+    [DataMember(Order = 1)]
+    public int UserTextSeq;
+
+    public static byte[] GetData(CtpRspGenUserText obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.UserTextSeq);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///用户发出带图形验证码的登录请求请求
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpReqUserLoginWithCaptcha
+{
+    ///<summary>
+    ///交易日
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradingDay;
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+    ///<summary>
+    ///密码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string Password;
+    ///<summary>
+    ///用户端产品信息
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string UserProductInfo;
+    ///<summary>
+    ///接口端产品信息
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string InterfaceProductInfo;
+    ///<summary>
+    ///协议信息
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ProtocolInfo;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+    ///<summary>
+    ///终端IP地址
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string ClientIPAddress;
+    ///<summary>
+    ///登录备注
+    ///</summary>
+    [DataMember(Order = 10)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 36)]
+    public string LoginRemark;
+    ///<summary>
+    ///图形验证码的文字内容
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string Captcha;
+    ///<summary>
+    ///终端IP端口
+    ///</summary>
+    [DataMember(Order = 12)]
+    public int ClientIPPort;
+
+    public static byte[] GetData(CtpReqUserLoginWithCaptcha obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.TradingDay);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.UserID);
+            writer.Write(obj.Password);
+            writer.Write(obj.UserProductInfo);
+            writer.Write(obj.InterfaceProductInfo);
+            writer.Write(obj.ProtocolInfo);
+            writer.Write(obj.MacAddress);
+            writer.Write(obj.ClientIPAddress);
+            writer.Write(obj.LoginRemark);
+            writer.Write(obj.Captcha);
+            writer.Write(obj.ClientIPPort);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///用户发出带短信验证码的登录请求请求
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpReqUserLoginWithText
+{
+    ///<summary>
+    ///交易日
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradingDay;
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+    ///<summary>
+    ///密码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string Password;
+    ///<summary>
+    ///用户端产品信息
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string UserProductInfo;
+    ///<summary>
+    ///接口端产品信息
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string InterfaceProductInfo;
+    ///<summary>
+    ///协议信息
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ProtocolInfo;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+    ///<summary>
+    ///终端IP地址
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string ClientIPAddress;
+    ///<summary>
+    ///登录备注
+    ///</summary>
+    [DataMember(Order = 10)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 36)]
+    public string LoginRemark;
+    ///<summary>
+    ///短信验证码文字内容
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string Text;
+    ///<summary>
+    ///终端IP端口
+    ///</summary>
+    [DataMember(Order = 12)]
+    public int ClientIPPort;
+
+    public static byte[] GetData(CtpReqUserLoginWithText obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.TradingDay);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.UserID);
+            writer.Write(obj.Password);
+            writer.Write(obj.UserProductInfo);
+            writer.Write(obj.InterfaceProductInfo);
+            writer.Write(obj.ProtocolInfo);
+            writer.Write(obj.MacAddress);
+            writer.Write(obj.ClientIPAddress);
+            writer.Write(obj.LoginRemark);
+            writer.Write(obj.Text);
+            writer.Write(obj.ClientIPPort);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///用户发出带动态验证码的登录请求请求
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpReqUserLoginWithOTP
+{
+    ///<summary>
+    ///交易日
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    public string TradingDay;
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 3)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+    ///<summary>
+    ///密码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string Password;
+    ///<summary>
+    ///用户端产品信息
+    ///</summary>
+    [DataMember(Order = 5)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string UserProductInfo;
+    ///<summary>
+    ///接口端产品信息
+    ///</summary>
+    [DataMember(Order = 6)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string InterfaceProductInfo;
+    ///<summary>
+    ///协议信息
+    ///</summary>
+    [DataMember(Order = 7)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string ProtocolInfo;
+    ///<summary>
+    ///Mac地址
+    ///</summary>
+    [DataMember(Order = 8)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 21)]
+    public string MacAddress;
+    ///<summary>
+    ///终端IP地址
+    ///</summary>
+    [DataMember(Order = 9)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string ClientIPAddress;
+    ///<summary>
+    ///登录备注
+    ///</summary>
+    [DataMember(Order = 10)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 36)]
+    public string LoginRemark;
+    ///<summary>
+    ///OTP密码
+    ///</summary>
+    [DataMember(Order = 11)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 41)]
+    public string OTPPassword;
+    ///<summary>
+    ///终端IP端口
+    ///</summary>
+    [DataMember(Order = 12)]
+    public int ClientIPPort;
+
+    public static byte[] GetData(CtpReqUserLoginWithOTP obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.TradingDay);
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.UserID);
+            writer.Write(obj.Password);
+            writer.Write(obj.UserProductInfo);
+            writer.Write(obj.InterfaceProductInfo);
+            writer.Write(obj.ProtocolInfo);
+            writer.Write(obj.MacAddress);
+            writer.Write(obj.ClientIPAddress);
+            writer.Write(obj.LoginRemark);
+            writer.Write(obj.OTPPassword);
+            writer.Write(obj.ClientIPPort);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///api握手请求
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpReqApiHandshake
+{
+    ///<summary>
+    ///api与front通信密钥版本号
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 31)]
+    public string CryptoKeyVersion;
+
+    public static byte[] GetData(CtpReqApiHandshake obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.CryptoKeyVersion);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///front发给api的握手回复
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpRspApiHandshake
+{
+    ///<summary>
+    ///握手回复数据长度
+    ///</summary>
+    [DataMember(Order = 1)]
+    public int FrontHandshakeDataLen;
+    ///<summary>
+    ///握手回复数据
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 301)]
+    public string FrontHandshakeData;
+    ///<summary>
+    ///API认证是否开启
+    ///</summary>
+    [DataMember(Order = 3)]
+    public int IsApiAuthEnabled;
+
+    public static byte[] GetData(CtpRspApiHandshake obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.FrontHandshakeDataLen);
+            writer.Write(obj.FrontHandshakeData);
+            writer.Write(obj.IsApiAuthEnabled);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///api给front的验证key的请求
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpReqVerifyApiKey
+{
+    ///<summary>
+    ///握手回复数据长度
+    ///</summary>
+    [DataMember(Order = 1)]
+    public int ApiHandshakeDataLen;
+    ///<summary>
+    ///握手回复数据
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 301)]
+    public string ApiHandshakeData;
+
+    public static byte[] GetData(CtpReqVerifyApiKey obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.ApiHandshakeDataLen);
+            writer.Write(obj.ApiHandshakeData);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///操作员组织架构关系
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpDepartmentUser
+{
+    ///<summary>
+    ///经纪公司代码
+    ///</summary>
+    [DataMember(Order = 1)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 11)]
+    public string BrokerID;
+    ///<summary>
+    ///用户代码
+    ///</summary>
+    [DataMember(Order = 2)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string UserID;
+    ///<summary>
+    ///投资者范围
+    ///</summary>
+    [DataMember(Order = 3)]
+    public byte InvestorRange;
+    ///<summary>
+    ///投资者代码
+    ///</summary>
+    [DataMember(Order = 4)]
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
+    public string InvestorID;
+
+    public static byte[] GetData(CtpDepartmentUser obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.BrokerID);
+            writer.Write(obj.UserID);
+            writer.Write(obj.InvestorRange);
+            writer.Write(obj.InvestorID);
+            return stream.ToArray();
+        }
+    }
+};
+
+///<summary>
+///查询频率，每秒查询比数
+///</summary>
+[DataContract]
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+public class CtpQueryFreq
+{
+    ///<summary>
+    ///查询频率
+    ///</summary>
+    [DataMember(Order = 1)]
+    public int QueryFreq;
+
+    public static byte[] GetData(CtpQueryFreq obj)
+    {
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream)) {
+            writer.Write(obj.QueryFreq);
+            return stream.ToArray();
+        }
     }
 };
 

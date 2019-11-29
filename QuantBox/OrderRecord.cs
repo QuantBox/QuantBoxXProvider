@@ -3,7 +3,7 @@
 namespace QuantBox
 {
     internal class OrderRecord
-    {
+    {        
         public OrderRecord(Order order)
         {
             Order = order;
@@ -12,9 +12,11 @@ namespace QuantBox
             AvgPx = 0;
         }
 
-        public Order Order { get; }
+        public readonly Order Order;
 
-        public double LeavesQty { get; set; }
+        public double LeavesQty;
+
+        public bool Cancelling;
 
         public double CumQty { get; private set; }
 

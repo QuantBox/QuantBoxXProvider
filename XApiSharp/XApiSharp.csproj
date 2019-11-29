@@ -42,6 +42,12 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>quantbox.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -51,6 +57,7 @@
   <ItemGroup>
     <Compile Include="AccountField.cs" />
     <Compile Include="ApiType.cs" />
+    <Compile Include="BarDataField.cs" />
     <Compile Include="BarType.cs" />
     <Compile Include="BusinessType.cs" />
     <Compile Include="AssemblyResolver.cs" />
@@ -117,7 +124,11 @@
     <Compile Include="Nactive\XApiInvokeProxy.cs" />
     <Compile Include="UserInfoField.cs" />
     <Compile Include="DepthMarketDataField.cs" />
+    <Compile Include="XSpi.cs" />
     <Compile Include="XTradingApi.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="quantbox.pfx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

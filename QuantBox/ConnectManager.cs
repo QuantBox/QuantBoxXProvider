@@ -23,6 +23,7 @@ namespace QuantBox
                         ConnectClient();
                     }
                     else {
+                        TradingCalendar.Instance.Init(DateTime.Today);
                         _provider.Logger.Info("等待交易时段......");
                         _provider.StartTimerTask();
                         _manualDisconnecting = false;
@@ -181,9 +182,10 @@ namespace QuantBox
             }
             _provider.Trader?.Disconnect();
             _provider.Trader = new TraderClient(_provider, connection);
+            _provider.OnTraderCreated();
             _provider.Trader.Connect();
         }
-
+        
         public ConnectManager(XProvider provider)
         {
             _provider = provider;
@@ -193,6 +195,19 @@ namespace QuantBox
         public void Post(Event e)
         {
             _block.Post(e);
+        }
+
+        public TraderClient CreateTrader(IXSpi spi)
+        {
+            var connection = GetConnectionInfo(TraderClient.ApiType);
+            if (connection == null) {
+                return null;
+            }
+            if (!CheckConnection(connection)) {
+                return null;
+            }
+
+            return new TraderClient(_provider, connection, spi);
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Skyline;
 
 namespace QuantBox
 {
@@ -50,7 +51,7 @@ namespace QuantBox
         {
             var file = Path.Combine(Path.GetDirectoryName(path), $"{Path.GetFileNameWithoutExtension(path)}.{name}.json");
             if (File.Exists(file)) {
-                return JsonConvert.DeserializeObject<List<T>>(File.ReadAllText(file));
+                return JsonConvert.DeserializeObject<List<T>>(QBHelper.ReadOnlyAllText(file));
             }
             return new List<T>();
         }
@@ -58,7 +59,7 @@ namespace QuantBox
         public static XProviderSettings Load(string path)
         {
             if (File.Exists(path)) {
-                var settings = JsonConvert.DeserializeObject<XProviderSettings>(File.ReadAllText(path));
+                var settings = JsonConvert.DeserializeObject<XProviderSettings>(QBHelper.ReadOnlyAllText(path));
                 settings.Users = LoadItems<UserInfo>(path, nameof(Users));
                 settings.Servers = LoadItems<ServerInfo>(path, nameof(Servers));
                 settings.Connections = LoadItems<ConnectionInfo>(path, nameof(Connections));

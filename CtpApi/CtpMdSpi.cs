@@ -36,9 +36,7 @@ namespace QuantBox.Sfit.Api
         private void DoFrontConnected(ref CtpResponse rsp)
         {
             var handler = OnFrontConnected;
-            if (handler != null){
-                handler(this);
-            }
+            handler?.Invoke(this);
         }
         
         public event CtpEventHandler OnFrontConnected;
@@ -46,9 +44,7 @@ namespace QuantBox.Sfit.Api
         private void DoFrontDisconnected(ref CtpResponse rsp)
         {
             var handler = OnFrontDisconnected;
-            if (handler != null){
-                handler(this, rsp.Item1.AsInt.Value);
-            }
+            handler?.Invoke(this, rsp.Item1.AsInt.Value);
         }
         
         public event CtpEventHandler<int> OnFrontDisconnected;
@@ -56,9 +52,7 @@ namespace QuantBox.Sfit.Api
         private void DoHeartBeatWarning(ref CtpResponse rsp)
         {
             var handler = OnHeartBeatWarning;
-            if (handler != null){
-                handler(this, rsp.Item1.AsInt.Value);
-            }
+            handler?.Invoke(this, rsp.Item1.AsInt.Value);
         }
         
         public event CtpEventHandler<int> OnHeartBeatWarning;
@@ -66,9 +60,7 @@ namespace QuantBox.Sfit.Api
         private void DoRspUserLogin(ref CtpResponse rsp)
         {
             var handler = OnRspUserLogin;
-            if (handler != null){
-                handler(this, rsp.Item1.AsRspUserLogin, rsp.Item2, rsp.RequestID, rsp.IsLast);
-            }
+            handler?.Invoke(this, rsp.Item1.AsRspUserLogin, rsp.Item2, rsp.RequestID, rsp.IsLast);
         }
         
         public event CtpEventHandler4<CtpRspUserLogin> OnRspUserLogin;
@@ -76,9 +68,7 @@ namespace QuantBox.Sfit.Api
         private void DoRspUserLogout(ref CtpResponse rsp)
         {
             var handler = OnRspUserLogout;
-            if (handler != null){
-                handler(this, rsp.Item1.AsUserLogout, rsp.Item2, rsp.RequestID, rsp.IsLast);
-            }
+            handler?.Invoke(this, rsp.Item1.AsUserLogout, rsp.Item2, rsp.RequestID, rsp.IsLast);
         }
         
         public event CtpEventHandler4<CtpUserLogout> OnRspUserLogout;
@@ -86,9 +76,7 @@ namespace QuantBox.Sfit.Api
         private void DoRspError(ref CtpResponse rsp)
         {
             var handler = OnRspError;
-            if (handler != null){
-                handler(this, rsp.Item1.AsRspInfo, rsp.RequestID, rsp.IsLast);
-            }
+            handler?.Invoke(this, rsp.Item1.AsRspInfo, rsp.RequestID, rsp.IsLast);
         }
         
         public event CtpEventHandler3 OnRspError;
@@ -96,9 +84,7 @@ namespace QuantBox.Sfit.Api
         private void DoRspSubMarketData(ref CtpResponse rsp)
         {
             var handler = OnRspSubMarketData;
-            if (handler != null){
-                handler(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast);
-            }
+            handler?.Invoke(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast);
         }
         
         public event CtpEventHandler4<CtpSpecificInstrument> OnRspSubMarketData;
@@ -106,9 +92,7 @@ namespace QuantBox.Sfit.Api
         private void DoRspUnSubMarketData(ref CtpResponse rsp)
         {
             var handler = OnRspUnSubMarketData;
-            if (handler != null){
-                handler(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast);
-            }
+            handler?.Invoke(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast);
         }
         
         public event CtpEventHandler4<CtpSpecificInstrument> OnRspUnSubMarketData;
@@ -116,9 +100,7 @@ namespace QuantBox.Sfit.Api
         private void DoRspSubForQuoteRsp(ref CtpResponse rsp)
         {
             var handler = OnRspSubForQuoteRsp;
-            if (handler != null){
-                handler(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast);
-            }
+            handler?.Invoke(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast);
         }
         
         public event CtpEventHandler4<CtpSpecificInstrument> OnRspSubForQuoteRsp;
@@ -126,9 +108,7 @@ namespace QuantBox.Sfit.Api
         private void DoRspUnSubForQuoteRsp(ref CtpResponse rsp)
         {
             var handler = OnRspUnSubForQuoteRsp;
-            if (handler != null){
-                handler(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast);
-            }
+            handler?.Invoke(this, rsp.Item1.AsSpecificInstrument, rsp.Item2, rsp.RequestID, rsp.IsLast);
         }
         
         public event CtpEventHandler4<CtpSpecificInstrument> OnRspUnSubForQuoteRsp;
@@ -136,9 +116,7 @@ namespace QuantBox.Sfit.Api
         private void DoRtnDepthMarketData(ref CtpResponse rsp)
         {
             var handler = OnRtnDepthMarketData;
-            if (handler != null){
-                handler(this, rsp.Item1.AsDepthMarketData);
-            }
+            handler?.Invoke(this, rsp.Item1.AsDepthMarketData);
         }
         
         public event CtpEventHandler<CtpDepthMarketData> OnRtnDepthMarketData;
@@ -146,9 +124,7 @@ namespace QuantBox.Sfit.Api
         private void DoRtnForQuoteRsp(ref CtpResponse rsp)
         {
             var handler = OnRtnForQuoteRsp;
-            if (handler != null){
-                handler(this, rsp.Item1.AsForQuoteRsp);
-            }
+            handler?.Invoke(this, rsp.Item1.AsForQuoteRsp);
         }
         
         public event CtpEventHandler<CtpForQuoteRsp> OnRtnForQuoteRsp;

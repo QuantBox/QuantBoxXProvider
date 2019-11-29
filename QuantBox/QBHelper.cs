@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Microsoft.Win32;
+using Newtonsoft.Json.Linq;
 using NLog;
 using NLog.Config;
 using NLog.LayoutRenderers;
+using QuantBox.XApi;
 using SmartQuant;
 
 namespace QuantBox
@@ -17,6 +20,25 @@ namespace QuantBox
         static QBHelper()
         {
             BasePath = Path.GetDirectoryName(typeof(XProvider).Assembly.Location) + Path.DirectorySeparatorChar;
+        }
+
+        public static string ReadOnlyAllText(string path)
+        {
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+                return new StreamReader(stream).ReadToEnd();
+            }
+        }
+
+        public static string[] ReadOnlyAllLine(string path)
+        {
+            var lines = new List<string>();
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+                var reader = new StreamReader(stream);
+                while (!reader.EndOfStream) {
+                    lines.Add(reader.ReadLine());
+                }
+            }
+            return lines.ToArray();
         }
 
         public static string GetSmartQuantPath()
@@ -65,18 +87,28 @@ namespace QuantBox
             return list.ToArray();
         }
 
+        public static string GetConfigPath()
+        {
+            return Path.Combine(Installation.ConfigDir.FullName, "quantbox");
+        }
+
         public static string GetConfigPath(string name)
         {
-            var dir = Path.Combine(Installation.ConfigDir.FullName, "thanf");
+            var dir = Path.Combine(Installation.ConfigDir.FullName, "quantbox");
             if (!Directory.Exists(dir)) {
                 Directory.CreateDirectory(dir);
             }
             return Path.Combine(dir, $"{name}.json");
         }
+       
+        public static string GetVersionString()
+        {
+            return XApiHelper.GetVersionString(typeof(XProvider));
+        }
 
         public static string GetVersionString(Type type)
         {
-            return type.Assembly.GetName().Version.ToString();
+            return XApiHelper.GetVersionString(type);
         }
 
         public static string MakeAbsolutePath(string path, string basePath = null)
@@ -94,6 +126,63 @@ namespace QuantBox
             while (Math.Abs(value * Math.Pow(10, precision) - Math.Round(value * Math.Pow(10, precision))) > double.Epsilon)
                 precision++;
             return precision;
+        }
+
+        public static DateTime CorrectionActionDay(DateTime local, DateTime exchange)
+        {
+            switch (exchange.Hour) {
+                case 0:
+                    if (local.Hour == 23) {
+                        return local.Date.AddDays(1).Add(exchange.TimeOfDay);
+                    }
+                    break;
+                case 23:
+                    if (local.Hour == 0) {
+                        return local.Date.AddDays(-1).Add(exchange.TimeOfDay);
+                    }
+                    break;
+            }
+            return local.Date.Add(exchange.TimeOfDay);
+        }
+
+        public static void LoadFromJson(object instance, Type type, JToken token)
+        {
+            var list = type.GetProperties();
+            foreach (var prop in list) {
+                if (!prop.CanWrite) {
+                    continue;
+                }
+                var item = token[prop.Name];
+                if (item == null) {
+                    continue;
+                }
+                prop.SetValue(instance, item.ToObject(prop.PropertyType));
+            }
+        }
+
+        public static void SaveInt(byte[] bytes, int index, int value)
+        {
+            bytes[index] = (byte)(value >> 24);
+            bytes[index + 1] = (byte)(value >> 16);
+            bytes[index + 2] = (byte)(value >> 8);
+            bytes[index + 3] = (byte)value;
+        }
+
+        public static int LoadInt(byte[] bytes, int index)
+        {
+            return (bytes[index] << 24) | (bytes[index + 1] << 16) | (bytes[index + 2] << 8) | (bytes[index + 3] & 0xFF);
+        }
+
+        public static Bar MergeBar(Bar bar, Bar bar2)
+        {
+            bar.High = Math.Max(bar.High, bar.High);
+            bar.Low = Math.Min(bar.Low, bar.Low);
+            bar.Close = bar.Close;
+            bar.Volume += bar.Volume;
+            bar.OpenInt = bar.OpenInt;
+            bar.IncTurnover(bar.GetTurnover());
+            bar.DateTime = bar2.CloseDateTime;
+            return bar;
         }
     }
 }

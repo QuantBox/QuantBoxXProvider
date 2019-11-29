@@ -42,6 +42,8 @@ namespace QuantBox.Sfit.Api
         
         public CtpAuthenticationInfo AsAuthenticationInfo { get { return _refValue as CtpAuthenticationInfo; } }
         
+        public CtpRspUserLogin2 AsRspUserLogin2 { get { return _refValue as CtpRspUserLogin2; } }
+        
         public CtpTransferHeader AsTransferHeader { get { return _refValue as CtpTransferHeader; } }
         
         public CtpTransferBankToFutureReq AsTransferBankToFutureReq { get { return _refValue as CtpTransferBankToFutureReq; } }
@@ -358,6 +360,56 @@ namespace QuantBox.Sfit.Api
         
         public CtpForQuoteParam AsForQuoteParam { get { return _refValue as CtpForQuoteParam; } }
         
+        public CtpMMOptionInstrCommRate AsMMOptionInstrCommRate { get { return _refValue as CtpMMOptionInstrCommRate; } }
+        
+        public CtpQryMMOptionInstrCommRate AsQryMMOptionInstrCommRate { get { return _refValue as CtpQryMMOptionInstrCommRate; } }
+        
+        public CtpMMInstrumentCommissionRate AsMMInstrumentCommissionRate { get { return _refValue as CtpMMInstrumentCommissionRate; } }
+        
+        public CtpQryMMInstrumentCommissionRate AsQryMMInstrumentCommissionRate { get { return _refValue as CtpQryMMInstrumentCommissionRate; } }
+        
+        public CtpInstrumentOrderCommRate AsInstrumentOrderCommRate { get { return _refValue as CtpInstrumentOrderCommRate; } }
+        
+        public CtpQryInstrumentOrderCommRate AsQryInstrumentOrderCommRate { get { return _refValue as CtpQryInstrumentOrderCommRate; } }
+        
+        public CtpTradeParam AsTradeParam { get { return _refValue as CtpTradeParam; } }
+        
+        public CtpInstrumentMarginRateUL AsInstrumentMarginRateUL { get { return _refValue as CtpInstrumentMarginRateUL; } }
+        
+        public CtpFutureLimitPosiParam AsFutureLimitPosiParam { get { return _refValue as CtpFutureLimitPosiParam; } }
+        
+        public CtpLoginForbiddenIP AsLoginForbiddenIP { get { return _refValue as CtpLoginForbiddenIP; } }
+        
+        public CtpIPList AsIPList { get { return _refValue as CtpIPList; } }
+        
+        public CtpInputOptionSelfClose AsInputOptionSelfClose { get { return _refValue as CtpInputOptionSelfClose; } }
+        
+        public CtpInputOptionSelfCloseAction AsInputOptionSelfCloseAction { get { return _refValue as CtpInputOptionSelfCloseAction; } }
+        
+        public CtpOptionSelfClose AsOptionSelfClose { get { return _refValue as CtpOptionSelfClose; } }
+        
+        public CtpOptionSelfCloseAction AsOptionSelfCloseAction { get { return _refValue as CtpOptionSelfCloseAction; } }
+        
+        public CtpQryOptionSelfClose AsQryOptionSelfClose { get { return _refValue as CtpQryOptionSelfClose; } }
+        
+        public CtpExchangeOptionSelfClose AsExchangeOptionSelfClose { get { return _refValue as CtpExchangeOptionSelfClose; } }
+        
+        public CtpQryOptionSelfCloseAction AsQryOptionSelfCloseAction { get { return _refValue as CtpQryOptionSelfCloseAction; } }
+        
+        public CtpExchangeOptionSelfCloseAction AsExchangeOptionSelfCloseAction { get { return _refValue as CtpExchangeOptionSelfCloseAction; } }
+        
+        public CtpSyncDelaySwap AsSyncDelaySwap { get { return _refValue as CtpSyncDelaySwap; } }
+        
+        public CtpQrySyncDelaySwap AsQrySyncDelaySwap { get { return _refValue as CtpQrySyncDelaySwap; } }
+        
+        public CtpInvestUnit AsInvestUnit { get { return _refValue as CtpInvestUnit; } }
+        
+        public CtpQryInvestUnit AsQryInvestUnit { get { return _refValue as CtpQryInvestUnit; } }
+        
+        public CtpSecAgentCheckMode AsSecAgentCheckMode { get { return _refValue as CtpSecAgentCheckMode; } }
+        
+        public CtpSecAgentTradeInfo AsSecAgentTradeInfo { get { return _refValue as CtpSecAgentTradeInfo; } }
+        
         public CtpMarketData AsMarketData { get { return _refValue as CtpMarketData; } }
         
         public CtpMarketDataBase AsMarketDataBase { get { return _refValue as CtpMarketDataBase; } }
@@ -536,6 +588,10 @@ namespace QuantBox.Sfit.Api
         
         public CtpProductGroup AsProductGroup { get { return _refValue as CtpProductGroup; } }
         
+        public CtpBulletin AsBulletin { get { return _refValue as CtpBulletin; } }
+        
+        public CtpQryBulletin AsQryBulletin { get { return _refValue as CtpQryBulletin; } }
+        
         public CtpReqOpenAccount AsReqOpenAccount { get { return _refValue as CtpReqOpenAccount; } }
         
         public CtpReqCancelAccount AsReqCancelAccount { get { return _refValue as CtpReqCancelAccount; } }
@@ -626,6 +682,56 @@ namespace QuantBox.Sfit.Api
         
         public CtpTradingAccountReserve AsTradingAccountReserve { get { return _refValue as CtpTradingAccountReserve; } }
         
+        public CtpQryLoginForbiddenIP AsQryLoginForbiddenIP { get { return _refValue as CtpQryLoginForbiddenIP; } }
+        
+        public CtpQryIPList AsQryIPList { get { return _refValue as CtpQryIPList; } }
+        
+        public CtpQryUserRightsAssign AsQryUserRightsAssign { get { return _refValue as CtpQryUserRightsAssign; } }
+        
+        public CtpReserveOpenAccountConfirm AsReserveOpenAccountConfirm { get { return _refValue as CtpReserveOpenAccountConfirm; } }
+        
+        public CtpReserveOpenAccount AsReserveOpenAccount { get { return _refValue as CtpReserveOpenAccount; } }
+        
+        public CtpAccountProperty AsAccountProperty { get { return _refValue as CtpAccountProperty; } }
+        
+        public CtpQryCurrDRIdentity AsQryCurrDRIdentity { get { return _refValue as CtpQryCurrDRIdentity; } }
+        
+        public CtpCurrDRIdentity AsCurrDRIdentity { get { return _refValue as CtpCurrDRIdentity; } }
+        
+        public CtpQrySecAgentCheckMode AsQrySecAgentCheckMode { get { return _refValue as CtpQrySecAgentCheckMode; } }
+        
+        public CtpQrySecAgentTradeInfo AsQrySecAgentTradeInfo { get { return _refValue as CtpQrySecAgentTradeInfo; } }
+        
+        public CtpUserSystemInfo AsUserSystemInfo { get { return _refValue as CtpUserSystemInfo; } }
+        
+        public CtpReqUserAuthMethod AsReqUserAuthMethod { get { return _refValue as CtpReqUserAuthMethod; } }
+        
+        public CtpRspUserAuthMethod AsRspUserAuthMethod { get { return _refValue as CtpRspUserAuthMethod; } }
+        
+        public CtpReqGenUserCaptcha AsReqGenUserCaptcha { get { return _refValue as CtpReqGenUserCaptcha; } }
+        
+        public CtpRspGenUserCaptcha AsRspGenUserCaptcha { get { return _refValue as CtpRspGenUserCaptcha; } }
+        
+        public CtpReqGenUserText AsReqGenUserText { get { return _refValue as CtpReqGenUserText; } }
+        
+        public CtpRspGenUserText AsRspGenUserText { get { return _refValue as CtpRspGenUserText; } }
+        
+        public CtpReqUserLoginWithCaptcha AsReqUserLoginWithCaptcha { get { return _refValue as CtpReqUserLoginWithCaptcha; } }
+        
+        public CtpReqUserLoginWithText AsReqUserLoginWithText { get { return _refValue as CtpReqUserLoginWithText; } }
+        
+        public CtpReqUserLoginWithOTP AsReqUserLoginWithOTP { get { return _refValue as CtpReqUserLoginWithOTP; } }
+        
+        public CtpReqApiHandshake AsReqApiHandshake { get { return _refValue as CtpReqApiHandshake; } }
+        
+        public CtpRspApiHandshake AsRspApiHandshake { get { return _refValue as CtpRspApiHandshake; } }
+        
+        public CtpReqVerifyApiKey AsReqVerifyApiKey { get { return _refValue as CtpReqVerifyApiKey; } }
+        
+        public CtpDepartmentUser AsDepartmentUser { get { return _refValue as CtpDepartmentUser; } }
+        
+        public CtpQueryFreq AsQueryFreq { get { return _refValue as CtpQueryFreq; } }
+        
 
        
         public string ToXmlString()
@@ -650,6 +756,9 @@ namespace QuantBox.Sfit.Api
         
       if(AsAuthenticationInfo!=null)
            return Serialize(AsAuthenticationInfo);
+        
+      if(AsRspUserLogin2!=null)
+           return Serialize(AsRspUserLogin2);
         
       if(AsTransferHeader!=null)
            return Serialize(AsTransferHeader);
@@ -1125,6 +1234,81 @@ namespace QuantBox.Sfit.Api
       if(AsForQuoteParam!=null)
            return Serialize(AsForQuoteParam);
         
+      if(AsMMOptionInstrCommRate!=null)
+           return Serialize(AsMMOptionInstrCommRate);
+        
+      if(AsQryMMOptionInstrCommRate!=null)
+           return Serialize(AsQryMMOptionInstrCommRate);
+        
+      if(AsMMInstrumentCommissionRate!=null)
+           return Serialize(AsMMInstrumentCommissionRate);
+        
+      if(AsQryMMInstrumentCommissionRate!=null)
+           return Serialize(AsQryMMInstrumentCommissionRate);
+        
+      if(AsInstrumentOrderCommRate!=null)
+           return Serialize(AsInstrumentOrderCommRate);
+        
+      if(AsQryInstrumentOrderCommRate!=null)
+           return Serialize(AsQryInstrumentOrderCommRate);
+        
+      if(AsTradeParam!=null)
+           return Serialize(AsTradeParam);
+        
+      if(AsInstrumentMarginRateUL!=null)
+           return Serialize(AsInstrumentMarginRateUL);
+        
+      if(AsFutureLimitPosiParam!=null)
+           return Serialize(AsFutureLimitPosiParam);
+        
+      if(AsLoginForbiddenIP!=null)
+           return Serialize(AsLoginForbiddenIP);
+        
+      if(AsIPList!=null)
+           return Serialize(AsIPList);
+        
+      if(AsInputOptionSelfClose!=null)
+           return Serialize(AsInputOptionSelfClose);
+        
+      if(AsInputOptionSelfCloseAction!=null)
+           return Serialize(AsInputOptionSelfCloseAction);
+        
+      if(AsOptionSelfClose!=null)
+           return Serialize(AsOptionSelfClose);
+        
+      if(AsOptionSelfCloseAction!=null)
+           return Serialize(AsOptionSelfCloseAction);
+        
+      if(AsQryOptionSelfClose!=null)
+           return Serialize(AsQryOptionSelfClose);
+        
+      if(AsExchangeOptionSelfClose!=null)
+           return Serialize(AsExchangeOptionSelfClose);
+        
+      if(AsQryOptionSelfCloseAction!=null)
+           return Serialize(AsQryOptionSelfCloseAction);
+        
+      if(AsExchangeOptionSelfCloseAction!=null)
+           return Serialize(AsExchangeOptionSelfCloseAction);
+        
+      if(AsSyncDelaySwap!=null)
+           return Serialize(AsSyncDelaySwap);
+        
+      if(AsQrySyncDelaySwap!=null)
+           return Serialize(AsQrySyncDelaySwap);
+        
+      if(AsInvestUnit!=null)
+           return Serialize(AsInvestUnit);
+        
+      if(AsQryInvestUnit!=null)
+           return Serialize(AsQryInvestUnit);
+        
+      if(AsSecAgentCheckMode!=null)
+           return Serialize(AsSecAgentCheckMode);
+        
+      if(AsSecAgentTradeInfo!=null)
+           return Serialize(AsSecAgentTradeInfo);
+        
       if(AsMarketData!=null)
            return Serialize(AsMarketData);
         
@@ -1392,6 +1576,12 @@ namespace QuantBox.Sfit.Api
       if(AsProductGroup!=null)
            return Serialize(AsProductGroup);
         
+      if(AsBulletin!=null)
+           return Serialize(AsBulletin);
+        
+      if(AsQryBulletin!=null)
+           return Serialize(AsQryBulletin);
+        
       if(AsReqOpenAccount!=null)
            return Serialize(AsReqOpenAccount);
         
@@ -1526,6 +1716,81 @@ namespace QuantBox.Sfit.Api
         
       if(AsTradingAccountReserve!=null)
            return Serialize(AsTradingAccountReserve);
+        
+      if(AsQryLoginForbiddenIP!=null)
+           return Serialize(AsQryLoginForbiddenIP);
+        
+      if(AsQryIPList!=null)
+           return Serialize(AsQryIPList);
+        
+      if(AsQryUserRightsAssign!=null)
+           return Serialize(AsQryUserRightsAssign);
+        
+      if(AsReserveOpenAccountConfirm!=null)
+           return Serialize(AsReserveOpenAccountConfirm);
+        
+      if(AsReserveOpenAccount!=null)
+           return Serialize(AsReserveOpenAccount);
+        
+      if(AsAccountProperty!=null)
+           return Serialize(AsAccountProperty);
+        
+      if(AsQryCurrDRIdentity!=null)
+           return Serialize(AsQryCurrDRIdentity);
+        
+      if(AsCurrDRIdentity!=null)
+           return Serialize(AsCurrDRIdentity);
+        
+      if(AsQrySecAgentCheckMode!=null)
+           return Serialize(AsQrySecAgentCheckMode);
+        
+      if(AsQrySecAgentTradeInfo!=null)
+           return Serialize(AsQrySecAgentTradeInfo);
+        
+      if(AsUserSystemInfo!=null)
+           return Serialize(AsUserSystemInfo);
+        
+      if(AsReqUserAuthMethod!=null)
+           return Serialize(AsReqUserAuthMethod);
+        
+      if(AsRspUserAuthMethod!=null)
+           return Serialize(AsRspUserAuthMethod);
+        
+      if(AsReqGenUserCaptcha!=null)
+           return Serialize(AsReqGenUserCaptcha);
+        
+      if(AsRspGenUserCaptcha!=null)
+           return Serialize(AsRspGenUserCaptcha);
+        
+      if(AsReqGenUserText!=null)
+           return Serialize(AsReqGenUserText);
+        
+      if(AsRspGenUserText!=null)
+           return Serialize(AsRspGenUserText);
+        
+      if(AsReqUserLoginWithCaptcha!=null)
+           return Serialize(AsReqUserLoginWithCaptcha);
+        
+      if(AsReqUserLoginWithText!=null)
+           return Serialize(AsReqUserLoginWithText);
+        
+      if(AsReqUserLoginWithOTP!=null)
+           return Serialize(AsReqUserLoginWithOTP);
+        
+      if(AsReqApiHandshake!=null)
+           return Serialize(AsReqApiHandshake);
+        
+      if(AsRspApiHandshake!=null)
+           return Serialize(AsRspApiHandshake);
+        
+      if(AsReqVerifyApiKey!=null)
+           return Serialize(AsReqVerifyApiKey);
+        
+      if(AsDepartmentUser!=null)
+           return Serialize(AsDepartmentUser);
+        
+      if(AsQueryFreq!=null)
+           return Serialize(AsQueryFreq);
         
              return "";
         }

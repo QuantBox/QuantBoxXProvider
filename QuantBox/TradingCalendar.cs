@@ -1,17 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
+using Skyline;
 using SmartQuant;
 
 namespace QuantBox
 {
-    public class TradingCalendar
+    public class TradingCalendar : TradingCalendarBase
     {
-        private TradingTimeManager _manager = new TradingTimeManager();
-        private TradingDayList _tradingDayList;
         public static readonly DateTime CalendarBegin;
         public static readonly DateTime CalendarEnd;
         public static readonly TradingCalendar Instance;
@@ -19,7 +21,7 @@ namespace QuantBox
 
         static TradingCalendar()
         {
-            CalendarBegin = new DateTime(DateTime.Today.Year - 1, 1, 1);
+            CalendarBegin = new DateTime(DateTime.Today.Year - 10, 1, 1);
             CalendarEnd = new DateTime(DateTime.Today.Year + 1, 12, 31);
             Instance = new TradingCalendar();
             Logger = LogManager.GetLogger("TradingCalendar");
@@ -27,70 +29,78 @@ namespace QuantBox
 
         public DateTime TradingDay { get; private set; } = DateTime.MinValue;
 
-        public void Init(DateTime tradingDay, bool updateCalendar = true)
+        public void Init(DateTime tradingDay, bool updateCalendar = true, string host = "data.quantbox.cn")
         {
             lock (this) {
                 if (TradingDay != tradingDay) {
                     TradingDay = tradingDay;
-                    if (updateCalendar) {
-                        UpdateDataFromRemote();
-                    }
                     Load();
+                    if (updateCalendar || (!DayList.HolidayLoaded || DayList.BeginDate.Year != CalendarBegin.Year)) {
+                        UpdateDataFromRemote(host);
+                        Load();
+                    }
                 }
             }
         }
 
         private static string GetTimeRangeDataFile()
         {
-            return Path.Combine(Installation.ConfigDir.FullName, "thanf", "trading_range.json");
+            return Path.Combine(Installation.ConfigDir.FullName, "quantbox", "trading_range.json");
         }
 
         private static string GetCalendarDataFile()
         {
-            return Path.Combine(Installation.ConfigDir.FullName, "thanf", "trading_calendar.json");
+            return Path.Combine(Installation.ConfigDir.FullName, "quantbox", "trading_calendar.json");
         }
 
-        private static void UpdateDataFromRemote()
+        private static void UpdateDataFromRemote(string host)
         {
-            const string remoteTimeRangeFile = "http://data.thanf.com/get_exchange_trading_time_data";
+            const string remoteTimeRangeFile = "http://{0}/get_exchange_trading_time_data";
             using (var wc = new WebClient()) {
                 try {
-                    var task = wc.DownloadFileTaskAsync(remoteTimeRangeFile, GetTimeRangeDataFile());
-                    task.Wait(2000);
+                    var tempFile = Path.GetTempFileName();
+                    var task = wc.DownloadFileTaskAsync(string.Format(remoteTimeRangeFile, host), tempFile);
+                    task.Wait(5000);
                     if (wc.IsBusy || task.Status == TaskStatus.WaitingForActivation) {
                         wc.CancelAsync();
                         wc.Dispose();
+                    }
+
+                    if (File.Exists(tempFile) && new FileInfo(tempFile).Length > 0) {
+                        File.Copy(tempFile, GetTimeRangeDataFile(), true);
+                        File.Delete(tempFile);
                     }
                 }
                 catch (Exception e) {
                     Logger.Warn($@"Update time range from remote: [{e}]");
                 }
             }
-            const string remoteCalendarUrl = "http://data.thanf.com/trading_dates?start_date={0}0101&end_date={1}1231";
+            const string remoteCalendarUrl = "http://{2}/trading_dates?start_date={0}0101&end_date={1}1231";
             using (var wc = new WebClient()) {
                 try {
-                    var uri = new Uri(string.Format(remoteCalendarUrl, CalendarBegin.Year, CalendarEnd.Year));
-                    var task = wc.DownloadFileTaskAsync(uri, GetCalendarDataFile());
-                    task.Wait(2000);
+                    var uri = new Uri(string.Format(remoteCalendarUrl, CalendarBegin.Year, CalendarEnd.Year, host));
+                    var tempFile = Path.GetTempFileName();
+                    var task = wc.DownloadFileTaskAsync(uri, tempFile);
+                    task.Wait(5000);
                     if (wc.IsBusy || task.Status == TaskStatus.WaitingForActivation) {
                         wc.CancelAsync();
                         wc.Dispose();
+                    }
+
+                    if (File.Exists(tempFile) && new FileInfo(tempFile).Length > 0) {
+                        File.Copy(tempFile, GetCalendarDataFile(), true);
+                        File.Delete(tempFile);
                     }
                 }
                 catch (Exception e) {
                     Logger.Warn($@"Update calendar from remote: [{e}]");
                 }
             }
-            //var downloadTask = new WebClient().DownloadFileTaskAsync(RemoteTimeRangeFile, GetTimeRangeDataFile());
-            //downloadTask.Wait(2000);
-            //var uri = new Uri(string.Format(RemoteCalendarUrl, CalendarBegin.Year, CalendarEnd.Year));
-            //var stringTask = new WebClient().DownloadFileTaskAsync(uri, GetCalendarDataFile());
-            //stringTask.Wait(2000);
         }
 
         private TradingCalendar()
         {
-            _tradingDayList = new TradingDayList(CalendarBegin, CalendarEnd);
+            DayList = new TradingDayList(CalendarBegin, CalendarEnd);
         }
 
         private void LoadTimeRange()
@@ -99,8 +109,8 @@ namespace QuantBox
                 var file = GetTimeRangeDataFile();
                 if (File.Exists(file)) {
                     var manager = new TradingTimeManager();
-                    manager.Load(file);
-                    _manager = manager;
+                    manager.Load(JsonConvert.DeserializeObject<string[][]>(QBHelper.ReadOnlyAllText(file)));
+                    TimeManager = manager;
                 }
             }
             catch (Exception e) {
@@ -113,19 +123,26 @@ namespace QuantBox
             try {
                 var file = GetCalendarDataFile();
                 if (File.Exists(file)) {
-                    var list = JToken.Parse(File.ReadAllText(file));
+                    var list = JToken.Parse(QBHelper.ReadOnlyAllText(file));
+                    var firstDate = ParseDateTime(list.First);
+                    var days = new TradingDayList(firstDate.AddDays(-firstDate.DayOfYear + 1), CalendarEnd);
                     var current = list.First;
-                    var days = new TradingDayList(CalendarBegin, CalendarEnd);
                     while (current != null) {
-                        var date = DateTime.ParseExact((string)current, "yyyyMMdd", null);
+                        var date = ParseDateTime(current);
                         days[date] = true;
                         current = current.Next;
                     }
-                    _tradingDayList = days;
+                    days.SetHoliday();
+                    DayList = days;
                 }
             }
             catch (Exception e) {
                 Logger.Warn($@"LoadCalendar [{e}]");
+            }
+
+            DateTime ParseDateTime(JToken current)
+            {
+                return DateTime.ParseExact((string)current, "yyyyMMdd", null);
             }
         }
 
@@ -137,44 +154,22 @@ namespace QuantBox
 
         public TradingTimeRange GetTimeRange(Instrument inst, DateTime date)
         {
-            return _manager.GetTimeRange(inst, date);
+            return GetTimeRange(inst.Symbol, date);
         }
 
-        public bool IsTradingDay(DateTime date)
+        public IList<TradingTimeRange> GetTimeRanges(Instrument inst)
         {
-            if (date >= _tradingDayList.BeginDate && date <= _tradingDayList.EndDate) {
-                return _tradingDayList[date];
-            }
-            return date.DayOfWeek != DayOfWeek.Sunday && date.DayOfWeek != DayOfWeek.Saturday;
+            return GetTimeRanges(inst.Symbol);
         }
-        private DateTime SeekTradingDay(DateTime day, bool next = true)
-        {
-            var offset = 1;
-            if (!next) {
-                offset = -1;
-            }
 
-            var tmp = day.AddDays(offset);
-            if (day > _tradingDayList.EndDate || day < _tradingDayList.BeginDate) {
-                while (true) {
-                    if (tmp.DayOfWeek != DayOfWeek.Saturday && tmp.DayOfWeek != DayOfWeek.Sunday)
-                        return day;
-                    tmp = tmp.AddDays(offset);
-                }
-            }
-            while (true) {
-                if (IsTradingDay(tmp))
-                    return tmp;
-                tmp = tmp.AddDays(offset);
-            }
-        }
-        public DateTime GetNextTradingDay(DateTime date)
+        public DateTime GetNextMarketOpenTime(Instrument inst, DateTime dateTime, bool backtestMode = false, DateTime? dateTime1 = null)
         {
-            return SeekTradingDay(date);
+            return GetNextMarketOpenTime(inst.Symbol, dateTime, backtestMode, dateTime1);
         }
-        public DateTime GetPrevTradingDay(DateTime day)
+
+        public DateTime GetNextCloseTime(Instrument inst, DateTime dateTime)
         {
-            return SeekTradingDay(day, false);
+            return GetNextCloseTime(inst.Symbol, dateTime);
         }
     }
 }

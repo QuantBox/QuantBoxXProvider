@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using SmartQuant;
 
 namespace QuantBox
@@ -25,21 +27,25 @@ namespace QuantBox
                 _provider = provider;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void EmitData(DataObject data, bool queued = true)
             {
                 _provider.EmitData(data, queued);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void EmitExecutionReport(ExecutionReport report, bool queued = true)
             {
                 _provider.EmitExecutionReport(report, queued);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void EmitAccountData(AccountData data)
             {
                 _provider.EmitAccountData(data);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void EmitAccountReport(AccountReport report, bool queued = true)
             {
                 _provider.EmitAccountReport(report, queued);
@@ -115,21 +121,25 @@ namespace QuantBox
                 _executionPipe.Add(_accountQueue);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void EmitData(DataObject data, bool queued = true)
             {
                 _dataQueue.Enqueue(data);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void EmitExecutionReport(ExecutionReport report, bool queued = true)
             {
                 _executionQueue.Enqueue(report);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void EmitAccountData(AccountData data)
             {
                 _accountQueue.Enqueue(data);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void EmitAccountReport(AccountReport report, bool queued = true)
             {
                 _accountQueue.Enqueue(report);

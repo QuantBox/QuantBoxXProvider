@@ -4,7 +4,7 @@ using QuantBox.XApi;
 
 namespace QuantBox
 {
-    internal abstract class XApiClient
+    public abstract class XApiClient
     {
         protected readonly ConnectionInfo Info;
         protected readonly XTradingApi Api;
@@ -24,7 +24,7 @@ namespace QuantBox
 
         protected virtual void OnRspQryPositions(object sender, PositionField position, bool isLast)
         {
-            Provider.OnMessage(position, isLast);
+            Provider.OnMessage(position);
         }
 
         protected virtual void OnRspQryAccount(object sender, AccountField account, bool isLast)
@@ -46,7 +46,16 @@ namespace QuantBox
 
             switch (status) {
                 case ConnectionStatus.Done:
-                    TradingDay = field.TradingDay();
+                    if (field != null) {
+                        TradingDay = field.TradingDay();
+                        if (string.IsNullOrEmpty(field.SessionID)) {
+                            OrderPrefix = string.Empty;
+                        }
+                        else {
+                            OrderPrefix = field.SessionID.EndsWith(":") ? field.SessionID : field.SessionID + ":";
+                        }
+                        OrderIdBase = int.Parse(field.Text);
+                    }
                     OnConnected();
                     break;
                 case ConnectionStatus.Disconnected:
@@ -57,10 +66,12 @@ namespace QuantBox
 
         protected virtual void OnRtnTrade(object sender, TradeField trade)
         {
+            Provider.OnMessage(trade);
         }
 
         protected virtual void OnRtnOrder(object sender, OrderField order)
         {
+            Provider.OnMessage(order);
         }
 
         protected virtual void OnConnected()
@@ -70,10 +81,10 @@ namespace QuantBox
 
         protected virtual void OnDisconnected()
         {
-            Provider.OnClientDisconnected();
+            Provider.OnClientDisconnected(this);
         }
 
-        protected XApiClient(XProvider provider, ConnectionInfo info)
+        protected XApiClient(XProvider provider, ConnectionInfo info, IXSpi spi = null)
         {
             Info = info;
             Provider = provider;
@@ -81,6 +92,9 @@ namespace QuantBox
             Server = provider.GetServerInfo(info.Server, info.UseType);
             Logger = LogManager.GetLogger($"{provider.Name}.{info.LogPrefix}.{User.UserID}");
             Api = provider.CreateXApi(provider.GetApiPath(Info.ApiPath));
+            if (spi != null) {
+                Api.RegisterSpi(spi);
+            }
             Api.ErrorHappened += OnErrorHappened;
             Api.StatusChanged += OnStatusChanged;
             Api.InvestorReceived += OnInvestorReceived;
@@ -90,6 +104,24 @@ namespace QuantBox
             Api.TradeReturn += OnRtnTrade;
             Api.InstrumentReceived += OnInstrumentReceived;
             Api.MarketDataReceived += OnMarketDataReceived;
+            Api.OrderReceived += OnOrderReceived;
+            Api.TradeReceived += OnTradeReceived;
+            Api.InstrumentStatusChanged += OnInstrumentStatusChanged;
+        }
+
+        private void OnInstrumentStatusChanged(object sender, InstrumentStatusField status)
+        {
+            Provider.OnMessage(status);
+        }
+
+        private void OnTradeReceived(object sender, TradeField trade, bool isLast)
+        {
+            Provider.OnMessage(trade);
+        }
+
+        private void OnOrderReceived(object sender, OrderField order, bool isLast)
+        {
+            Provider.OnMessage(order);
         }
 
         private void OnErrorHappened(object sender, ErrorField error)
@@ -109,8 +141,9 @@ namespace QuantBox
 
         public bool Connected => Api.Connected;
 
-        public DateTime TradingDay { get; set; }
-
+        public DateTime TradingDay { get; internal set; }
+        public int OrderIdBase { get; private set; }
+        public string OrderPrefix { get; private set; }
         public XProvider Provider { get; }
     }
 }

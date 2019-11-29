@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks.Dataflow;
 using QuantBox.XApi;
 using SmartQuant;
@@ -60,11 +62,27 @@ namespace QuantBox
             field.HedgeFlag = Convertor.GetHedgeFlag(order, _provider.DefaultHedgeFlag);
             field.Side = Convertor.GetSide(order);
             field.OpenClose = order.GetOpenClose();
+            if (field.OpenClose == OpenCloseType.Open
+                && field.Side == XApi.OrderSide.Sell
+                && order.SubSide == SubSide.Undefined) {
+                order.SetSubSide(SubSide.SellShort);
+            }
             field.ClientID = order.ClientID;
             field.AccountID = order.Account;
             field.StopPx = order.StopPx;
+            field.ID = GetOrderId(order);
+            field.LocalID = GetOrderLocalId(order);
+            if (!string.IsNullOrEmpty(order.ProviderOrderId)) {
+                field.OrderID = order.ProviderOrderId;
+                field.ExchangeID = order.Instrument.Exchange;
+                field.Status = XApi.OrderStatus.New;
+            }
+            else {
+                field.Status = XApi.OrderStatus.NotSent;
+            }
             return field;
         }
+
         private static ExecutionReport CreateReport(OrderRecord record, OrderStatus ordStatus, ExecType execType, string text = "")
         {
             var report = new ExecutionReport(record.Order);
@@ -72,9 +90,9 @@ namespace QuantBox
             report.AvgPx = record.AvgPx;
             report.CumQty = record.CumQty;
             report.LeavesQty = record.LeavesQty;
-            report.OrdStatus = ordStatus;
+             report.OrdStatus = ordStatus;
             report.ExecType = execType;
-            report.Text = text;
+            report.Text = text == "" ? record.Order.Text : text;
             return report;
         }
 
@@ -104,46 +122,41 @@ namespace QuantBox
 
         private void ProcessExecCancelled(OrderField field)
         {
-            if (_map.TryPickCancelled(field.ID, out var record)) {
-                _provider.OnMessage(CreateReport(record, (OrderStatus)field.Status, ExecType.ExecCancelled));
-            }
-            else if (_map.TryPickLocal(field.LocalID, out var order)) {
-                _provider.OnMessage(CreateReport(new OrderRecord(order), (OrderStatus)field.Status,
-                    ExecType.ExecCancelled, field.Text()));
+            if (_map.TryGetOrder(field.ID, out var record)) {
+                _provider.OnMessage(CreateReport(record, (OrderStatus)field.Status, ExecType.ExecCancelled, field.Text()));
             }
         }
 
         private void ProcessExecNew(OrderField field)
         {
-            var record = _map.PendingToWorking(field.LocalID, field.ID);
-            if (record != null) {
-                _provider.OnMessage(CreateReport(record, (OrderStatus)field.Status, ExecType.ExecNew));
+            if (_map.TryGetOrder(field.ID, out var record)) {
+                if (string.IsNullOrEmpty(record.Order.ProviderOrderId)) {
+                    _map.RemoveNoSend(field.ID);
+                    record.Order.ProviderOrderId = field.OrderID;
+                    _provider.OnMessage(CreateReport(record, (OrderStatus)field.Status, ExecType.ExecNew));
+                }
             }
         }
 
         private void ProcessExecRejected(OrderField field)
         {
-            if (_map.TryPickLocal(field.LocalID, out var order)) {
-                _provider.OnMessage(CreateReport(new OrderRecord(order), (OrderStatus)field.Status,
-                    ExecType.ExecRejected, field.Text()));
-            }
-            else if (_map.TryPickRejected(field.ID, out var record)) {
-                //出现超出涨跌停时，会先收到 ProcessExecNew
-                _provider.OnMessage(CreateReport(record, (OrderStatus)field.Status, ExecType.ExecRejected,
-                    field.Text()));
+            if (_map.TryGetOrder(field.ID, out var record)) {
+                var report = CreateReport(record, (OrderStatus)field.Status, ExecType.ExecRejected, field.Text());
+                report.SetErrorId(field.XErrorID, field.RawErrorID);
+                _provider.OnMessage(report);
             }
         }
 
         private void ProcessExecPendingCancel(OrderField field)
         {
-            if (_map.TryPickCancelling(field.ID, out var record)) {
+            if (_map.TryGetOrder(field.ID, out var record)) {
                 _provider.OnMessage(CreateReport(record, (OrderStatus)field.Status, ExecType.ExecPendingCancel));
             }
         }
 
         private void ProcessExecCancelReject(OrderField field)
         {
-            if (_map.TryPickPendingCancel(field.LocalID, out var record)) {
+            if (_map.TryGetOrder(field.ID, out var record)) {
                 _provider.OnMessage(CreateReport(record, (OrderStatus)field.Status, ExecType.ExecCancelReject,
                     field.Text()));
             }
@@ -151,27 +164,33 @@ namespace QuantBox
 
         private void ProcessTrade(TradeField trade)
         {
-            _map.TryPeek(trade.ID, out var record);
+            _map.TryGetOrder(trade.ID, out var record);
             if (record != null) {
                 record.AddFill(trade.Price, trade.Qty);
-                var status = (record.LeavesQty > 0) ? OrderStatus.PartiallyFilled : OrderStatus.Filled;
+                var status = record.LeavesQty > 0 ? OrderStatus.PartiallyFilled : OrderStatus.Filled;
                 var report = CreateReport(record, status, ExecType.ExecTrade);
+                report.ExecId = trade.TradeID;
                 report.DateTime = trade.UpdateTime();
+                if (report.DateTime.Date != _provider.Trader.TradingDay) {
+                    report.TransactTime = _provider.Trader.TradingDay.Add(report.DateTime.TimeOfDay);
+                }
+                else {
+                    report.TransactTime = report.DateTime;
+                }
+
                 report.LastPx = trade.Price;
                 report.LastQty = trade.Qty;
 
-                if (Math.Abs(trade.Commission) < double.Epsilon)
-                {
+                if (Math.Abs(trade.Commission) < double.Epsilon) {
                     report.Commission = _provider.GetCommission(report);
                 }
-                else
-                {
+                else {
                     report.Commission = trade.Commission;
                 }
 
                 _provider.OnMessage(report);
                 if (status == OrderStatus.Filled) {
-                    _map.RemoveFilled(trade.ID);
+                    _map.RemoveDone(trade.ID);
                 }
             }
         }
@@ -206,11 +225,8 @@ namespace QuantBox
         private void ProcessCancel(Order order)
         {
             string error;
-            if (_map.TryGetOrderId(order, out var id)) {
-                error = _provider.Trader.CancelOrder(id);
-                if (string.IsNullOrEmpty(error) || error == "0") {
-                    _map.AddCancelPending(order);
-                }
+            if (_map.OrderExist(GetOrderId(order))) {
+                error = _provider.Trader.CancelOrder(GetOrderId(order));
             }
             else {
                 error = @"Can't Found Order";
@@ -225,15 +241,8 @@ namespace QuantBox
         private void ProcessSend(Order order)
         {
             _provider.Logger.Info(string.Join(",", order.Id, order.Side, order.Instrument.Symbol, order.Qty, order.Price));
-            var localId = _provider.Trader.SendOrder(CreateOrderField(order));
-            if (string.IsNullOrEmpty(localId)) {
-                var report = CreateReport(new OrderRecord(order), OrderStatus.Rejected, ExecType.ExecRejected,
-                    @"Internal Error");
-                _provider.OnMessage(report);
-            }
-            else {
-                _map.SetLocalId(localId, order);
-            }
+            _map.AddNewOrder(GetOrderId(order), order);
+            _provider.Trader.SendOrder(CreateOrderField(order));
         }
 
         #endregion
@@ -242,6 +251,84 @@ namespace QuantBox
         {
             _provider = provider;
             InitHandler();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string GetOrderLocalId(Order order)
+        {
+            var id = GetOrderId(order);
+            return (id.Length == 8) ? id : id.Substring(id.Length - 8, 8);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string GetOrderId(Order order)
+        {
+            return order.ClOrderId;
+        }
+
+        internal static string GetOrderId(ExecutionCommand order)
+        {
+            return order.ClOrderId;
+        }
+
+        public void ProcessNoSendOrders()
+        {
+            var list = _map.GetNoSend();
+            list.Sort((x, y) => string.Compare(GetOrderId(x.Order), GetOrderId(y.Order), StringComparison.Ordinal));
+            foreach (var record in list) {
+                _provider.Trader.SendOrder(CreateOrderField(record.Order));
+                _provider.SetOrderIdBase(int.Parse(GetOrderLocalId(record.Order)));
+            }
+        }
+
+        public void LoadUndoneOrders(Framework framework, DateTime tradingDay, HashSet<string> processedTrades)
+        {
+            LoadOrders();
+            ProcessMissed();
+            SendToTrader();
+
+            void LoadOrders()
+            {
+                foreach (var order in framework.OrderManager.Orders) {
+                    if (order.ProviderId == _provider.Id
+                        && !order.IsDone
+                        && order.TransactTime > tradingDay) {
+                        _map.AddNewOrder(GetOrderId(order), order);
+                    }
+                }
+            }
+
+            void ProcessMissed()
+            {
+                var data = framework.StrategyManager;
+                var idMap = new Dictionary<string, string>();
+                foreach (var field in data.GetExOrders(_provider.Id)) {
+                    if (!string.IsNullOrEmpty(field.OrderID)) {
+                        idMap[field.ID] = field.OrderID;
+                        if (field.ExecType == XApi.ExecType.Trade) {
+                            ProcessExecNew(field);
+                        }
+                    }
+                    ProcessReturnOrder(field);
+                }
+                data.RemoveExOrders(_provider.Id);
+                foreach (var trade in data.GetExTrades(_provider.Id)) {
+                    if (!processedTrades.Contains($"{trade.TradeID}_{trade.Side}") && idMap.TryGetValue(trade.ID, out var id)) {
+                        trade.ID = id;
+                        ProcessTrade(trade);
+                    }
+                }
+                data.RemoveExTrades(_provider.Id);
+            }
+
+            void SendToTrader()
+            {
+                foreach (var record in _map) {
+                    if (!string.IsNullOrEmpty(record.Order.ProviderOrderId)) {
+                        _provider.Trader.SendOrder(CreateOrderField(record.Order));
+                    }
+                }
+            }
         }
 
         public void Open()
@@ -275,7 +362,7 @@ namespace QuantBox
             _orderBlock.Post(new TradingEvent(ExecType.ExecTrade, trade));
         }
 
-        public void PostRetrunOrder(OrderField order)
+        public void PostReturnOrder(OrderField order)
         {
             _orderBlock.Post(new TradingEvent(ExecType.ExecOrderStatus, order));
         }
