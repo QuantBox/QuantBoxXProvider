@@ -52,8 +52,9 @@
     <Reference Include="LiteDB, Version=4.1.4.0, Culture=neutral, PublicKeyToken=4ee40123013c9f27, processorArchitecture=MSIL">
       <HintPath>..\packages\LiteDB.4.1.4\lib\net40\LiteDB.dll</HintPath>
     </Reference>
-    <Reference Include="LiteMarketDatabase">
-      <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\LiteMarketDatabase.dll</HintPath>
+    <Reference Include="LiteMarketDatabase, Version=1.0.1.0, Culture=neutral, PublicKeyToken=4614856edd8db701, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\LiteMarketDatabase.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -67,8 +68,9 @@
     <Reference Include="QuantBox.XApiSharp">
       <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\QuantBox.XApiSharp.dll</HintPath>
     </Reference>
-    <Reference Include="Skyline.Core">
-      <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\Skyline.Core.dll</HintPath>
+    <Reference Include="Skyline.Core, Version=1.2.0.0, Culture=neutral, PublicKeyToken=9ff31e85b4b12396, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Skyline.Core.dll</HintPath>
     </Reference>
     <Reference Include="SmartQuant, Version=1.2.0.1, Culture=neutral, PublicKeyToken=023ca4f8a69375d5, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
