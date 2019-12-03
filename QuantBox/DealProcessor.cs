@@ -90,7 +90,7 @@ namespace QuantBox
             report.AvgPx = record.AvgPx;
             report.CumQty = record.CumQty;
             report.LeavesQty = record.LeavesQty;
-             report.OrdStatus = ordStatus;
+            report.OrdStatus = ordStatus;
             report.ExecType = execType;
             report.Text = text == "" ? record.Order.Text : text;
             return report;
@@ -124,6 +124,7 @@ namespace QuantBox
         {
             if (_map.TryGetOrder(field.ID, out var record)) {
                 _provider.OnMessage(CreateReport(record, (OrderStatus)field.Status, ExecType.ExecCancelled, field.Text()));
+                _map.RemoveDone(field.ID);
             }
         }
 
@@ -144,6 +145,7 @@ namespace QuantBox
                 var report = CreateReport(record, (OrderStatus)field.Status, ExecType.ExecRejected, field.Text());
                 report.SetErrorId(field.XErrorID, field.RawErrorID);
                 _provider.OnMessage(report);
+                _map.RemoveDone(field.ID);
             }
         }
 

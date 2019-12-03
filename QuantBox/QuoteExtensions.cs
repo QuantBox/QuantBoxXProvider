@@ -181,6 +181,61 @@ namespace QuantBox
             var turnover = GetTurnover(bar);
             return turnover / bar.Volume;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Green(this Bar bar) 
+        {
+            return bar.Close <= bar.Open;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Red(this Bar bar)
+        {
+            return bar.Close >= bar.Open;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Efficiency(this Bar bar)
+        {
+            return Body(bar) / bar.Size;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double UpperShadow(this Bar bar)
+        {
+            return Green(bar) ? bar.High - bar.Open : bar.High - bar.Close;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double LowerShadow(this Bar bar)
+        {
+            return Green(bar) ? bar.Open - bar.Low : bar.Close - bar.Low;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Body(this Bar bar)
+        {
+            return Math.Abs(bar.Close - bar.Open);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Height(this Bar bar)
+        {
+            return Math.Abs(bar.High - bar.Low);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double UpperShadowRatio(this Bar bar)
+        {
+            return UpperShadow(bar) / Height(bar);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double LowerShadowRatio(this Bar bar)
+        {
+            return LowerShadow(bar) / Height(bar);
+        }
+
         #endregion
 
         #region TickSeries
@@ -308,6 +363,7 @@ namespace QuantBox
                 var range = selector.Get(series[i].DateTime.Date);
                 if (index == 0) {
                     last = series[i];
+                    last.Size = last.Size * count;
                 }
                 else {
                     QBHelper.MergeBar(last, series[i]);

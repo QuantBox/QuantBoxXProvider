@@ -122,7 +122,7 @@ namespace QuantBox
             var framework = order.Portfolio.GetFramework();
             GetEventQueue(framework).Enqueue(CreateRejectReport(order));
         }
-        
+
         private ExecutionReport CreateCancelReport(Order order)
         {
             var report = new ExecutionReport(order);
@@ -154,6 +154,7 @@ namespace QuantBox
                 }
                 else {
                     _logger.Debug($"{order.Text}: 检测到自成交可能，进入等待队列.");
+                    order.DateTime = DateTime.Now;
                     _pendingList.Add(order);
                 }
             }
@@ -198,25 +199,33 @@ namespace QuantBox
 
         private void ProcessReport(ExecutionReport report)
         {
+            switch (report.OrdStatus) {
+                case OrderStatus.Rejected:
+                case OrderStatus.Filled:
+                case OrderStatus.Cancelled:
+                case OrderStatus.Expired:
+                case OrderStatus.Replaced:
+                    break;
+                default:
+                    return;
+            }
             var order = report.Order;
-            if (order.IsDone) {
-                if (_priceBookList.TryGetValue(order.Instrument.Symbol, out var book)) {
-                    book.RemoveOrder(order);
-                    _logger.Debug($"{order.Text}, 成交");
-                    if (_pendingList.Count == 0) { return; }
-                    var temp = new List<Order>();
-                    foreach (var item in _pendingList) {
-                        if (order.Side != item.Side) {
-                            if (!book.TradeTest(item)) {
-                                book.AddOrder(item);
-                                item.Send();
-                                continue;
-                            }
+            if (_priceBookList.TryGetValue(order.Instrument.Symbol, out var book)) {
+                book.RemoveOrder(order);
+                _logger.Debug($"{order.Text}, {report.ExecType}:{report.OrdStatus}");
+                if (_pendingList.Count == 0) { return; }
+                var temp = new List<Order>();
+                foreach (var item in _pendingList) {
+                    if (order.Side != item.Side) {
+                        if (!book.TradeTest(item)) {
+                            book.AddOrder(item);
+                            item.Send();
+                            continue;
                         }
-                        temp.Add(item);
                     }
-                    _pendingList = temp;
+                    temp.Add(item);
                 }
+                _pendingList = temp;
             }
         }
 
