@@ -363,7 +363,7 @@ namespace QuantBox
                 var range = selector.Get(series[i].DateTime.Date);
                 if (index == 0) {
                     last = series[i];
-                    last.Size = last.Size * count;
+                    last.Size *= count;
                 }
                 else {
                     QBHelper.MergeBar(last, series[i]);
