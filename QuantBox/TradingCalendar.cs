@@ -14,6 +14,8 @@ namespace QuantBox
 {
     public class TradingCalendar : TradingCalendarBase
     {
+        private const int LockPort = 15346;
+
         public static readonly DateTime CalendarBegin;
         public static readonly DateTime CalendarEnd;
         public static readonly TradingCalendar Instance;
@@ -67,7 +69,7 @@ namespace QuantBox
                     }
 
                     if (File.Exists(tempFile) && new FileInfo(tempFile).Length > 0) {
-                        File.Copy(tempFile, GetTimeRangeDataFile(), true);
+                        GlobalWait.Run(LockPort, () => File.Copy(tempFile, GetTimeRangeDataFile(), true));
                         File.Delete(tempFile);
                     }
                 }
@@ -88,7 +90,7 @@ namespace QuantBox
                     }
 
                     if (File.Exists(tempFile) && new FileInfo(tempFile).Length > 0) {
-                        File.Copy(tempFile, GetCalendarDataFile(), true);
+                        GlobalWait.Run(LockPort, () => File.Copy(tempFile, GetCalendarDataFile(), true));
                         File.Delete(tempFile);
                     }
                 }
