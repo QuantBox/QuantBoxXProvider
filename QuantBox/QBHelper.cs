@@ -43,13 +43,15 @@ namespace QuantBox
 
         public static string GetSmartQuantPath()
         {
+#if NETFRAMEWORK
             var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{C224DA18-4901-433D-BD94-82D28B640B2C}");
             if (key != null) {
                 var names = new List<string>(key.GetSubKeyNames());
                 names.Sort();
                 return key.GetValue("InstallLocation").ToString();
             }
-            return Directory.GetParent(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).FullName;
+#endif            
+            return Directory.GetParent(Path.GetDirectoryName(typeof(Framework).Assembly.Location)).FullName;
         }
 
         public static void InitNLog()
@@ -175,12 +177,12 @@ namespace QuantBox
 
         public static Bar MergeBar(Bar bar, Bar bar2)
         {
-            bar.High = Math.Max(bar.High, bar.High);
-            bar.Low = Math.Min(bar.Low, bar.Low);
-            bar.Close = bar.Close;
-            bar.Volume += bar.Volume;
-            bar.OpenInt = bar.OpenInt;
-            bar.IncTurnover(bar.GetTurnover());
+            bar.High = Math.Max(bar.High, bar2.High);
+            bar.Low = Math.Min(bar.Low, bar2.Low);
+            bar.Close = bar2.Close;
+            bar.Volume += bar2.Volume;
+            bar.OpenInt = bar2.OpenInt;
+            bar.IncTurnover(bar2.GetTurnover());
             bar.DateTime = bar2.CloseDateTime;
             return bar;
         }

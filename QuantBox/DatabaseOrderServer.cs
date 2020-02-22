@@ -1,10 +1,9 @@
-﻿
+﻿using LiteDB;
 namespace QuantBox
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using LiteDB;
+    using System.Linq;    
     using SmartQuant;
 
     internal enum ProviderSettingsType
@@ -18,9 +17,9 @@ namespace QuantBox
         #region Settings
         public class SettingsManager
         {
-            private readonly LiteCollection<BsonDocument> _collection;
+            private readonly ILiteCollection<BsonDocument> _collection;
 
-            public SettingsManager(LiteCollection<BsonDocument> collection)
+            public SettingsManager(ILiteCollection<BsonDocument> collection)
             {
                 _collection = collection;
             }
@@ -148,9 +147,9 @@ namespace QuantBox
 
         private readonly Framework _framework;
         private readonly LiteDatabase _database;
-        private readonly LiteCollection<ExecutionCommand> _orders;
-        private readonly LiteCollection<ExecutionReport> _reports;
-        private readonly LiteCollection<Stop> _stops;
+        private readonly ILiteCollection<ExecutionCommand> _orders;
+        private readonly ILiteCollection<ExecutionReport> _reports;
+        private readonly ILiteCollection<Stop> _stops;
 
         public Action<ExecutionCommand> SetOrderId = _ => { };
 

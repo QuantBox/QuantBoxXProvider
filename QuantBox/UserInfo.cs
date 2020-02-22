@@ -2,13 +2,17 @@
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+#if NETFRAMEWORK
 using QuantBox.Design;
+#endif
 using QuantBox.XApi;
 
 namespace QuantBox
 {
     [DefaultProperty("Label")]
+#if NETFRAMEWORK
     [TypeConverter(typeof(UserInfoConverter))]
+#endif
     [JsonConverter(typeof(NoTypeConverterJsonConverter<UserInfo>))]
     [DataContract]
     public class UserInfo

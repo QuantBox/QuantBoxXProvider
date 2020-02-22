@@ -1,16 +1,20 @@
 ﻿using System.ComponentModel;
 using System.Drawing.Design;
 using System.Runtime.Serialization;
-using System.Windows.Forms.Design;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+#if NETFRAMEWORK
+using System.Windows.Forms.Design;
 using QuantBox.Design;
+#endif
 using QuantBox.XApi;
 
 namespace QuantBox
 {
     [DefaultProperty("Label")]
+#if NETFRAMEWORK
     [TypeConverter(typeof(ServerInfoConverter))]
+#endif
     [JsonConverter(typeof(NoTypeConverterJsonConverter<ServerInfo>))]
     [DataContract]
     public class ServerInfo
@@ -26,7 +30,9 @@ namespace QuantBox
         public string Name { get; set; }
 
         [Category("标签")]
+#if NETFRAMEWORK
         [Editor(typeof(ApiTypeSelectorEditor), typeof(UITypeEditor))]
+#endif
         [DataMember]
         public ApiType Type { get; set; }
 
@@ -77,12 +83,16 @@ namespace QuantBox
         public bool SimulationSystem { get; set;}
 
         [Category("配置信息")]
+#if NETFRAMEWORK
         [Editor(typeof(FileNameEditor), typeof(UITypeEditor))]
+#endif
         [DataMember]
         public string ConfigPath { get; set; }
 
         [Category("配置信息")]
+#if NETFRAMEWORK
         [Editor(typeof(FileNameEditor), typeof(UITypeEditor))]
+#endif
         [DataMember]
         public string ConfigPath2 { get; set; }
 

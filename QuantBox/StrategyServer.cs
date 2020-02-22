@@ -26,12 +26,11 @@ namespace QuantBox
 
     public class StrategyServer
     {
-        private const string ConnectionString = "Filename={0};Journal={1};Mode=Exclusive";
+        private const string ConnectionString = "Filename={0};Upgrade=true";
 
         private volatile int _initialized;
-        private Framework _framework;
-        private Strategy _strategy;
-        private bool _journal = true;
+        private readonly Framework _framework;
+        private readonly Strategy _strategy;
         private string _databasePath;
         private ObjectTableWriter _fieldsWriter = null;
         private ObjectTableReader _fieldsReader = null;
@@ -70,17 +69,7 @@ namespace QuantBox
         LiteDatabase CreateDatabase()
         {
             var mapper = new DataEventMapper(_fieldsWriter, _fieldsReader);
-            return new LiteDatabase(string.Format(ConnectionString, _databasePath, _journal), mapper);
-        }
-
-        /// <summary>
-        /// 是否启用数据库日志，启用会保证数据完整性，减低写入性能。
-        /// </summary>
-        /// <returns></returns>
-        public StrategyServer EnableJournal(bool enabled = true)
-        {
-            _journal = enabled;
-            return this;
+            return new LiteDatabase(string.Format(ConnectionString, _databasePath), mapper);
         }
 
         /// <summary>

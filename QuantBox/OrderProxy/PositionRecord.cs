@@ -169,17 +169,7 @@ namespace QuantBox.OrderProxy
             }
         }
 
-        [Obsolete()]
-        public void GetCanCloseQty(out double qtyToday, out double qtyYesterday)
-        {
-            // 得到可平的今仓
-            qtyToday = QtyToday - FrozenCloseToday;
-            // 得到可平的昨仓
-            qtyYesterday = Qty - QtyToday - (FrozenClose - FrozenCloseToday);
-            // 对于非上海的，应当QtyYesterday就是所想要的值
-        }
-
-        public (double, double) GetCanCloseQty()
+        public (double closeTd, double closeYd) GetCanCloseQty()
         {
             // 得到可平的今仓
             var qtyToday = QtyToday - FrozenCloseToday;

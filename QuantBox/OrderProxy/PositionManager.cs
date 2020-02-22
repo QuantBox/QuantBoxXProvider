@@ -80,6 +80,11 @@ namespace QuantBox.OrderProxy
             }
         }
 
+        public void ProcessSend(Order order)
+        {
+            GetPosition(order.Instrument).ProcessSend(order, GetOrderFlags(order));
+        }
+
         public void ProcessExecutionReport(ExecutionReport report)
         {
             GetPosition(report.Instrument).ProcessExecutionReport(report, GetOrderFlags(report.Order));

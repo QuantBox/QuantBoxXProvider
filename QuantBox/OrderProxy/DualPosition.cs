@@ -42,6 +42,11 @@ namespace QuantBox.OrderProxy
         }
 
         #region Process Report
+        public void ProcessSend(Order order, OrderFlags flags)
+        {
+            OnPendingNewOrder(order, flags);
+        }
+
         public void ProcessExecutionReport(ExecutionReport report, OrderFlags flags)
         {
             switch (report.ExecType) {
@@ -51,9 +56,9 @@ namespace QuantBox.OrderProxy
                 case ExecType.ExecCancelled:
                     OnOrderCancelled(report.Order, flags);
                     break;
-                case ExecType.ExecNew:
-                    OnPendingNewOrder(report.Order, flags);
-                    break;
+                //case ExecType.ExecNew:
+                //    OnPendingNewOrder(report.Order, flags);
+                //    break;
                 case ExecType.ExecTrade:
                     OnOrderFilled(report.Order, flags);
                     break;

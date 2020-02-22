@@ -30,7 +30,7 @@ namespace QuantBox.OrderProxy
         protected readonly PositionManager Manager;
         private readonly OrderRecord _record;
         private readonly QuantBoxOrderInfo _info;
-        private OrderAgent.InstTradeInfo _tradeInfo;
+        private InstTradingRules _rules;
         private readonly Logger _logger;
         private DepthMarketDataField _marketData = DepthMarketDataField.Empty;
         internal Order OpenOrder;
@@ -80,7 +80,7 @@ namespace QuantBox.OrderProxy
 
         private void RecreateOrder(Order order, bool copyDeviationInfo = false)
         {
-            var newOrder = CreateOrder(order.LeavesQty, order.GetOpenClose());
+            var newOrder = CreateOrder(order.LeavesQty, order.GetOpenClose(true));
             if (copyDeviationInfo) {
                 var info = OrderExtensions.GetOrderInfo(newOrder);
                 var old = OrderExtensions.GetOrderInfo(order);
@@ -107,7 +107,7 @@ namespace QuantBox.OrderProxy
             var p = Manager.GetPosition(Order.Instrument);
             var (closeQty, closeTodayQty) = GetCloseItems();
 
-            var oc = Order.GetOpenClose();
+            var oc = Order.GetOpenClose(true);
             switch (oc) {
                 case OpenCloseType.Undefined:
                     AutoOpenClose(false);
@@ -131,12 +131,12 @@ namespace QuantBox.OrderProxy
             {
                 double close, closeToday;
                 if (Order.Side == OrderSide.Buy) {
-                    (close, closeToday) = p.Short.GetCanCloseQty();
+                    (closeToday, close) = p.Short.GetCanCloseQty();
                 }
                 else {
-                    (close, closeToday) = p.Long.GetCanCloseQty();
+                    (closeToday, close) = p.Long.GetCanCloseQty();
                 }
-                if (!_tradeInfo.CloseToday) {
+                if (!_rules.CloseToday) {
                     close += closeToday;
                     closeToday = 0;
                 }
@@ -145,8 +145,8 @@ namespace QuantBox.OrderProxy
             void AutoOpenClose(bool closeOnly = true)
             {
                 var qty = Order.Qty;
-                if (_tradeInfo.CloseToday) {
-                    if (_tradeInfo.CloseTodayFirst) {
+                if (_rules.CloseToday) {
+                    if (_rules.CloseTodayFirst) {
                         info.CloseToday = Math.Min(qty, closeTodayQty);
                         qty -= closeTodayQty;
                         if (qty <= 0) {
@@ -158,7 +158,7 @@ namespace QuantBox.OrderProxy
                     if (qty <= 0) {
                         return;
                     }
-                    if (!_tradeInfo.CloseTodayFirst) {
+                    if (!_rules.CloseTodayFirst) {
                         info.CloseToday = Math.Min(qty, closeTodayQty);
                         qty -= closeTodayQty;
                         if (qty <= 0) {
@@ -202,15 +202,15 @@ namespace QuantBox.OrderProxy
                 order.Type = OrderType.Limit;
             }
             switch (info.PriceAdjustMethod) {
-                case OrderPriceAdjustMethod.LowerUpperLimit:
-                    if (_tradeInfo.MarketOrder) {
+                case OrderPriceAdjustMethod.UpperLowerLimit:
+                    if (_rules.MarketOrder) {
                         _logger.Debug($"{Order.Id}, adjust to market");
                         order.Type = OrderType.Market;
                         order.Price = 0;
                     }
                     else {
                         _logger.Debug($"{Order.Id}, adjust to lower_upper_limit");
-                        order.Price = GetLowerUpperPrice();
+                        order.Price = GetUpperLowerPrice();
                     }
                     break;
                 case OrderPriceAdjustMethod.MatchPrice:
@@ -219,7 +219,7 @@ namespace QuantBox.OrderProxy
                     break;
             }
 
-            double GetLowerUpperPrice()
+            double GetUpperLowerPrice()
             {
                 return order.Side == OrderSide.Buy ? GetUpperLimitPrice() : GetLowerLimitPrice();
             }
@@ -238,7 +238,7 @@ namespace QuantBox.OrderProxy
             if (IsNotSent(order)) {
                 if (Order.Type == OrderType.Market) {
                     checkUpperLowerLimit = false;
-                    if (!_tradeInfo.MarketOrder) {
+                    if (!_rules.MarketOrder) {
                         Order.SetOrderType(OrderType.Limit);
                         SetOrderPrice(order, _info.Market2Limit);
                     }
@@ -250,7 +250,7 @@ namespace QuantBox.OrderProxy
                     }
                 }
                 if (!checkUpperLowerLimit || (order.Price >= GetLowerLimitPrice() && order.Price <= GetUpperLimitPrice())) {
-                    order.Send();
+                    Agent.SendOrder(order);
                 }
                 else {
                     _logger.Debug($"{Order.Id}, price_out_of_bounds");
@@ -295,12 +295,13 @@ namespace QuantBox.OrderProxy
             _record = new OrderRecord(order);
             _info = OrderExtensions.GetOrderInfo(order);
             _logger = logger;
-            ResetInfo();
+            InitRules();
         }
 
-        private void ResetInfo()
+        private void InitRules()
         {
-            _tradeInfo = Agent.InstTradeInfoList[Order.Instrument.Id];
+            SetMarketData();
+            _rules = Agent.InstTradeInfoList[Order.Instrument.Id];
             _info.DeviationMode = GetMode();
             if (_info.DeviationMode != OrderDeviationMode.Disabled) {
                 _info.Market2Limit.PriceAdjustMethod = GetMarket2LimitMethod();
@@ -316,7 +317,7 @@ namespace QuantBox.OrderProxy
 
             OrderDeviationMode GetMode()
             {
-                if ((Order.Type == OrderType.Market || Order.Type == OrderType.Stop) && _tradeInfo.MarketOrder) {
+                if ((Order.Type == OrderType.Market || Order.Type == OrderType.Stop) && _rules.MarketOrder) {
                     return OrderDeviationMode.Disabled;
                 }
                 return _info.DeviationMode;
@@ -330,6 +331,17 @@ namespace QuantBox.OrderProxy
                 report.ExecType = ExecType.ExecNew;
                 report.OrdStatus = OrderStatus.New;
                 Agent.EmitExecutionReport(report);
+            }
+            if (Order.Type == OrderType.Market 
+                && double.IsNaN(_marketData.OpenPrice) 
+                && !_rules.MarketOrder) {
+                var report = new ExecutionReport(Order);
+                report.ExecType = ExecType.ExecRejected;
+                report.OrdStatus = OrderStatus.Rejected;
+                report.Text = "没有行情无法将市价转化为限价";
+                Agent.EmitExecutionReport(report);
+                Clear();
+                return;
             }
             AutoCloseOpen();
             SendOrder();
@@ -355,9 +367,15 @@ namespace QuantBox.OrderProxy
             CancelOrder(ref CloseTodayOrder);
         }
 
-        #region Process ExecutionReport 
+        #region Process ExecutionReport
+        public virtual void OnSendOrder(Order order)
+        {
+            Manager.ProcessSend(order);
+        }
+
         public virtual void OnExecutionReport(ExecutionReport report)
         {
+            Manager.ProcessExecutionReport(report);
             switch (report.ExecType) {
                 case ExecType.ExecNew:
                     OnExecNew(report);
@@ -400,6 +418,7 @@ namespace QuantBox.OrderProxy
 
         private void Clear()
         {
+            OrderExtensions.GetOrderInfo(Order).Processor = null;
             ClearOrder(ref OpenOrder);
             ClearOrder(ref CloseOrder);
             ClearOrder(ref CloseTodayOrder);
@@ -579,7 +598,7 @@ namespace QuantBox.OrderProxy
                 return;
             }
             var info = OrderExtensions.GetOrderInfo(order);
-            if (Math.Abs(order.Price - price) > _info.DeviationInfo.Threshold) {                
+            if (Math.Abs(order.Price - price) > _info.DeviationInfo.Threshold) {
                 Do();
             }
 
@@ -591,7 +610,7 @@ namespace QuantBox.OrderProxy
             }
 
             void Do()
-            {                
+            {
                 if (CheckTryCount(info)) {
                     _logger.Debug($"{Order.Id}, price deviation {info.DeviationInfo.TryCount}.");
                     Agent.Cancel(order);
@@ -619,7 +638,7 @@ namespace QuantBox.OrderProxy
         }
 
         public virtual void OnReminder(DateTime dateTime, Order order)
-        {            
+        {
             var info = OrderExtensions.GetOrderInfo(order);
             if (CheckTryCount(info)) {
                 _logger.Debug($"{Order.Id}, time deviation {info.DeviationInfo.TryCount}.");
@@ -633,7 +652,6 @@ namespace QuantBox.OrderProxy
 
         public void OnMarketContinous()
         {
-            SetMarketData();
             SendOrder();
         }
 

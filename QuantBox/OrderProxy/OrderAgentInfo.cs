@@ -13,7 +13,7 @@ namespace QuantBox
 
         public OrderAgentInfo()
         {
-            Market2Limit.PriceAdjustMethod = OrderPriceAdjustMethod.LowerUpperLimit;
+            Market2Limit.PriceAdjustMethod = OrderPriceAdjustMethod.UpperLowerLimit;
         }
 
         /// <summary>
@@ -29,12 +29,12 @@ namespace QuantBox
         /// <summary>
         /// 支持平金的交易所列表
         /// </summary>
-        public readonly HashSet<string> SupportCloseTodayExchanges = new HashSet<string> { QuantBoxConst.SHFE, QuantBoxConst.INE, QuantBoxConst.CFFEX };
-        
+        public readonly HashSet<string> SupportCloseTodayExchanges = new HashSet<string> { QuantBoxConst.SHFE, QuantBoxConst.INE };
+
         /// <summary>
         /// 支持市价的交易所列表
         /// </summary>
-        public readonly HashSet<string> SupportMarketOrderExchanges = new HashSet<string> { QuantBoxConst.DCE, QuantBoxConst.CFFEX, QuantBoxConst.CZCE };
+        public readonly HashSet<string> SupportMarketOrderExchanges = new HashSet<string> { QuantBoxConst.DCE, QuantBoxConst.CZCE };
 
         /// <summary>
         /// 下反手单时，平仓单和开仓单同时发出还是先平后开顺序发出。
@@ -44,13 +44,13 @@ namespace QuantBox
         /// <summary>
         /// 是否对接OMS，如果对接OMS，则所有交易都区分平今平昨.
         /// </summary>
-        public bool ConnectOms = true;
+        //public bool ConnectOms = true;
 
         /// <summary>
         /// 市价转现价
         /// </summary>
         public DeviationInfo Market2Limit = new DeviationInfo();
-            
+
         public static OrderAgentInfo Load()
         {
             var settingsFile = GetSettingsFile();

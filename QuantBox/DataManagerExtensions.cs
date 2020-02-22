@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Linq;
-using SmartQuant;
-using System.Windows.Forms;
+using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
+#if NETFRAMEWORK
+using System.Windows.Forms;
+#endif
+using SmartQuant;
 
 namespace QuantBox
 {
@@ -19,7 +22,9 @@ namespace QuantBox
                 framework.EventManager.Dispatcher.HistoricalDataEnd += OnHistoricalDataEnd;
                 hdata.Send(request);
                 while (!wait.WaitOne(0)) {
+#if NETFRAMEWORK
                     Application.DoEvents();
+#endif
                 }
                 framework.EventManager.Dispatcher.HistoricalData -= OnHistoricalData;
                 framework.EventManager.Dispatcher.HistoricalDataEnd -= OnHistoricalDataEnd;
@@ -88,6 +93,24 @@ namespace QuantBox
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="manager"></param>
+        /// <param name="inst"></param>
+        /// <param name="date"></param>
+        /// <returns></returns>
+        public static TickSeries GetHistoricalTrades(this DataManager manager, Instrument inst, DateTime tradingDay)
+        {
+            var range = TradingCalendar.Instance.GetTimeRange(inst, tradingDay);
+            var datetime1 = tradingDay.Date.Add(range.OpenTime);
+            if (TradingCalendar.Instance.IsNightOpen(datetime1)) {
+                datetime1 = TradingCalendar.Instance.GetPrevTradingDay(tradingDay).Add(range.NightOpenTime);
+            }
+            var datetime2 = tradingDay.Date.Add(range.CloseTime);
+            return manager.GetHistoricalTrades(inst, datetime1, datetime2);
+        }
+
+        /// <summary>
         /// 下载 Tick 数据，返回值（ask,bid,trade）
         /// </summary>
         /// <param name="manager"></param>
@@ -148,7 +171,9 @@ namespace QuantBox
                         framework.EventManager.OnEvent(framework.EventBus.Dequeue());
                     }
                     else {
+#if NETFRAMEWORK
                         Application.DoEvents();
+#endif
                     }
                 }
                 framework.EventManager.Dispatcher.InstrumentDefinition -= OnInstrumentDefinition;
@@ -175,7 +200,7 @@ namespace QuantBox
         /// <param name="tradingDay"></param>
         /// <returns></returns>
         public static List<Instrument> GetMainFutures(this InstrumentManager manager, DateTime? tradingDay = null)
-        {            
+        {
             var framework = manager.GetFramework();
             if (!tradingDay.HasValue) {
                 tradingDay = TradingCalendar.Instance.GetPrevTradingDay(DateTime.Today);
@@ -365,7 +390,7 @@ namespace QuantBox
             }
         }
 
-        public static void UseBarBacktest(this IDataSimulator simulator, Instrument inst, BarSeries inputBars, params long[] barSizes) 
+        public static void UseBarBacktest(this IDataSimulator simulator, Instrument inst, BarSeries inputBars, params long[] barSizes)
         {
             var framework = ((DataSimulator)simulator).GetFramework();
             framework.EventManager.Dispatcher.SimulatorStop += DispatcherSimulatorStop;
@@ -446,16 +471,6 @@ namespace QuantBox
             simulator.SubscribeTrade = false;
             simulator.SubscribeQuote = false;
             simulator.SubscribeLevelII = false;
-        }
-
-        public static (TickSeries, TickSeries, TickSeries) ReadFromLocal(this DataManager manager, Instrument inst, string path)
-        {
-            return Convertor.MarketDataToTick(LiteMarketDatabase.Read(path), inst);
-        }
-
-        public static (TickSeries, TickSeries, TickSeries) ReadFromHost(this DataManager manager, Instrument inst, string url, string user = "", string password = "")
-        {
-            return Convertor.MarketDataToTick(LiteMarketDatabase.ReadFromHost(url, user, password), inst);
         }
     }
 }

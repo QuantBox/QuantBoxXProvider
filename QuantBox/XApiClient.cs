@@ -91,7 +91,7 @@ namespace QuantBox
             User = provider.GetUserInfo(info.User);
             Server = provider.GetServerInfo(info.Server, info.UseType);
             Logger = LogManager.GetLogger($"{provider.Name}.{info.LogPrefix}.{User.UserID}");
-            Api = provider.CreateXApi(provider.GetApiPath(Info.ApiPath));
+            Api = provider.CreateXApi(info);
             if (spi != null) {
                 Api.RegisterSpi(spi);
             }

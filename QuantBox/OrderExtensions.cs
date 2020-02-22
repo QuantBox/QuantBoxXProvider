@@ -312,7 +312,7 @@ namespace QuantBox
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Order TimeDeviationUseMarket(this Order order, int timeout)
         {
-            return Deviation(order, OrderDeviationMode.Time, timeout, OrderDeviationMethod.PriceAdjust, OrderPriceAdjustMethod.LowerUpperLimit, 0, 0);
+            return Deviation(order, OrderDeviationMode.Time, timeout, OrderDeviationMethod.PriceAdjust, OrderPriceAdjustMethod.UpperLowerLimit, 0, 0);
         }
 
         /// <summary>
@@ -366,7 +366,7 @@ namespace QuantBox
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Order PriceDeviationUseMarket(this Order order, byte priceOffset)
         {
-            return PriceDeviation(order, priceOffset, OrderDeviationMode.QuoteAndTrade, OrderPriceAdjustMethod.LowerUpperLimit, 0, 0);
+            return PriceDeviation(order, priceOffset, OrderDeviationMode.QuoteAndTrade, OrderPriceAdjustMethod.UpperLowerLimit, 0, 0);
         }
 
         /// <summary>

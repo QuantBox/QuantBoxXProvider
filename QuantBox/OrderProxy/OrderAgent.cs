@@ -10,6 +10,26 @@ namespace QuantBox
     using ProcessorList = System.Collections.Generic.LinkedList<OrderProxy.OrderProcessor>;
     using ProcessorListNode = System.Collections.Generic.LinkedListNode<OrderProxy.OrderProcessor>;
 
+    public struct InstTradingRules
+    {
+        /// <summary>
+        /// 锁仓
+        /// </summary>
+        public bool LockCloseToday;
+        /// <summary>
+        /// 支持市价
+        /// </summary>
+        public bool MarketOrder;
+        /// <summary>
+        /// 使用平金
+        /// </summary>
+        public bool CloseToday;
+        /// <summary>
+        /// 优先平金
+        /// </summary>
+        public bool CloseTodayFirst;
+    }
+
     public class OrderAgent : SellSideStrategy, IProvider
     {
         private static volatile int _nextId;
@@ -18,14 +38,7 @@ namespace QuantBox
             return Interlocked.Increment(ref _nextId);
         }
 
-        internal struct InstTradeInfo
-        {
-            public bool MarketOrder;
-            public bool CloseToday;
-            public bool CloseTodayFirst;
-        }
-        internal IdArray<InstTradeInfo> InstTradeInfoList = new IdArray<InstTradeInfo>();
-
+        internal readonly IdArray<InstTradingRules> InstTradeInfoList = new IdArray<InstTradingRules>();
         private readonly IdArray<PositionManager> _managers = new IdArray<PositionManager>();
         private readonly ProcessorList _processors = new ProcessorList();
         private readonly OrderAgentInfo _info;
@@ -55,15 +68,19 @@ namespace QuantBox
             }
         }
 
-        private void InitInstTradingInfo()
+        private InstTradingRules DefaultTradingRules(Instrument inst)
+        {
+            return new InstTradingRules {
+                MarketOrder = _info.SupportMarketOrderExchanges.Contains(inst.Exchange),
+                CloseToday = _info.SupportCloseTodayExchanges.Contains(inst.Exchange),
+                CloseTodayFirst = _info.UseCloseTodayExchanges.Contains(inst.Exchange)
+            };
+        }
+
+        private void InitInstTradingRules()
         {
             foreach (var inst in framework.InstrumentManager.Instruments) {
-                var info = new InstTradeInfo {
-                    MarketOrder = _info.SupportMarketOrderExchanges.Contains(inst.Exchange),
-                    CloseToday = _info.SupportCloseTodayExchanges.Contains(inst.Exchange),
-                    CloseTodayFirst = _info.UseCloseTodayExchanges.Contains(inst.Exchange)
-                };
-                InstTradeInfoList[inst.Id] = info;
+                InstTradeInfoList[inst.Id] = RulesGetter(inst);
             }
         }
 
@@ -167,58 +184,36 @@ namespace QuantBox
             return manager;
         }
 
-        private void ProcessCommand(ExecutionCommand command)
-        {
-            switch (command.Type) {
-                case ExecutionCommandType.Send:
-                    ProcessSend(command);
-                    break;
-                case ExecutionCommandType.Cancel:
-                    ProcessCancel(command);
-                    break;
-                case ExecutionCommandType.Replace:
-                    break;
-            }
-        }
-
         internal Order CreateOrder(Order order, double qty)
         {
             return Order(order.Instrument, order.Type, order.Side, qty, order.StopPx, order.Price, order.Text);
         }
 
-        private void ProcessCancel(ExecutionCommand cmd)
+        internal void SendOrder(Order order)
         {
-            var order = cmd.Order;
-            var info = OrderExtensions.GetOrderInfo(order);
-            if (info.Processor is OrderProcessor processor) {
-                processor.Cancel();
-            }
-        }
-
-        private void ProcessSend(ExecutionCommand cmd)
-        {
-            var order = cmd.Order;
-            var info = OrderExtensions.GetOrderInfo(order);
-            info.Processor = new OrderProcessor(this, order, _logger);
-            ((OrderProcessor)info.Processor).Do();
+            order.Provider = ExecutionProvider;
+            Send(order);
         }
 
         public const string DefaultName = "QBAgent";
         public OrderAgent(Framework framework, string name = DefaultName)
             : base(framework, name)
         {
+            RulesGetter = DefaultTradingRules;
             Status = ProviderStatus.Disconnected;
             DataProvider = EmptyDataProvider.Instance;
             _info = OrderAgentInfo.Load();
             _eventClock = new Clock(framework);
             _eventClock.SetMode(ClockMode.Realtime);
-            _eventQueue = new EventQueue(size: 10, bus: framework.EventBus);            
+            _eventQueue = new EventQueue(size: 10, bus: framework.EventBus);
             framework.EventBus.ExecutionPipe.Add(_eventQueue);
         }
         byte IProvider.Id { get; set; }
         public byte AgentId => ((IProvider)this).Id;
         public OrderAgentInfo Info => _info;
         public XProviderEventType TradingStatus { get; private set; } = XProviderEventType.MarketNoTrading;
+
+        public Func<Instrument, InstTradingRules> RulesGetter;
 
         #region Setting Functions
         public OrderAgent EnableLog(bool enable = true)
@@ -230,6 +225,14 @@ namespace QuantBox
         {
             Info.Market2Limit.PriceAdjustMethod = method;
             Info.Market2Limit.Slippage = slippage;
+            return this;
+        }
+
+        public OrderAgent TradingRules(Func<Instrument, InstTradingRules> getter)
+        {
+            if (getter != null) {
+                RulesGetter = getter;
+            }
             return this;
         }
 
@@ -278,12 +281,6 @@ namespace QuantBox
             return this;
         }
 
-        public OrderAgent CloseTodayFirst(bool enable)
-        {
-            Info.CloseTodayFirst = enable;
-            return this;
-        }
-
         #endregion
 
         public override void Connect()
@@ -293,7 +290,7 @@ namespace QuantBox
                 if (ExecutionProvider is XProvider x) {
                     x.EventHappened += ProviderEventHappened;
                 }
-                InitInstTradingInfo();
+                InitInstTradingRules();
                 InitSubscription();
                 framework.StrategyManager.Strategy.AddStrategy(this);
             }
@@ -361,6 +358,31 @@ namespace QuantBox
             }
         }
 
+        public override void OnSendCommand(ExecutionCommand cmd)
+        {
+            var order = cmd.Order;
+            var info = OrderExtensions.GetOrderInfo(order);
+            info.Processor = new OrderProcessor(this, order, _logger);
+            ((OrderProcessor)info.Processor).Do();
+        }
+
+        public override void OnCancelCommand(ExecutionCommand cmd)
+        {
+            var order = cmd.Order;
+            var info = OrderExtensions.GetOrderInfo(order);
+            if (info.Processor is OrderProcessor processor) {
+                processor.Cancel();
+            }
+        }
+
+        protected override void OnSendOrder(Order order)
+        {
+            var info = OrderExtensions.GetOrderInfo(order);
+            if (info.Processor is OrderProcessor processor) {
+                processor.OnSendOrder(order);
+            }
+        }
+
         protected override void OnExecutionReport(ExecutionReport report)
         {
             var info = OrderExtensions.GetOrderInfo(report.Order);
@@ -386,11 +408,6 @@ namespace QuantBox
             if (info.Processor is OrderProcessor processor) {
                 processor.OnReminder(dateTime, order);
             }
-        }
-
-        public override void Send(ExecutionCommand command)
-        {
-            ProcessCommand(command);
         }
 
         protected override void OnStrategyStart()

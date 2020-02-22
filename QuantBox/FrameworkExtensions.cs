@@ -221,20 +221,21 @@ namespace QuantBox
         /// 获取订单助手，使用指定服务器、用户的CTP插件
         /// </summary>
         /// <returns></returns>
-        public static OrderAgent NewCtpAgent(this ProviderManager manager, string server, string user, string password)
-        {
-            var ctp = NewCtp(manager, server, user, password);
+        public static (OrderAgent, XProvider) NewCtpAgent(this ProviderManager manager, string server, string user, string password)
+        {            
             var name = OrderAgent.DefaultName + $"({server}_{user})";
             var agent = GetAgent(manager, name);
             if (agent == null) {
                 agent = new OrderAgent(ProviderManagerFrameworkField.Getter(manager), name);
                 manager.AddNew(agent);
             }
+            var ctp = NewCtp(manager, server, user, password);
             agent.ExecutionProvider = ctp;
-            return agent;
+            //agent.DataProvider = ctp;
+            return (agent, ctp);
         }
 
-        private static XProvider GetCtp(this ProviderManager manager, string server, string user)
+        public static XProvider GetCtp(this ProviderManager manager, string server, string user)
         {
             foreach (var p in manager.Providers) {
                 if (p is XProvider xp && xp.GetType().Name == "QuantBoxCtpse") {

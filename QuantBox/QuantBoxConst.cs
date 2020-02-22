@@ -19,11 +19,11 @@
         /// </summary>
         public const byte PIdThanfSubscribe = 63;
         /// <summary>
-        /// 数据模拟插件
+        /// 数据模拟
         /// </summary>
         public const byte PIdSimData = 64;
         /// <summary>
-        /// 文件数据模拟插件
+        /// 文件数据模拟
         /// </summary>
         public const byte PIdFileSimData = 65;
         /// <summary>
@@ -51,9 +51,13 @@
         /// </summary>
         public const byte PIdCtpSim = 73;
         /// <summary>
-        /// 撮合模拟器
+        /// 交易撮合模拟
         /// </summary>
         public const byte PIdSimExec = 74;
+        /// <summary>
+        /// 期权数据模拟
+        /// </summary>
+        public const byte PIdOptionSimData = 75;
 
         public const int ReportErrorOffset = 0;
         public const int OrderInfoOffset = 0;
@@ -76,13 +80,12 @@
         public const int MonthBarSize = DayBarSize * 30;
 
         /// <summary>
-        /// 上市合约
+        /// 交易所
         /// </summary>
         public const string CZCE = "CZCE";
         public const string CFFEX = "CFFEX";
         public const string DCE = "DCE";
         public const string SHFE = "SHFE";
-        public const string INE = "INE";
-        
+        public const string INE = "INE";        
     }
 }

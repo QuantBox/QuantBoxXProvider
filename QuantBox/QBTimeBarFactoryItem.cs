@@ -131,6 +131,7 @@ namespace QuantBox
             if (_enableLog && _framework.Mode == FrameworkMode.Realtime) {
                 _logger.Debug($"new_bar,{time: dd_HH:mm:ss},{_closeDateTime: dd_HH:mm:ss}");
             }
+#if Compatibility
             bar = OpenQuant.Helper.NewBar(
                 time,
                 tick.DateTime,
@@ -139,6 +140,15 @@ namespace QuantBox
                 barType,
                 barSize,
                 tick.Price, tick.Price, tick.Price, tick.Price, OpenQuant.Helper.GetDoubleSize(tick));
+#else
+            bar = new Bar(time,
+                tick.DateTime,
+                ProviderId,
+                tick.InstrumentId,
+                barType,
+                barSize,
+                tick.Price, tick.Price, tick.Price, tick.Price, tick.Size);
+#endif
             _turnover = 0;
             if (!_delayedBarOpen) {
                 EmitBarOpen();
@@ -161,7 +171,11 @@ namespace QuantBox
             }
             var trade = (Trade)obj;
             if (_enableLog && _framework.Mode == FrameworkMode.Realtime) {
-                _logger.Debug($"{trade.Price}, {OpenQuant.Helper.GetIntSize(trade)},{trade.DateTime: HH:mm:ss},{trade.ExchangeDateTime: HH:mm:ss}");
+#if Compatibility
+                _logger.Debug($"{trade.Price},{OpenQuant.Helper.GetIntSize(trade)},{trade.DateTime: HH:mm:ss},{trade.ExchangeDateTime: HH:mm:ss}");
+#else
+                _logger.Debug($"{trade.Price},{trade.Size},{trade.DateTime: HH:mm:ss},{trade.ExchangeDateTime: HH:mm:ss}");
+#endif
             }
 
             if (bar != null) {
@@ -172,7 +186,12 @@ namespace QuantBox
 
                 if (_closeDateTime < trade.ExchangeDateTime) {
                     RaiseBar();
-                    if (OpenQuant.Helper.GetIntSize(trade) == 0) {
+#if Compatibility
+                    if (OpenQuant.Helper.GetIntSize(trade) == 0)
+#else
+                    if (trade.Size == 0)
+#endif
+                    {
                         return;
                     }
                     CreateBar(trade);
@@ -194,7 +213,12 @@ namespace QuantBox
                 }
             }
             else {
-                if (OpenQuant.Helper.GetIntSize(trade) == 0) {
+#if Compatibility
+                if (OpenQuant.Helper.GetIntSize(trade) == 0) 
+#else
+                if (trade.Size == 0)
+#endif
+                {
                     return;
                 }
                 CreateBar(trade);

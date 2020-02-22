@@ -31,7 +31,7 @@ namespace QuantBox
         /// <summary>
         /// 涨跌停价 
         /// </summary>
-        LowerUpperLimit,
+        UpperLowerLimit,
         /// <summary>
         /// 对手价
         /// </summary>

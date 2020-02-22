@@ -8,7 +8,7 @@ namespace QuantBox
     internal class DatabasePortfolioServer : PortfolioServer
     {
         private readonly LiteDatabase _database;
-        private readonly LiteCollection<Portfolio> _portfolios;
+        private readonly ILiteCollection<Portfolio> _portfolios;
 
         public DatabasePortfolioServer(Framework framework, LiteDatabase database) : base(framework)
         {

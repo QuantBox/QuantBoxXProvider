@@ -69,7 +69,7 @@ namespace QuantBox
                     }
 
                     if (File.Exists(tempFile) && new FileInfo(tempFile).Length > 0) {
-                        GlobalWait.Run(LockPort, () => File.Copy(tempFile, GetTimeRangeDataFile(), true));
+                        GlobalWait.Run(LockPort, () => File.Copy(tempFile, GetTimeRangeDataFile(), true), 1000);
                         File.Delete(tempFile);
                     }
                 }
@@ -90,7 +90,7 @@ namespace QuantBox
                     }
 
                     if (File.Exists(tempFile) && new FileInfo(tempFile).Length > 0) {
-                        GlobalWait.Run(LockPort, () => File.Copy(tempFile, GetCalendarDataFile(), true));
+                        GlobalWait.Run(LockPort, () => File.Copy(tempFile, GetCalendarDataFile(), true), 1000);
                         File.Delete(tempFile);
                     }
                 }
