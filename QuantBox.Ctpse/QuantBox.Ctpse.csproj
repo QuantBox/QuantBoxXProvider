@@ -41,9 +41,6 @@
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="QuantBox.XApiSharp">
-      <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\QuantBox.XApiSharp.dll</HintPath>
-    </Reference>
     <Reference Include="Skyline.Core">
       <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\Skyline.Core.dll</HintPath>
     </Reference>
@@ -67,6 +64,10 @@
     <ProjectReference Include="..\QuantBox\QuantBox.csproj">
       <Project>{5feb5600-7c98-4a76-a885-c21e6a99223e}</Project>
       <Name>QuantBox</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\XApiSharp\XApiSharp.csproj">
+      <Project>{ba6da3bd-c80f-49f5-953f-34e12967d166}</Project>
+      <Name>XApiSharp</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
