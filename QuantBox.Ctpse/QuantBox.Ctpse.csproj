@@ -41,8 +41,9 @@
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Skyline.Core">
-      <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\Skyline.Core.dll</HintPath>
+    <Reference Include="Skyline.Core, Version=1.2.0.0, Culture=neutral, PublicKeyToken=9ff31e85b4b12396, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Skyline.Core.dll</HintPath>
     </Reference>
     <Reference Include="SmartQuant, Version=1.2.0.1, Culture=neutral, PublicKeyToken=023ca4f8a69375d5, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
