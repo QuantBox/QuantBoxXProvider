@@ -58,12 +58,6 @@
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.4.6.8\lib\net45\NLog.dll</HintPath>
     </Reference>
-    <Reference Include="OpenQuantCompatibility">
-      <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\OpenQuantCompatibility.dll</HintPath>
-    </Reference>
-    <Reference Include="QuantBox.XApiSharp">
-      <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\QuantBox.XApiSharp.dll</HintPath>
-    </Reference>
     <Reference Include="Skyline.Core, Version=1.2.0.0, Culture=neutral, PublicKeyToken=9ff31e85b4b12396, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\Skyline.Core.dll</HintPath>
@@ -221,6 +215,16 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OpenQuantCompatibility\OpenQuantCompatibility.csproj">
+      <Project>{6ad35d65-bd88-4fc5-a61a-8818a6981e43}</Project>
+      <Name>OpenQuantCompatibility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\XApiSharp\XApiSharp.csproj">
+      <Project>{ba6da3bd-c80f-49f5-953f-34e12967d166}</Project>
+      <Name>XApiSharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
