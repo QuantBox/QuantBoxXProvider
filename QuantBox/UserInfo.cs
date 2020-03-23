@@ -28,13 +28,13 @@ namespace QuantBox
         public string Password { get; set; }
         [Category("账号")]
         [DataMember]
-        public string FundId { get; set; }
+        public string AccountId { get; set; }
         [Category("账号")]
         [DataMember]
-        public string CombiId { get; set; }
+        public string CombinationId { get; set; }
         [Category("账号")]
         [DataMember]
-        public string StockHolderId { get; set; }
+        public string AssetId { get; set; }
 
         public UserInfoField Get()
         {

@@ -2,6 +2,7 @@
 
 namespace QuantBox
 {
+    [Flags]
     public enum OrderDeviationMode : byte
     {
         Disabled = 0,

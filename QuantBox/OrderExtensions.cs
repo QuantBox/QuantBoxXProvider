@@ -320,6 +320,7 @@ namespace QuantBox
         /// </summary>
         /// <param name="order"></param>
         /// <param name="timeout">超时时间(毫秒)</param>
+        /// <param name="maxTry">尝试的次数</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Order TimeDeviationUseMatch(this Order order, int timeout, byte maxTry = 3)
@@ -338,7 +339,7 @@ namespace QuantBox
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Order TimeDeviationUseSlippage(this Order order, int timeout, byte slippage = 1, byte maxTry = 3)
         {
-            return Deviation(order, OrderDeviationMode.Time, timeout, OrderDeviationMethod.PriceAdjust, OrderPriceAdjustMethod.MatchPrice, 0, 0);
+            return Deviation(order, OrderDeviationMode.Time, timeout, OrderDeviationMethod.PriceAdjust, OrderPriceAdjustMethod.MatchPrice, slippage, maxTry);
         }
 
         /// <summary>

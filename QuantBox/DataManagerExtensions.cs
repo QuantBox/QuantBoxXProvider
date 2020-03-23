@@ -7,6 +7,7 @@ using System.Threading;
 #if NETFRAMEWORK
 using System.Windows.Forms;
 #endif
+using QuantBox.Serialization;
 using SmartQuant;
 
 namespace QuantBox
@@ -471,6 +472,27 @@ namespace QuantBox
             simulator.SubscribeTrade = false;
             simulator.SubscribeQuote = false;
             simulator.SubscribeLevelII = false;
+        }
+
+        public static (TickSeries, TickSeries, TickSeries) ReadFromLocal(this DataManager manager, Instrument inst, string path)
+        {
+            return Convertor.MarketDataToTick(TickH5.Load(path), inst);
+        }
+
+        public static (TickSeries, TickSeries, TickSeries) ReadFromHost(this DataManager manager, Instrument inst, string url)
+        {
+            using (var http = new HttpClient()) {
+                var task = http.GetStreamAsync(new Uri(url));
+                task.Wait();
+                var dataLen = (int)task.Result.Length;
+                var data = new byte[dataLen];
+                task.Result.Read(data, 0, dataLen);
+                var file = System.IO.Path.GetTempFileName();
+                System.IO.File.WriteAllBytes(file, data);
+                var ticks = Convertor.MarketDataToTick(TickH5.Load(file), inst);
+                System.IO.File.Delete(file);
+                return ticks;
+            }
         }
     }
 }

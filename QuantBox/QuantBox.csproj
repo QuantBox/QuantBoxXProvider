@@ -18,8 +18,8 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NETFRAMEWORK</DefineConstants>
+    <OutputPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;NETFRAMEWORK, Compatibility</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -27,7 +27,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\</OutputPath>
     <DefineConstants>TRACE;NETFRAMEWORK</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -42,15 +42,20 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>quantbox.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LiteDB, Version=5.0.3.0, Culture=neutral, PublicKeyToken=4ee40123013c9f27, processorArchitecture=MSIL">
-      <HintPath>..\packages\LiteDB.5.0.3\lib\net45\LiteDB.dll</HintPath>
+    <Reference Include="CSharpHdf, Version=1.0.0.1, Culture=neutral, PublicKeyToken=4614856edd8db701, processorArchitecture=MSIL">
+      <HintPath>..\packages\CSharpHdf.1.0.2\lib\net472\CSharpHdf.dll</HintPath>
+    </Reference>
+    <Reference Include="HDF.PInvoke, Version=1.10.502.0, Culture=neutral, PublicKeyToken=18793c1fcffe58a3, processorArchitecture=MSIL">
+      <HintPath>..\packages\HDF.PInvoke.NETStandard.1.10.502\lib\netstandard2.0\HDF.PInvoke.dll</HintPath>
+    </Reference>
+    <Reference Include="LiteDB, Version=5.0.4.0, Culture=neutral, PublicKeyToken=4ee40123013c9f27, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiteDB.5.0.4\lib\net45\LiteDB.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -58,9 +63,14 @@
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.4.6.8\lib\net45\NLog.dll</HintPath>
     </Reference>
+    <Reference Include="OpenQuantCompatibility, Version=1.0.5.0, Culture=neutral, PublicKeyToken=3955d3361f384280, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenQuantCompatibility.1.0.6\lib\net451\OpenQuantCompatibility.dll</HintPath>
+    </Reference>
+    <Reference Include="QuantBox.XApiSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4614856edd8db701, processorArchitecture=MSIL">
+      <HintPath>..\packages\XApiSharp.1.0.10\lib\net472\QuantBox.XApiSharp.dll</HintPath>
+    </Reference>
     <Reference Include="Skyline.Core, Version=1.2.0.0, Culture=neutral, PublicKeyToken=9ff31e85b4b12396, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Skyline.Core.dll</HintPath>
+      <HintPath>..\packages\SkylineStandard.1.0.26\lib\net472\Skyline.Core.dll</HintPath>
     </Reference>
     <Reference Include="SmartQuant, Version=1.2.0.1, Culture=neutral, PublicKeyToken=023ca4f8a69375d5, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -87,9 +97,16 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="TickSerializer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4614856edd8db701, processorArchitecture=MSIL">
+      <HintPath>..\packages\TickSerializer.1.0.48\lib\net472\TickSerializer.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccountPosition.cs" />
+    <Compile Include="OptionChainData.cs" />
+    <Compile Include="OptionChainDataType.cs" />
+    <Compile Include="ChainDataSimulation.cs" />
+    <Compile Include="OptionStrategy.cs" />
     <Compile Include="OrderProxy\EmptyDataProvider.cs" />
     <Compile Include="OrderRegister.cs" />
     <Compile Include="QBCommissionProvider.cs" />
@@ -207,6 +224,7 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="quantbox.pfx" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Design\XApiSettingsDialog.resx">
@@ -215,16 +233,6 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\OpenQuantCompatibility\OpenQuantCompatibility.csproj">
-      <Project>{6ad35d65-bd88-4fc5-a61a-8818a6981e43}</Project>
-      <Name>OpenQuantCompatibility</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\XApiSharp\XApiSharp.csproj">
-      <Project>{ba6da3bd-c80f-49f5-953f-34e12967d166}</Project>
-      <Name>XApiSharp</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,9 +1,10 @@
-﻿using LiteDB;
+﻿
 namespace QuantBox
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;    
+    using System.Linq;
+    using LiteDB;
     using SmartQuant;
 
     internal enum ProviderSettingsType
