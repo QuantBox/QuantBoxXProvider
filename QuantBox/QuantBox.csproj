@@ -41,12 +41,6 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>quantbox.pfx</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="CSharpHdf, Version=1.0.0.1, Culture=neutral, PublicKeyToken=4614856edd8db701, processorArchitecture=MSIL">
       <HintPath>..\packages\CSharpHdf.1.0.2\lib\net472\CSharpHdf.dll</HintPath>
