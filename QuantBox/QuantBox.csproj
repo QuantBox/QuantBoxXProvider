@@ -55,13 +55,7 @@
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NLog.4.6.8\lib\net45\NLog.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenQuantCompatibility, Version=1.0.5.0, Culture=neutral, PublicKeyToken=3955d3361f384280, processorArchitecture=MSIL">
-      <HintPath>..\packages\OpenQuantCompatibility.1.0.6\lib\net451\OpenQuantCompatibility.dll</HintPath>
-    </Reference>
-    <Reference Include="QuantBox.XApiSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4614856edd8db701, processorArchitecture=MSIL">
-      <HintPath>..\packages\XApiSharp.1.0.10\lib\net472\QuantBox.XApiSharp.dll</HintPath>
+      <HintPath>..\packages\NLog.4.7.0\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="Skyline.Core, Version=1.2.0.0, Culture=neutral, PublicKeyToken=9ff31e85b4b12396, processorArchitecture=MSIL">
       <HintPath>..\packages\SkylineStandard.1.0.26\lib\net472\Skyline.Core.dll</HintPath>
@@ -97,10 +91,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccountPosition.cs" />
-    <Compile Include="OptionChainData.cs" />
-    <Compile Include="OptionChainDataType.cs" />
-    <Compile Include="ChainDataSimulation.cs" />
-    <Compile Include="OptionStrategy.cs" />
     <Compile Include="OrderProxy\EmptyDataProvider.cs" />
     <Compile Include="OrderRegister.cs" />
     <Compile Include="QBCommissionProvider.cs" />
@@ -218,7 +208,6 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="quantbox.pfx" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Design\XApiSettingsDialog.resx">
@@ -227,6 +216,16 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OpenQuantCompatibility\OpenQuantCompatibility.csproj">
+      <Project>{6ad35d65-bd88-4fc5-a61a-8818a6981e43}</Project>
+      <Name>OpenQuantCompatibility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\XApiSharp\XApiSharp.csproj">
+      <Project>{ba6da3bd-c80f-49f5-953f-34e12967d166}</Project>
+      <Name>XApiSharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
