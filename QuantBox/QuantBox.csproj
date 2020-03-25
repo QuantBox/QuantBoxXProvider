@@ -42,9 +42,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CSharpHdf, Version=1.0.0.1, Culture=neutral, PublicKeyToken=4614856edd8db701, processorArchitecture=MSIL">
-      <HintPath>..\packages\CSharpHdf.1.0.2\lib\net472\CSharpHdf.dll</HintPath>
-    </Reference>
     <Reference Include="HDF.PInvoke, Version=1.10.502.0, Culture=neutral, PublicKeyToken=18793c1fcffe58a3, processorArchitecture=MSIL">
       <HintPath>..\packages\HDF.PInvoke.NETStandard.1.10.502\lib\netstandard2.0\HDF.PInvoke.dll</HintPath>
     </Reference>
