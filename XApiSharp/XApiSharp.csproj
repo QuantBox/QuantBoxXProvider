@@ -121,8 +121,5 @@
     <Compile Include="XSpi.cs" />
     <Compile Include="XTradingApi.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="quantbox.pfx" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -7,7 +7,6 @@ using System.Threading;
 #if NETFRAMEWORK
 using System.Windows.Forms;
 #endif
-using QuantBox.Serialization;
 using SmartQuant;
 
 namespace QuantBox
