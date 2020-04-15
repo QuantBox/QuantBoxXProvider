@@ -22,13 +22,6 @@ namespace QuantBox
             return Api.SendOrder(order);
         }
 
-        public void QueryInstrument()
-        {
-            if (Connected) {
-                Api.Query(QueryType.ReqQryInstrument, null);
-            }
-        }
-
         public void QueryAccount()
         {
             if (Connected) {

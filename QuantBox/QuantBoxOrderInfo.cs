@@ -47,7 +47,7 @@ namespace QuantBox
         public int ParentOrderId;
         public DeviationInfo Market2Limit = new DeviationInfo();
         public DeviationInfo DeviationInfo = new DeviationInfo();
-        internal object Processor = null;
+        internal object processor = null;
 
         private static readonly int ThisSize;
         static QuantBoxOrderInfo()

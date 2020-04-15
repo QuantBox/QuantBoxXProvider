@@ -6,39 +6,37 @@ namespace QuantBox
 {
     using System.Collections.Generic;
     using NLog;
-    using QuantBox.OrderProxy;
+    using OrderProxy;
     using ProcessorList = System.Collections.Generic.LinkedList<OrderProxy.OrderProcessor>;
     using ProcessorListNode = System.Collections.Generic.LinkedListNode<OrderProxy.OrderProcessor>;
 
     public struct InstTradingRules
     {
         /// <summary>
-        /// 锁仓
+        /// 支持做空
         /// </summary>
-        public bool LockCloseToday;
+        public bool HasShort;
         /// <summary>
         /// 支持市价
         /// </summary>
-        public bool MarketOrder;
+        public bool HasMarketOrder;
         /// <summary>
-        /// 使用平金
+        /// T+1 平仓
         /// </summary>
-        public bool CloseToday;
+        public bool DisableCloseToday;
         /// <summary>
-        /// 优先平金
+        /// 平今优先
         /// </summary>
         public bool CloseTodayFirst;
+        /// <summary>
+        /// 严格的平今
+        /// </summary>
+        public bool StrictCloseToday;
     }
 
-    public class OrderAgent : SellSideStrategy, IProvider
+    public sealed class OrderAgent : SellSideStrategy, IProvider
     {
-        private static volatile int _nextId;
-        internal static int GetNextId()
-        {
-            return Interlocked.Increment(ref _nextId);
-        }
-
-        internal readonly IdArray<InstTradingRules> InstTradeInfoList = new IdArray<InstTradingRules>();
+        internal readonly IdArray<InstTradingRules> instTradeInfoList = new IdArray<InstTradingRules>();
         private readonly IdArray<PositionManager> _managers = new IdArray<PositionManager>();
         private readonly ProcessorList _processors = new ProcessorList();
         private readonly OrderAgentInfo _info;
@@ -49,21 +47,23 @@ namespace QuantBox
         private void InitSubscription()
         {
             foreach (var s in framework.StrategyManager.GetStrategies()) {
-                foreach (var (inst, p) in s.GetExecutionProviderList()) {
+                foreach ((Instrument inst, IExecutionProvider p) in s.GetExecutionProviderList()) {
                     if (p == null) {
                         continue;
                     }
-                    if (p.Id == AgentId && p is OrderAgent agent) {
-                        if (inst == null) {
-                            foreach (var item in s.Instruments) {
-                                AddInstrument(item, s.GetDataProvider(item));
-                            }
-                            break;
-                        }
-                        else {
-                            AddInstrument(inst, s.GetDataProvider(inst));
-                        }
+
+                    if (p.Id != AgentId || !(p is OrderAgent)) {
+                        continue;
                     }
+
+                    if (inst == null) {
+                        foreach (var item in s.Instruments) {
+                            AddInstrument(item, s.GetDataProvider(item));
+                        }
+                        break;
+                    }
+
+                    AddInstrument(inst, s.GetDataProvider(inst));
                 }
             }
         }
@@ -71,16 +71,18 @@ namespace QuantBox
         private InstTradingRules DefaultTradingRules(Instrument inst)
         {
             return new InstTradingRules {
-                MarketOrder = _info.SupportMarketOrderExchanges.Contains(inst.Exchange),
-                CloseToday = _info.SupportCloseTodayExchanges.Contains(inst.Exchange),
-                CloseTodayFirst = _info.UseCloseTodayExchanges.Contains(inst.Exchange)
+                HasShort = inst.Type == InstrumentType.Future || inst.Type == InstrumentType.FutureOption || inst.Type == InstrumentType.Option,
+                DisableCloseToday = !(inst.Type == InstrumentType.Future || inst.Type == InstrumentType.FutureOption || inst.Type == InstrumentType.Option),
+                HasMarketOrder = _info.SupportMarketOrderExchanges.Contains(inst.Exchange),
+                CloseTodayFirst = _info.CloseTodayFirstExchanges.Contains(inst.Exchange),
+                StrictCloseToday = _info.StrictCloseTodayExchanges.Contains(inst.Exchange),
             };
         }
 
         private void InitInstTradingRules()
         {
             foreach (var inst in framework.InstrumentManager.Instruments) {
-                InstTradeInfoList[inst.Id] = RulesGetter(inst);
+                instTradeInfoList[inst.Id] = RulesGetter(inst);
             }
         }
 
@@ -93,7 +95,7 @@ namespace QuantBox
                 case XProviderEventType.MarketNoTrading:
                     break;
                 case XProviderEventType.MarketContinous:
-                    OnMarketContinous();
+                    OnMarketContinuous();
                     break;
                 case XProviderEventType.MarketAuctionOrdering:
                     OnMarketAuctionOrdering();
@@ -104,8 +106,6 @@ namespace QuantBox
                     break;
                 case XProviderEventType.MarketClosed:
                     OnMarketClosed();
-                    break;
-                default:
                     break;
             }
         }
@@ -146,10 +146,10 @@ namespace QuantBox
             }
         }
 
-        private void OnMarketContinous()
+        private void OnMarketContinuous()
         {
             foreach (var item in _processors) {
-                item.OnMarketContinous();
+                item.OnMarketContentious();
             }
         }
 
@@ -160,7 +160,7 @@ namespace QuantBox
 
         internal void RemoveProcessor(OrderProcessor p)
         {
-            _processors.Remove(p.ListNode);
+            _processors.Remove(p.listNode);
         }
 
         internal PositionManager GetPositionManager(int strategyId)
@@ -212,7 +212,6 @@ namespace QuantBox
         public byte AgentId => ((IProvider)this).Id;
         public OrderAgentInfo Info => _info;
         public XProviderEventType TradingStatus { get; private set; } = XProviderEventType.MarketNoTrading;
-
         public Func<Instrument, InstTradingRules> RulesGetter;
 
         #region Setting Functions
@@ -236,26 +235,18 @@ namespace QuantBox
             return this;
         }
 
-        public OrderAgent UseCloseTodayExchanges(params string[] exchanges)
+        /// <summary>
+        /// 设置优先平金的交易所
+        /// </summary>
+        /// <param name="exchanges"></param>
+        /// <returns></returns>
+        public OrderAgent CloseTodayFirstExchanges(params string[] exchanges)
         {
             if (exchanges.Length > 0) {
-                Info.UseCloseTodayExchanges.Clear();
+                Info.CloseTodayFirstExchanges.Clear();
                 foreach (var item in exchanges) {
-                    if (!Info.UseCloseTodayExchanges.Contains(item)) {
-                        Info.UseCloseTodayExchanges.Add(item);
-                    }
-                }
-            }
-            return this;
-        }
-
-        public OrderAgent SupportCloseTodayExchanges(params string[] exchanges)
-        {
-            if (exchanges.Length > 0) {
-                Info.SupportCloseTodayExchanges.Clear();
-                foreach (var item in exchanges) {
-                    if (!Info.SupportCloseTodayExchanges.Contains(item)) {
-                        Info.SupportCloseTodayExchanges.Add(item);
+                    if (!Info.CloseTodayFirstExchanges.Contains(item)) {
+                        Info.CloseTodayFirstExchanges.Add(item);
                     }
                 }
             }
@@ -275,6 +266,11 @@ namespace QuantBox
             return this;
         }
 
+        /// <summary>
+        /// 反向开仓时先平后开
+        /// </summary>
+        /// <param name="enable"></param>
+        /// <returns></returns>
         public OrderAgent CloseFirstOnReversing(bool enable)
         {
             Info.CloseFirstOnReversing = enable;
@@ -285,15 +281,17 @@ namespace QuantBox
 
         public override void Connect()
         {
-            if (Status == ProviderStatus.Disconnected) {
-                Status = ProviderStatus.Connecting;
-                if (ExecutionProvider is XProvider x) {
-                    x.EventHappened += ProviderEventHappened;
-                }
-                InitInstTradingRules();
-                InitSubscription();
-                framework.StrategyManager.Strategy.AddStrategy(this);
+            if (Status != ProviderStatus.Disconnected) {
+                return;
             }
+
+            Status = ProviderStatus.Connecting;
+            if (ExecutionProvider is XProvider x) {
+                x.EventHappened += ProviderEventHappened;
+            }
+            InitInstTradingRules();
+            InitSubscription();
+            framework.StrategyManager.Strategy.AddStrategy(this);
         }
 
         public void LoadPositions()
@@ -304,36 +302,42 @@ namespace QuantBox
 
             var processorList = new Dictionary<int, OrderProcessor>();
             foreach (var order in OrderManager.Orders) {
-                if (!order.IsDone && order.ProviderId == AgentId) {
-                    var info = OrderExtensions.GetOrderInfo(order);
-                    info.Processor = new OrderProcessor(this, order, _logger);
-                    processorList[order.Id] = (OrderProcessor)info.Processor;
+                if (order.IsDone || order.ProviderId != AgentId) {
+                    continue;
                 }
+
+                var info = OrderExtensions.GetOrderInfo(order);
+                info.processor = new OrderProcessor(this, order, _logger);
+                processorList[order.Id] = (OrderProcessor)info.processor;
             }
 
             foreach (var order in OrderManager.Orders) {
-                if (order.strategyId == Id) {
-                    var info = OrderExtensions.GetOrderInfo(order);
-                    if (info.ParentOrderId != 0) {
-                        if (!processorList.TryGetValue(info.ParentOrderId, out var processor)) {
-                            continue;
-                        }
-                        switch (order.GetOpenClose()) {
-                            case XApi.OpenCloseType.Undefined:
-                            case XApi.OpenCloseType.Open:
-                                processor.OpenOrder = order;
-                                break;
-                            case XApi.OpenCloseType.Close:
-                                processor.CloseOrder = order;
-                                break;
-                            case XApi.OpenCloseType.CloseToday:
-                                processor.CloseTodayOrder = order;
-                                break;
-                        }
-                        if (!order.IsDone) {
-                            info.Processor = processor;
-                        }
-                    }
+                if (order.strategyId != Id) {
+                    continue;
+                }
+
+                var info = OrderExtensions.GetOrderInfo(order);
+                if (info.ParentOrderId == 0) {
+                    continue;
+                }
+
+                if (!processorList.TryGetValue(info.ParentOrderId, out var processor)) {
+                    continue;
+                }
+                switch (order.GetOpenClose()) {
+                    case XApi.OpenCloseType.Undefined:
+                    case XApi.OpenCloseType.Open:
+                        processor.openOrder = order;
+                        break;
+                    case XApi.OpenCloseType.Close:
+                        processor.closeOrder = order;
+                        break;
+                    case XApi.OpenCloseType.CloseToday:
+                        processor.closeTodayOrder = order;
+                        break;
+                }
+                if (!order.IsDone) {
+                    info.processor = processor;
                 }
             }
 
@@ -344,10 +348,12 @@ namespace QuantBox
 
         protected override void OnProviderConnected(Provider provider)
         {
-            if (provider.Id == ExecutionProvider.Id) {
-                if (Status != ProviderStatus.Connected) {
-                    Status = ProviderStatus.Connected;
-                }
+            if (provider.Id != ExecutionProvider.Id) {
+                return;
+            }
+
+            if (Status != ProviderStatus.Connected) {
+                Status = ProviderStatus.Connected;
             }
         }
 
@@ -362,15 +368,15 @@ namespace QuantBox
         {
             var order = cmd.Order;
             var info = OrderExtensions.GetOrderInfo(order);
-            info.Processor = new OrderProcessor(this, order, _logger);
-            ((OrderProcessor)info.Processor).Do();
+            info.processor = new OrderProcessor(this, order, _logger);
+            ((OrderProcessor)info.processor).Do();
         }
 
         public override void OnCancelCommand(ExecutionCommand cmd)
         {
             var order = cmd.Order;
             var info = OrderExtensions.GetOrderInfo(order);
-            if (info.Processor is OrderProcessor processor) {
+            if (info.processor is OrderProcessor processor) {
                 processor.Cancel();
             }
         }
@@ -378,7 +384,7 @@ namespace QuantBox
         protected override void OnSendOrder(Order order)
         {
             var info = OrderExtensions.GetOrderInfo(order);
-            if (info.Processor is OrderProcessor processor) {
+            if (info.processor is OrderProcessor processor) {
                 processor.OnSendOrder(order);
             }
         }
@@ -386,7 +392,7 @@ namespace QuantBox
         protected override void OnExecutionReport(ExecutionReport report)
         {
             var info = OrderExtensions.GetOrderInfo(report.Order);
-            if (info.Processor is OrderProcessor processor) {
+            if (info.processor is OrderProcessor processor) {
                 processor.OnExecutionReport(report);
             }
         }
@@ -405,7 +411,7 @@ namespace QuantBox
                 return;
             }
             var info = OrderExtensions.GetOrderInfo(order);
-            if (info.Processor is OrderProcessor processor) {
+            if (info.processor is OrderProcessor processor) {
                 processor.OnReminder(dateTime, order);
             }
         }

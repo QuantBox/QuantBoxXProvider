@@ -18,6 +18,14 @@ namespace QuantBox
             public readonly TradeField Trade;
             public readonly OrderField OrderReturn;
 
+            public TradingEvent(ExecType type)
+            {
+                Type = type;
+                Order = null;
+                Trade = null;
+                OrderReturn = null;
+            }
+
             public TradingEvent(ExecType type, Order order)
             {
                 Type = type;
@@ -49,7 +57,7 @@ namespace QuantBox
         private delegate void OrderReturnHandler(OrderField field);
         private readonly IdArray<OrderReturnHandler> _orderHandlers = new IdArray<OrderReturnHandler>(byte.MaxValue);
 
-        private OrderField CreateOrderField(Order order)
+        private OrderField CreateOrderField(Order order, string localId, string orderId = "")
         {
             var field = new OrderField();
             var (symbol, exchange) = _provider.GetSymbolInfo(order.Instrument);
@@ -67,13 +75,13 @@ namespace QuantBox
                 && order.SubSide == SubSide.Undefined) {
                 order.SetSubSide(SubSide.SellShort);
             }
-            field.ClientID = order.ClientID;
+            field.ClientID = order.Account;
             field.AccountID = order.Account;
             field.StopPx = order.StopPx;
             field.ID = GetOrderId(order);
-            field.LocalID = GetOrderLocalId(order);
-            if (!string.IsNullOrEmpty(order.ProviderOrderId)) {
-                field.OrderID = order.ProviderOrderId;
+            field.LocalID = localId;
+            if (!string.IsNullOrEmpty(orderId)) {
+                field.OrderID = orderId;
                 field.ExchangeID = order.Instrument.Exchange;
                 field.Status = XApi.OrderStatus.New;
             }
@@ -116,7 +124,7 @@ namespace QuantBox
 
         private void ProcessReturnOrder(OrderField field)
         {
-            _provider.Logger.Info(field.DebugInfo);
+            _provider.logger.Info(field.DebugInfo);
             _orderHandlers[(byte)field.ExecType](field);
         }
 
@@ -131,9 +139,10 @@ namespace QuantBox
         private void ProcessExecNew(OrderField field)
         {
             if (_map.TryGetOrder(field.ID, out var record)) {
-                if (string.IsNullOrEmpty(record.Order.ProviderOrderId)) {
-                    _map.RemoveNoSend(field.ID);
-                    record.Order.ProviderOrderId = field.OrderID;
+                _map.RemoveNoSent(field.ID);
+                (string localId, string orderId) = GetProviderOrderId(record.Order);
+                if (string.IsNullOrEmpty(orderId)) {
+                    record.Order.ProviderOrderId = $"{localId}_{field.OrderID}";
                     _provider.OnMessage(CreateReport(record, (OrderStatus)field.Status, ExecType.ExecNew));
                 }
             }
@@ -173,8 +182,8 @@ namespace QuantBox
                 var report = CreateReport(record, status, ExecType.ExecTrade);
                 report.ExecId = trade.TradeID;
                 report.DateTime = trade.UpdateTime();
-                if (report.DateTime.Date != _provider.Trader.TradingDay) {
-                    report.TransactTime = _provider.Trader.TradingDay.Add(report.DateTime.TimeOfDay);
+                if (report.DateTime.Date != _provider.trader.TradingDay) {
+                    report.TransactTime = _provider.trader.TradingDay.Add(report.DateTime.TimeOfDay);
                 }
                 else {
                     report.TransactTime = report.DateTime;
@@ -228,7 +237,7 @@ namespace QuantBox
         {
             string error;
             if (_map.OrderExist(GetOrderId(order))) {
-                error = _provider.Trader.CancelOrder(GetOrderId(order));
+                error = _provider.trader.CancelOrder(GetOrderId(order));
             }
             else {
                 error = @"Can't Found Order";
@@ -242,9 +251,10 @@ namespace QuantBox
 
         private void ProcessSend(Order order)
         {
-            _provider.Logger.Info(string.Join(",", order.Id, order.Side, order.Instrument.Symbol, order.Qty, order.Price));
-            _map.AddNewOrder(GetOrderId(order), order);
-            _provider.Trader.SendOrder(CreateOrderField(order));
+            _provider.logger.Info(string.Join(",", order.Id, order.Side, order.Instrument.Symbol, order.Qty, order.Price));
+            (string localId, string orderId) = GetProviderOrderId(order);
+            _map.AddNewOrder(GetOrderId(order), orderId, order);
+            _provider.trader.SendOrder(CreateOrderField(order, localId, orderId));
         }
 
         #endregion
@@ -256,79 +266,77 @@ namespace QuantBox
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static string GetOrderLocalId(Order order)
+        private static string GetOrderId(Order order)
         {
-            var id = GetOrderId(order);
-            return (id.Length == 8) ? id : id.Substring(id.Length - 8, 8);
+            return order.ClOrderId;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static string GetOrderId(Order order)
+        private static (string localId, string orderId) GetProviderOrderId(Order order)
         {
-            return order.ClOrderId;
+            var id = order.ProviderOrderId;
+            return id.Length == XProvider.LocalIdLength 
+                ? (id, string.Empty) 
+                : (id.Substring(0, XProvider.LocalIdLength), id.Substring(XProvider.LocalIdLength + 1));
         }
 
-        internal static string GetOrderId(ExecutionCommand order)
+        public void ProcessNoSent()
         {
-            return order.ClOrderId;
-        }
-
-        public void ProcessNoSendOrders()
-        {
-            var list = _map.GetNoSend();
+            var list = _map.GetNoSent();
             list.Sort((x, y) => string.Compare(GetOrderId(x.Order), GetOrderId(y.Order), StringComparison.Ordinal));
             foreach (var record in list) {
-                _provider.Trader.SendOrder(CreateOrderField(record.Order));
-                _provider.SetOrderIdBase(int.Parse(GetOrderLocalId(record.Order)));
+                (string localId, string orderId) = GetProviderOrderId(record.Order);
+                _provider.trader.SendOrder(CreateOrderField(record.Order, localId, orderId));
             }
         }
 
-        public void LoadUndoneOrders(Framework framework, DateTime tradingDay, HashSet<string> processedTrades)
+        public void ProcessUndone(Framework framework, DateTime tradingDay, HashSet<string> processedTrades)
         {
-            LoadOrders();
-            ProcessMissed();
-            SendToTrader();
-
-            void LoadOrders()
-            {
-                foreach (var order in framework.OrderManager.Orders) {
-                    if (order.ProviderId == _provider.Id
-                        && !order.IsDone
-                        && order.TransactTime > tradingDay) {
-                        _map.AddNewOrder(GetOrderId(order), order);
-                    }
+            var strategyManager = framework.StrategyManager;
+            var localIdMap = new Dictionary<string, OrderField>();
+            foreach (var field in strategyManager.GetExOrders(_provider.Id)) {
+                if (!string.IsNullOrEmpty(field.OrderID)) {
+                    localIdMap[field.LocalID] = field;
                 }
             }
+            strategyManager.RemoveExOrders(_provider.Id);
 
-            void ProcessMissed()
-            {
-                var data = framework.StrategyManager;
-                var idMap = new Dictionary<string, string>();
-                foreach (var field in data.GetExOrders(_provider.Id)) {
-                    if (!string.IsNullOrEmpty(field.OrderID)) {
-                        idMap[field.ID] = field.OrderID;
-                        if (field.ExecType == XApi.ExecType.Trade) {
-                            ProcessExecNew(field);
-                        }
-                    }
-                    ProcessReturnOrder(field);
+            foreach (var order in framework.OrderManager.Orders.ToArray()) {
+                if (order.ProviderId != _provider.Id || order.TransactTime <= tradingDay) {
+                    continue;
                 }
-                data.RemoveExOrders(_provider.Id);
-                foreach (var trade in data.GetExTrades(_provider.Id)) {
-                    if (!processedTrades.Contains($"{trade.TradeID}_{trade.Side}") && idMap.TryGetValue(trade.ID, out var id)) {
-                        trade.ID = id;
-                        ProcessTrade(trade);
-                    }
+                (string localId, string orderId) = GetProviderOrderId(order);
+                _provider.localId = Math.Max(int.Parse(localId), _provider.localId);
+                if (order.IsDone) {
+                    localIdMap.Remove(localId);
+                    continue;
                 }
-                data.RemoveExTrades(_provider.Id);
+
+                var id = GetOrderId(order);
+                if (localIdMap.TryGetValue(localId, out var orderField)) {
+                    orderField.ID = id;
+                    orderId = orderField.OrderID;
+                }
+
+                _map.AddNewOrder(id, orderId, order);
             }
 
-            void SendToTrader()
-            {
-                foreach (var record in _map) {
-                    if (!string.IsNullOrEmpty(record.Order.ProviderOrderId)) {
-                        _provider.Trader.SendOrder(CreateOrderField(record.Order));
-                    }
+            foreach (var orderField in localIdMap.Values) {
+                ProcessReturnOrder(orderField);
+            }
+
+            foreach (var trade in strategyManager.GetExTrades(_provider.Id)) {
+                if (!processedTrades.Contains($"{trade.TradeID}_{trade.Side}") && localIdMap.TryGetValue(trade.ID, out var orderField)) {
+                    trade.ID = orderField.ID;
+                    ProcessTrade(trade);
+                }
+            }
+            strategyManager.RemoveExTrades(_provider.Id);
+
+            foreach (var record in _map) {
+                (string localId, string orderId) = GetProviderOrderId(record.Order);
+                if (!string.IsNullOrEmpty(orderId)) {
+                    _provider.trader.SendOrder(CreateOrderField(record.Order, localId, orderId));
                 }
             }
         }
@@ -336,7 +344,7 @@ namespace QuantBox
         public void Open()
         {
             if (_orderBlock == null) {
-                _orderBlock = new ActionBlock<TradingEvent>((Action<TradingEvent>)OrderEventAction);
+                _orderBlock = new ActionBlock<TradingEvent>(OrderEventAction);
             }
         }
 

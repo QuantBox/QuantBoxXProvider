@@ -15,24 +15,24 @@ namespace QuantBox.XApi
         protected override int QryTradingAccount(ReqQueryField field)
         {
             var account = new CtpQryTradingAccount();
-            account.BrokerID = _client.CtpLoginInfo.BrokerID;
-            account.InvestorID = _client.CtpLoginInfo.UserID;
-            return _client.Api.ReqQryTradingAccount(account, _client.GetNextRequestId());
+            account.BrokerID = _client.ctpLoginInfo.BrokerID;
+            account.InvestorID = _client.ctpLoginInfo.UserID;
+            return _client.api.ReqQryTradingAccount(account, _client.GetNextRequestId());
         }
 
         protected override int QryOrder(ReqQueryField field)
         {
-            return _client.Api.ReqQryOrder(new CtpQryOrder {
-                BrokerID = _client.CtpLoginInfo.BrokerID,
-                InvestorID = _client.CtpLoginInfo.UserID
+            return _client.api.ReqQryOrder(new CtpQryOrder {
+                BrokerID = _client.ctpLoginInfo.BrokerID,
+                InvestorID = _client.ctpLoginInfo.UserID
             }, _client.GetNextRequestId());
         }
 
         protected override int QryTrade(ReqQueryField field)
         {
-            return _client.Api.ReqQryTrade(new CtpQryTrade {
-                BrokerID = _client.CtpLoginInfo.BrokerID,
-                InvestorID = _client.CtpLoginInfo.UserID
+            return _client.api.ReqQryTrade(new CtpQryTrade {
+                BrokerID = _client.ctpLoginInfo.BrokerID,
+                InvestorID = _client.ctpLoginInfo.UserID
             }, _client.GetNextRequestId());
         }
 
@@ -60,7 +60,7 @@ namespace QuantBox.XApi
         {
             var req = new CtpQryDepthMarketData();
             req.InstrumentID = field.InstrumentID;
-            return _client.Api.ReqQryDepthMarketData(req, _client.GetNextRequestId());
+            return _client.api.ReqQryDepthMarketData(req, _client.GetNextRequestId());
         }
 
         protected override bool ProcessInstrument(CtpResponse? rsp)
@@ -74,17 +74,17 @@ namespace QuantBox.XApi
                     return true;
 
                 if (CtpConvert.CheckRspInfo(rsp.Value.Item2)) {
-                    _client.Spi.ProcessQryInstrument(CtpConvert.GetInstrumentField(data), rsp.Value.IsLast);
+                    _client.spi.ProcessQryInstrument(CtpConvert.GetInstrumentField(data), rsp.Value.IsLast);
                     return rsp.Value.IsLast;
                 }
                 else {
                     _client.SendError(rsp.Value.Item2, nameof(ProcessInstrument));
-                    _client.Spi.ProcessQryInstrument(null, true);
+                    _client.spi.ProcessQryInstrument(null, true);
                 }
             }
             catch (Exception e) {
                 _client.SendError(-1, e.Message);
-                _client.Spi.ProcessQryInstrument(null, true);
+                _client.spi.ProcessQryInstrument(null, true);
             }
             return true;
         }
@@ -100,12 +100,12 @@ namespace QuantBox.XApi
                 if (data != null) {
                     position = CtpConvert.GetPositionField(data);
                 }
-                _client.Spi.ProcessQryPosition(position, rsp.Value.IsLast);
+                _client.spi.ProcessQryPosition(position, rsp.Value.IsLast);
                 return rsp.Value.IsLast;
             }
             else {
                 _client.SendError(rsp.Value.Item2, nameof(ProcessInvestorPosition));
-                _client.Spi.ProcessQryPosition(null, true);
+                _client.spi.ProcessQryPosition(null, true);
             }
             return true;
         }
@@ -116,12 +116,12 @@ namespace QuantBox.XApi
             if (data == null)
                 return true;
             if (CtpConvert.CheckRspInfo(rsp.Value.Item2)) {
-                _client.Spi.ProcessQryAccount(CtpConvert.GetAccountField(data), rsp.Value.IsLast);
+                _client.spi.ProcessQryAccount(CtpConvert.GetAccountField(data), rsp.Value.IsLast);
                 return rsp.Value.IsLast;
             }
             else {
                 _client.SendError(rsp.Value.Item2, nameof(ProcessTradingAccount));
-                _client.Spi.ProcessQryAccount(null, true);
+                _client.spi.ProcessQryAccount(null, true);
             }
             return true;
         }
@@ -133,7 +133,7 @@ namespace QuantBox.XApi
             }
 
             if (CtpConvert.CheckRspInfo(rsp.Value.Item2)) {
-                _client.Spi.ProcessQryOrder(CtpConvert.GetOrder(rsp.Value.Item1.AsOrder), rsp.Value.IsLast);
+                _client.spi.ProcessQryOrder(CtpConvert.GetOrder(rsp.Value.Item1.AsOrder), rsp.Value.IsLast);
                 return rsp.Value.IsLast;
             }
             return true;
@@ -146,7 +146,7 @@ namespace QuantBox.XApi
             }
 
             if (CtpConvert.CheckRspInfo(rsp.Value.Item2)) {
-                _client.Spi.ProcessQryTrade(CtpConvert.GetTrade(rsp.Value.Item1.AsTrade), rsp.Value.IsLast);
+                _client.spi.ProcessQryTrade(CtpConvert.GetTrade(rsp.Value.Item1.AsTrade), rsp.Value.IsLast);
                 return rsp.Value.IsLast;
             }
 
@@ -188,15 +188,15 @@ namespace QuantBox.XApi
 
         protected override int QueryInstrument(ReqQueryField field)
         {
-            return _client.Api.ReqQryInstrument(new CtpQryInstrument(), _client.GetNextRequestId());
+            return _client.api.ReqQryInstrument(new CtpQryInstrument(), _client.GetNextRequestId());
         }
 
         protected override int QryInvestorPosition(ReqQueryField field)
         {
             var position = new CtpQryInvestorPosition();
-            position.BrokerID = _client.CtpLoginInfo.BrokerID;
-            position.InvestorID = _client.CtpLoginInfo.UserID;
-            return _client.Api.ReqQryInvestorPosition(position, _client.GetNextRequestId());
+            position.BrokerID = _client.ctpLoginInfo.BrokerID;
+            position.InvestorID = _client.ctpLoginInfo.UserID;
+            return _client.api.ReqQryInvestorPosition(position, _client.GetNextRequestId());
         }
 
         public CtpQueryManager(CtpTradeClient client)

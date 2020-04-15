@@ -6,12 +6,7 @@ namespace QuantBox.XApi
     public class CtpQuote : IXApi
     {
         private CtpMdClient _client;
-
-        static CtpQuote()
-        {
-            AssemblyResolver.AddPath(Path.GetDirectoryName(typeof(CtpQuote).Assembly.Location));
-        }
-
+        
         public void RegisterSpi(IXSpi spi)
         {
             if (_client != null) {

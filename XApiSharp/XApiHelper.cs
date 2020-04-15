@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Ideafixxxer.Generics;
-using QuantBox.XApi.Nactive;
+using QuantBox.XApi.Native;
 
 namespace QuantBox.XApi
 {
@@ -72,10 +72,7 @@ namespace QuantBox.XApi
                 case 'C':
                     return ExchangeType.DCE;
                 case 'Z':
-                    if (exchange[0] == 'C') {
-                        return ExchangeType.CZCE;
-                    }
-                    return ExchangeType.SZSE;
+                    return exchange[0] == 'C' ? ExchangeType.CZCE : ExchangeType.SZSE;
                 case 'F':
                     return ExchangeType.CFFEX;
                 case 'N':
@@ -97,34 +94,22 @@ namespace QuantBox.XApi
 
         internal static string Text(this InternalErrorField field)
         {
-            if (field == null) {
-                return string.Empty;
-            }
-            return PInvokeUtility.ReadString(field.Text);
+            return field == null ? string.Empty : PInvokeUtility.ReadString(field.Text);
         }
 
         internal static string Text(this InternalLogField field)
         {
-            if (field == null) {
-                return string.Empty;
-            }
-            return PInvokeUtility.ReadString(field.Message);
+            return field == null ? string.Empty : PInvokeUtility.ReadString(field.Message);
         }
 
         internal static string Text(this InternalRspUserLoginField field)
         {
-            if (field == null) {
-                return string.Empty;
-            }
-            return PInvokeUtility.ReadString(field.Text);
+            return field == null ? string.Empty : PInvokeUtility.ReadString(field.Text);
         }
 
         public static string Text(this OrderField field)
         {
-            if (field == null) {
-                return string.Empty;
-            }
-            return PInvokeUtility.ReadString(field.Text);
+            return field == null ? string.Empty : PInvokeUtility.ReadString(field.Text);
         }
 
         public static void SetText(this OrderField field, string text)
@@ -134,18 +119,12 @@ namespace QuantBox.XApi
 
         internal static string Name(this InternalRspUserLoginField field)
         {
-            if (field == null) {
-                return string.Empty;
-            }
-            return PInvokeUtility.ReadString(field.InvestorName);
+            return field == null ? string.Empty : PInvokeUtility.ReadString(field.InvestorName);
         }
 
         public static string Name(this InstrumentField field)
         {
-            if (field == null) {
-                return string.Empty;
-            }
-            return PInvokeUtility.ReadString(field.InstrumentName);
+            return field == null ? string.Empty : PInvokeUtility.ReadString(field.InstrumentName);
         }
 
         public static void SetName(this InstrumentField field, string name)
@@ -155,18 +134,12 @@ namespace QuantBox.XApi
 
         public static string Name(this PositionField field)
         {
-            if (field == null) {
-                return string.Empty;
-            }
-            return PInvokeUtility.ReadString(field.InstrumentName);
+            return field == null ? string.Empty : PInvokeUtility.ReadString(field.InstrumentName);
         }
 
         public static string Name(this InvestorField field)
         {
-            if (field == null) {
-                return string.Empty;
-            }
-            return PInvokeUtility.ReadString(field.InvestorName);
+            return field == null ? string.Empty : PInvokeUtility.ReadString(field.InvestorName);
         }
 
         #endregion
@@ -286,50 +259,32 @@ namespace QuantBox.XApi
 
         public static string RawErrorMsg(this RspUserLoginField field)
         {
-            if (field == null) {
-                return string.Empty;
-            }
-            return $"[XErrorID={field.XErrorID},RawErrorID={field.RawErrorID},Message={field.Text}]";
+            return field == null ? string.Empty : $"[XErrorID={field.XErrorID},RawErrorID={field.RawErrorID},Message={field.Text}]";
         }
 
         public static string DebugInfo(this OrderField field)
         {
-            if (field == null) {
-                return string.Empty;
-            }
-            return $"[InstrumentID={field.InstrumentID};ExchangeID={field.ExchangeID};Side={field.Side};Qty={field.Qty};LeavesQty={field.LeavesQty};Price={field.Price};OpenClose={field.OpenClose};HedgeFlag={field.HedgeFlag};LocalID={field.LocalID};ID={field.ID};OrderID={field.OrderID};Date={field.Date};Time={field.Time};Type={field.Type};TimeInForce={field.TimeInForce};Status={field.Status};ExecType={field.ExecType};XErrorID={field.XErrorID};RawErrorID={field.RawErrorID};Text={field.Text()}]";
+            return field == null ? string.Empty : $"[InstrumentID={field.InstrumentID},ExchangeID={field.ExchangeID},Side={field.Side},Qty={field.Qty},LeavesQty={field.LeavesQty},Price={field.Price},OpenClose={field.OpenClose},HedgeFlag={field.HedgeFlag},LocalID={field.LocalID},ID={field.ID},OrderID={field.OrderID},Date={field.Date},Time={field.Time},Type={field.Type},TimeInForce={field.TimeInForce},Status={field.Status},ExecType={field.ExecType},XErrorID={field.XErrorID},RawErrorID={field.RawErrorID},Text={field.Text()}]";
         }
 
         public static string DebugInfo(this TradeField field)
         {
-            if (field == null) {
-                return string.Empty;
-            }
-            return $"[InstrumentID={field.InstrumentID};ExchangeID={field.ExchangeID};Side={field.Side};Qty={field.Qty};Price={field.Price};OpenClose={field.OpenClose};HedgeFlag={field.HedgeFlag};ID={field.ID};TradeID={field.TradeID};Date={field.Date};Time={field.Time};Commission={field.Commission}]";
+            return field == null ? string.Empty : $"[InstrumentID={field.InstrumentID},ExchangeID={field.ExchangeID},Side={field.Side},Qty={field.Qty},Price={field.Price},OpenClose={field.OpenClose},HedgeFlag={field.HedgeFlag},ID={field.ID},TradeID={field.TradeID},Date={field.Date},Time={field.Time},Commission={field.Commission}]";
         }
 
         public static string DebugInfo(this RspUserLoginField field)
         {
-            if (field == null) {
-                return string.Empty;
-            }
-            return $"[TradingDay={field.TradingDay},LoginTime={field.LoginTime},InvestorName={field.InvestorName},XErrorID={field.XErrorID},Message={field.Text}]";
+            return field == null ? string.Empty : $"[TradingDay={field.TradingDay},LoginTime={field.LoginTime},InvestorName={field.InvestorName},XErrorID={field.XErrorID},Message={field.Text}]";
         }
 
         public static string DebugInfo(this AccountField field)
         {
-            if (field == null) {
-                return string.Empty;
-            }
-            return $"[AccountID={field.AccountID};CurrencyID={field.CurrencyID};Balance={field.Balance};Available={field.Available}]";
+            return field == null ? string.Empty : $"[AccountID={field.AccountID},CurrencyID={field.CurrencyID},Balance={field.Balance},Available={field.Available}]";
         }
 
         public static string DebugInfo(this PositionField field)
         {
-            if (field == null) {
-                return string.Empty;
-            }
-            return $"[{field.InstrumentID};{field.ExchangeID};{Enum<HedgeFlagType>.ToString(field.HedgeFlag)};{Enum<PositionSide>.ToString(field.Side)};Position={field.Position};TodayPosition={field.TodayPosition};HistoryPosition={field.HistoryPosition};ID={field.ID}]";
+            return field == null ? string.Empty : $"[{field.InstrumentID},{field.ExchangeID},{Enum<HedgeFlagType>.ToString(field.HedgeFlag)},{Enum<PositionSide>.ToString(field.Side)},Position={field.Position},TPosition={field.TodayPosition},HPosition={field.HistoryPosition},ID={field.ID}]";
         }
 
         #endregion

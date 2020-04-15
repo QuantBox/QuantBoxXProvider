@@ -174,7 +174,7 @@ namespace QuantBox.OrderProxy
             // 得到可平的今仓
             var qtyToday = QtyToday - FrozenCloseToday;
             // 得到可平的昨仓
-            var qtyYesterday = Qty - QtyToday - (FrozenClose - FrozenCloseToday);
+            var qtyYesterday = Qty - FrozenClose - qtyToday;
             // 对于非上海的，应当QtyYesterday就是所想要的值
             return (qtyToday, qtyYesterday);
         }

@@ -10,7 +10,7 @@ namespace QuantBox.OrderProxy
     {
         private readonly IdArray<DualPosition> _positions = new IdArray<DualPosition>();
 
-        private OrderFlags GetOrderFlags(Order order)
+        private static OrderFlags GetOrderFlags(Order order)
         {
             var openCloseType = order.GetOpenClose();
             var isOpen = (openCloseType == OpenCloseType.Open);
@@ -42,7 +42,7 @@ namespace QuantBox.OrderProxy
             }
         }
 
-        public void InitPosition(Portfolio portfolio)
+        private void InitPosition(Portfolio portfolio)
         {
             foreach (var position in portfolio.Positions) {
                 var dualPosition = new DualPosition {
@@ -51,28 +51,30 @@ namespace QuantBox.OrderProxy
                     Short = { Qty = position.ShortPositionQty }
                 };
                 foreach (var fill in position.Fills) {
-                    if (FillInToday(fill.DateTime)) {
-                        if (fill.Side == OrderSide.Buy) {
-                            switch (fill.SubSide) {
-                                case SubSide.BuyCover:
-                                    dualPosition.Short.QtyToday -= fill.Qty;
-                                    break;
-                                case SubSide.SellShort:
-                                case SubSide.Undefined:
-                                    dualPosition.Long.QtyToday += fill.Qty;
-                                    break;
-                            }
+                    if (!FillInToday(fill.DateTime)) {
+                        continue;
+                    }
+
+                    if (fill.Side == OrderSide.Buy) {
+                        switch (fill.SubSide) {
+                            case SubSide.BuyCover:
+                                dualPosition.Short.QtyToday -= fill.Qty;
+                                break;
+                            case SubSide.SellShort:
+                            case SubSide.Undefined:
+                                dualPosition.Long.QtyToday += fill.Qty;
+                                break;
                         }
-                        else {
-                            switch (fill.SubSide) {
-                                case SubSide.BuyCover:
-                                case SubSide.Undefined:
-                                    dualPosition.Long.QtyToday -= fill.Qty;
-                                    break;
-                                case SubSide.SellShort:
-                                    dualPosition.Short.QtyToday += fill.Qty;
-                                    break;
-                            }
+                    }
+                    else {
+                        switch (fill.SubSide) {
+                            case SubSide.BuyCover:
+                            case SubSide.Undefined:
+                                dualPosition.Long.QtyToday -= fill.Qty;
+                                break;
+                            case SubSide.SellShort:
+                                dualPosition.Short.QtyToday += fill.Qty;
+                                break;
                         }
                     }
                 }

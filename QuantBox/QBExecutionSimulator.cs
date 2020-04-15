@@ -10,13 +10,13 @@ namespace QuantBox
     {
         private class SimulatorExecutionReport
         {
-            internal OrderStatus ordStatus;
+            internal readonly OrderStatus ordStatus;
 
-            internal double avgPx;
+            internal readonly double avgPx;
 
-            internal double cumQty;
+            internal readonly double cumQty;
 
-            internal double leavesQty;
+            internal readonly double leavesQty;
 
             internal double commission;
 
@@ -615,7 +615,7 @@ namespace QuantBox
                     return;
                 }
             }
-            SetVWapFromat(order.Instrument);
+            SetVWapFormat(order.Instrument);
             ExecutionReport report = new ExecutionReport(command);
             report.DateTime = framework.Clock.DateTime;
             report.ExecType = ExecType.ExecNew;
@@ -684,9 +684,9 @@ namespace QuantBox
             }
         }
 
-        private void SetVWapFromat(Instrument instrument)
+        private void SetVWapFormat(Instrument instrument)
         {
-            if (_vwapFormats[instrument.Id] == 0 && instrument.PriceFormat != null && instrument.PriceFormat.Length > 0) {
+            if (_vwapFormats[instrument.Id] == 0 && !string.IsNullOrEmpty(instrument.PriceFormat)) {
                 if (int.TryParse(instrument.PriceFormat.Substring(1), out var v)) {
                     _vwapFormats[instrument.Id] = v + 1;
                 }
@@ -765,7 +765,7 @@ namespace QuantBox
             }
             else {
                 if (size <= 0) {
-                    Console.WriteLine("ExecutionSimulator::Fill Error - using partial fills, size can not be zero");
+                    Console.WriteLine(@"ExecutionSimulator::Fill Error - using partial fills, size can not be zero");
                     return;
                 }
                 ExecutionReport report = new ExecutionReport(order);

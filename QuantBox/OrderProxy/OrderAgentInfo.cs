@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using QuantBox.XApi;
 
 namespace QuantBox
 {
@@ -17,24 +18,19 @@ namespace QuantBox
         }
 
         /// <summary>
-        /// 如果可能(交易所支持)优先平今
-        /// </summary>
-        public bool CloseTodayFirst = true;
-
-        /// <summary>
         /// 优先平金的交易所列表
         /// </summary>
-        public readonly HashSet<string> UseCloseTodayExchanges = new HashSet<string> { QuantBoxConst.SHFE, QuantBoxConst.INE };
-
-        /// <summary>
-        /// 支持平金的交易所列表
-        /// </summary>
-        public readonly HashSet<string> SupportCloseTodayExchanges = new HashSet<string> { QuantBoxConst.SHFE, QuantBoxConst.INE };
+        public readonly HashSet<string> CloseTodayFirstExchanges = new HashSet<string> { ExchangeNames.CFFEX };
 
         /// <summary>
         /// 支持市价的交易所列表
         /// </summary>
-        public readonly HashSet<string> SupportMarketOrderExchanges = new HashSet<string> { QuantBoxConst.DCE, QuantBoxConst.CZCE };
+        public readonly HashSet<string> SupportMarketOrderExchanges = new HashSet<string> { ExchangeNames.SSE, ExchangeNames.SZSE, ExchangeNames.DCE, ExchangeNames.CZCE };
+
+        /// <summary>
+        /// 支持市价的交易所列表
+        /// </summary>
+        public readonly HashSet<string> StrictCloseTodayExchanges = new HashSet<string> { ExchangeNames.SHFE, ExchangeNames.INE };
 
         /// <summary>
         /// 下反手单时，平仓单和开仓单同时发出还是先平后开顺序发出。
@@ -42,14 +38,9 @@ namespace QuantBox
         public bool CloseFirstOnReversing = false;
 
         /// <summary>
-        /// 是否对接OMS，如果对接OMS，则所有交易都区分平今平昨.
-        /// </summary>
-        //public bool ConnectOms = true;
-
-        /// <summary>
         /// 市价转现价
         /// </summary>
-        public DeviationInfo Market2Limit = new DeviationInfo();
+        public DeviationInfo Market2Limit;
 
         public static OrderAgentInfo Load()
         {

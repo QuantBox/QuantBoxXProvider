@@ -9,11 +9,6 @@ namespace QuantBox.XApi
     {
         private CtpTradeClient _client;
 
-        static CtpTrader()
-        {
-            AssemblyResolver.AddPath(Path.GetDirectoryName(typeof(CtpTrader).Assembly.Location));
-        }
-
         public void RegisterSpi(IXSpi spi)
         {
             if (_client != null) {

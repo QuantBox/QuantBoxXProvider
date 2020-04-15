@@ -15,8 +15,9 @@ namespace QuantBox
 {
     public static class QBHelper
     {
+        private static readonly object locker = new object();
         public static readonly string BasePath;
-
+        
         static QBHelper()
         {
             BasePath = Path.GetDirectoryName(typeof(XProvider).Assembly.Location) + Path.DirectorySeparatorChar;
@@ -24,7 +25,8 @@ namespace QuantBox
 
         public static string ReadOnlyAllText(string path)
         {
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
                 return new StreamReader(stream).ReadToEnd();
             }
         }
@@ -32,9 +34,11 @@ namespace QuantBox
         public static string[] ReadOnlyAllLine(string path)
         {
             var lines = new List<string>();
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
                 var reader = new StreamReader(stream);
-                while (!reader.EndOfStream) {
+                while (!reader.EndOfStream)
+                {
                     lines.Add(reader.ReadLine());
                 }
             }
@@ -45,7 +49,8 @@ namespace QuantBox
         {
 #if NETFRAMEWORK
             var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{C224DA18-4901-433D-BD94-82D28B640B2C}");
-            if (key != null) {
+            if (key != null)
+            {
                 var names = new List<string>(key.GetSubKeyNames());
                 names.Sort();
                 return key.GetValue("InstallLocation").ToString();
@@ -56,14 +61,21 @@ namespace QuantBox
 
         public static void InitNLog()
         {
-            LayoutRenderer.Register("op_logsdir", (logEvent) => Installation.LogsDir.FullName);
-            const string nlogConfig = "NLog.config";
-            var configFile = Path.Combine(BasePath, nlogConfig);
-            if (!File.Exists(configFile)) {
-                configFile = Path.Combine(Installation.ConfigDir.FullName, nlogConfig);
-            }
-            if (File.Exists(configFile)) {
-                LogManager.Configuration = new XmlLoggingConfiguration(configFile, true);
+            lock (locker) {
+                if (LogManager.Configuration != null) {
+                    return;
+                }
+
+                LayoutRenderer.Register("op_logsdir", (logEvent) => Installation.LogsDir.FullName);
+                const string nlogConfig = "NLog.config";
+                var configFile = Path.Combine(BasePath, nlogConfig);
+                if (!File.Exists(configFile)) {
+                    configFile = Path.Combine(Installation.ConfigDir.FullName, nlogConfig);
+                }
+
+                if (File.Exists(configFile)) {
+                    LogManager.Configuration = new XmlLoggingConfiguration(configFile);
+                }
             }
         }
 
@@ -72,16 +84,20 @@ namespace QuantBox
         public static Instrument[] FilterInstrument(InstrumentDefinitionRequest request, IEnumerable<Instrument> insts)
         {
             var list = new List<Instrument>();
-            foreach (var inst in insts) {
-                if (request.FilterType.HasValue && request.FilterType != inst.Type) {
+            foreach (var inst in insts)
+            {
+                if (request.FilterType.HasValue && request.FilterType != inst.Type)
+                {
                     continue;
                 }
                 if (!string.IsNullOrEmpty(request.FilterExchange)
-                    && !string.Equals(inst.Exchange, request.FilterExchange, StringComparison.CurrentCultureIgnoreCase)) {
+                    && !string.Equals(inst.Exchange, request.FilterExchange, StringComparison.CurrentCultureIgnoreCase))
+                {
                     continue;
                 }
                 if (!string.IsNullOrEmpty(request.FilterSymbol)
-                    && !inst.Symbol.ToLower().Contains(request.FilterSymbol.ToLower())) {
+                    && !inst.Symbol.ToLower().Contains(request.FilterSymbol.ToLower()))
+                {
                     continue;
                 }
                 list.Add(inst);
@@ -97,12 +113,13 @@ namespace QuantBox
         public static string GetConfigPath(string name)
         {
             var dir = Path.Combine(Installation.ConfigDir.FullName, "quantbox");
-            if (!Directory.Exists(dir)) {
+            if (!Directory.Exists(dir))
+            {
                 Directory.CreateDirectory(dir);
             }
             return Path.Combine(dir, $"{name}.json");
         }
-       
+
         public static string GetVersionString()
         {
             return XApiHelper.GetVersionString(typeof(XProvider));
@@ -116,7 +133,12 @@ namespace QuantBox
         public static string MakeAbsolutePath(string path, string basePath = null)
         {
             basePath = basePath ?? BasePath;
-            if (basePath != null && Uri.TryCreate(new Uri(basePath), path, out var uri)) {
+            //if (!basePath.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            //{
+            //    basePath += Path.DirectorySeparatorChar;
+            //}
+            if (basePath != null && Uri.TryCreate(new Uri(basePath), path, out var uri))
+            {
                 return uri.LocalPath.Replace('/', Path.DirectorySeparatorChar);
             }
             return path;
@@ -132,14 +154,17 @@ namespace QuantBox
 
         public static DateTime CorrectionActionDay(DateTime local, DateTime exchange)
         {
-            switch (exchange.Hour) {
+            switch (exchange.Hour)
+            {
                 case 0:
-                    if (local.Hour == 23) {
+                    if (local.Hour == 23)
+                    {
                         return local.Date.AddDays(1).Add(exchange.TimeOfDay);
                     }
                     break;
                 case 23:
-                    if (local.Hour == 0) {
+                    if (local.Hour == 0)
+                    {
                         return local.Date.AddDays(-1).Add(exchange.TimeOfDay);
                     }
                     break;
@@ -150,12 +175,15 @@ namespace QuantBox
         public static void LoadFromJson(object instance, Type type, JToken token)
         {
             var list = type.GetProperties();
-            foreach (var prop in list) {
-                if (!prop.CanWrite) {
+            foreach (var prop in list)
+            {
+                if (!prop.CanWrite)
+                {
                     continue;
                 }
                 var item = token[prop.Name];
-                if (item == null) {
+                if (item == null)
+                {
                     continue;
                 }
                 prop.SetValue(instance, item.ToObject(prop.PropertyType));

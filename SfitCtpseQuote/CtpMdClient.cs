@@ -55,6 +55,12 @@ namespace QuantBox.XApi
             _api.OnRspError += OnRspError;
             _api.OnRspUserLogin += OnRspUserLogin;
             _api.OnRtnDepthMarketData += OnRtnDepthMarketData;
+            _api.OnRspSubMarketData += OnRspSubMarketData;
+        }
+
+        private void OnRspSubMarketData(object sender, CtpSpecificInstrument response, CtpRspInfo info, int requestId, bool last)
+        {
+            _spi.ProcessLog(new LogField(LogLevel.Debug, $"Provider subscribe {response.InstrumentID}"));
         }
 
         private void OnRtnDepthMarketData(object sender, CtpDepthMarketData data)
@@ -98,7 +104,7 @@ namespace QuantBox.XApi
             }
             else {
                 market.ClosePrice = data.ClosePrice;
-                ///market.TradingPhase = TradingPhaseType.Closed;
+                //market.TradingPhase = TradingPhaseType.Closed;
             }
             market.SettlementPrice = CtpConvert.IsInvalid(data.SettlementPrice) ? 0 : data.SettlementPrice;
             market.UpperLimitPrice = data.UpperLimitPrice;
@@ -210,6 +216,7 @@ namespace QuantBox.XApi
         public void Release()
         {
             if (_api != null) {
+                _publisher.Post(ConnectionStatus.Releasing);
                 Connected = false;
                 _api.Release();
                 _api = null;

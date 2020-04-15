@@ -63,10 +63,12 @@ namespace QuantBox
         internal static QuantBoxOrderInfo GetOrderInfo(Order order)
         {
             var data = (QuantBoxOrderInfo)order.Fields[QuantBoxConst.OrderInfoOffset];
-            if (data == null) {
-                data = new QuantBoxOrderInfo();
-                order.Fields[QuantBoxConst.OrderInfoOffset] = data;
+            if (data != null) {
+                return data;
             }
+
+            data = new QuantBoxOrderInfo();
+            order.Fields[QuantBoxConst.OrderInfoOffset] = data;
             return data;
         }
 
@@ -117,13 +119,11 @@ namespace QuantBox
         public static OpenCloseType GetOpenClose(this Order order, bool enabledUndefined = false)
         {
             var f = GetOrderInfo(order).OpenClose;
-            if (!enabledUndefined) {
-                if (f == OpenCloseType.Undefined) {
-                    return OpenCloseType.Open;
-                }
+            if (enabledUndefined) {
+                return f;
             }
 
-            return f;
+            return f == OpenCloseType.Undefined ? OpenCloseType.Open : f;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -171,6 +171,9 @@ namespace QuantBox
                 case OpenCloseType.CloseToday:
                     CloseToday(order);
                     break;
+                case OpenCloseType.LockToday:
+                    LockToday(order);
+                    break;
             }
             return order;
         }
@@ -178,7 +181,13 @@ namespace QuantBox
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Order Open(this Order order)
         {
-            order.SubSide = order.Side == OrderSide.Buy ? SubSide.Undefined : SubSide.SellShort;
+            var subside = order.Side == OrderSide.Buy ? SubSide.Undefined : SubSide.SellShort;
+            if (order.IsNotSent) {
+                order.SubSide = subside;
+            }
+            else {
+                SetSubSide(order, subside);
+            }
             GetOrderInfo(order).OpenClose = OpenCloseType.Open;
             return order;
         }
@@ -186,7 +195,13 @@ namespace QuantBox
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Order Close(this Order order)
         {
-            order.SubSide = order.Side == OrderSide.Sell ? SubSide.Undefined : SubSide.BuyCover;
+            var subside = order.Side == OrderSide.Sell ? SubSide.Undefined : SubSide.BuyCover;
+            if (order.IsNotSent) {
+                order.SubSide = subside;
+            }
+            else {
+                SetSubSide(order, subside);
+            }
             GetOrderInfo(order).OpenClose = OpenCloseType.Close;
             return order;
         }
@@ -194,8 +209,21 @@ namespace QuantBox
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Order CloseToday(this Order order)
         {
-            order.SubSide = order.Side == OrderSide.Sell ? SubSide.Undefined : SubSide.BuyCover;
+            var subside = order.Side == OrderSide.Sell ? SubSide.Undefined : SubSide.BuyCover;
+            if (order.IsNotSent) {
+                order.SubSide = subside;
+            }
+            else {
+                SetSubSide(order, subside);
+            }
             GetOrderInfo(order).OpenClose = OpenCloseType.CloseToday;
+            return order;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Order LockToday(this Order order)
+        {
+            GetOrderInfo(order).OpenClose = OpenCloseType.LockToday;
             return order;
         }
 
@@ -208,7 +236,12 @@ namespace QuantBox
 
         public static Order SendWithSelfTradeCheck(this Order order)
         {
-            OrderRegister.Instance.Post(order);
+            if (order.Portfolio.GetFramework().Mode == FrameworkMode.Realtime) {
+                OrderRegister.Instance.Post(order);
+            }
+            else {
+                Send(order);
+            }
             return order;
         }
 
@@ -445,7 +478,7 @@ namespace QuantBox
         /// <param name="priceOffset">价格偏移的跳数</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Order PriceDeviationCancel(this Order order, byte priceOffset)
+        public static Order PriceDeviationCancel(this Order order, byte priceOffset = 1)
         {
             return Deviation(order, OrderDeviationMode.QuoteAndTrade, priceOffset, OrderDeviationMethod.Cancel, OrderPriceAdjustMethod.Default, 0, 0);
         }
@@ -457,7 +490,7 @@ namespace QuantBox
         /// <param name="priceOffset">价格偏移的跳数</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Order TradeDeviationCancel(this Order order, byte priceOffset)
+        public static Order TradeDeviationCancel(this Order order, byte priceOffset = 1)
         {
             return Deviation(order, OrderDeviationMode.Trade, priceOffset, OrderDeviationMethod.Cancel, OrderPriceAdjustMethod.Default, 0, 0);
         }

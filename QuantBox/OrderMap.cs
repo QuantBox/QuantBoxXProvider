@@ -8,20 +8,20 @@ namespace QuantBox
     internal class OrderMap : IEnumerable<OrderRecord>
     {
         private readonly Dictionary<string, OrderRecord> _working = new Dictionary<string, OrderRecord>();
-        private readonly Dictionary<string, OrderRecord> _noSends = new Dictionary<string, OrderRecord>();
+        private readonly Dictionary<string, OrderRecord> _noSent = new Dictionary<string, OrderRecord>();
 
-        public void AddNewOrder(string id, Order order)
+        public void AddNewOrder(string id, string orderId, Order order)
         {
             var record = new OrderRecord(order);
             _working.Add(id, record);
-            if (string.IsNullOrEmpty(order.ProviderOrderId)) {
-                _noSends.Add(id, record);
+            if (string.IsNullOrEmpty(orderId)) {
+                _noSent.Add(id, record);
             }
         }
 
-        public void RemoveNoSend(string id)
+        public void RemoveNoSent(string id)
         {
-            _noSends.Remove(id);
+            _noSent.Remove(id);
         }
 
         public void RemoveDone(string id)
@@ -39,9 +39,9 @@ namespace QuantBox
             return _working.TryGetValue(id, out record);
         }
 
-        public List<OrderRecord> GetNoSend()
+        public List<OrderRecord> GetNoSent()
         {
-            return _noSends.Values.ToList();
+            return _noSent.Values.ToList();
         }
 
         public IEnumerator<OrderRecord> GetEnumerator()

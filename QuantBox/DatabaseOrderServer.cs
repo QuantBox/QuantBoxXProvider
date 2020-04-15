@@ -9,8 +9,7 @@ namespace QuantBox
 
     internal enum ProviderSettingsType
     {
-        TradingDay = 1,
-        MaxLocalId = 2
+        TradingDay = 1
     }
 
     internal class DatabaseOrderServer : OrderServer
@@ -124,11 +123,13 @@ namespace QuantBox
                 };
                 _collection.Upsert(doc);
             }
+
             public long GetAsInt64(ProviderSettingsType type)
             {
                 var data = _collection.FindById((int)type);
-                return data != null ? data["value"].AsInt64 : default(long);
+                return data != null ? data["value"].AsInt64 : 0L;
             }
+
             public void Set(ProviderSettingsType type, string value)
             {
                 var doc = new BsonDocument {
@@ -137,10 +138,11 @@ namespace QuantBox
                 };
                 _collection.Upsert(doc);
             }
+
             public string GetAsString(ProviderSettingsType type)
             {
                 var data = _collection.FindById((int)type);
-                return data != null ? data["value"].AsString : default(string);
+                return data?["value"].AsString;
             }
 
         }
@@ -148,35 +150,41 @@ namespace QuantBox
 
         private readonly Framework _framework;
         private readonly LiteDatabase _database;
+        private readonly string _instanceName;
+        private readonly TickIdGen _idGen = new TickIdGen();
         private readonly ILiteCollection<ExecutionCommand> _orders;
         private readonly ILiteCollection<ExecutionReport> _reports;
         private readonly ILiteCollection<Stop> _stops;
 
         public Action<ExecutionCommand> SetOrderId = _ => { };
 
-        private readonly Skyline.IdArray<StopStrategy> _stopStrategys = new Skyline.IdArray<StopStrategy>(100);
+        private readonly Skyline.IdArray<StopStrategy> _stopStrategist = new Skyline.IdArray<StopStrategy>(100);
 
-        private void SetSubSide(ExecutionCommand cmd, SubSide subSide)
+        private static void SetSubSide(ExecutionCommand cmd, SubSide subSide)
         {
             ExecutionCommandSerializer.subSide.Setter(cmd, subSide);
         }
 
         private void SetStopStrategy(Stop stop)
         {
-            if (!(stop.Strategy is StopStrategy)) {
-                var ss = _stopStrategys[stop.Strategy.Id];
-                if (ss == null) {
+            if (!(stop.Strategy is StopStrategy))
+            {
+                var ss = _stopStrategist[stop.Strategy.Id];
+                if (ss == null)
+                {
                     ss = new StopStrategy(_framework, stop.Strategy, string.Empty);
-                    _stopStrategys[stop.Strategy.Id] = ss;
+                    _stopStrategist[stop.Strategy.Id] = ss;
                 }
                 stop.SetStrategy(ss);
             }
         }
 
-        public DatabaseOrderServer(Framework framework, LiteDatabase database) : base(framework)
+        public DatabaseOrderServer(Framework framework, LiteDatabase database, string instanceName)
+            : base(framework)
         {
             _framework = framework;
             _database = database;
+            _instanceName = instanceName;
             _orders = _database.GetCollection<ExecutionCommand>("orders");
             _reports = _database.GetCollection<ExecutionReport>("reports");
             _stops = _database.GetCollection<Stop>("stops");
@@ -187,9 +195,15 @@ namespace QuantBox
 
         public override void Save(ExecutionMessage message, int id = -1)
         {
-            try {
-                switch (message.TypeId) {
+            try
+            {
+                switch (message.TypeId)
+                {
                     case DataObjectType.ExecutionCommand:
+                        var nextId = _idGen.Next().ToString();
+                        message.Order.ClOrderId = nextId;
+                        message.ClOrderId = nextId;
+                        message.ProviderOrderId = nextId;
                         SetOrderId((ExecutionCommand)message);
                         _orders.Insert((ExecutionCommand)message);
                         break;
@@ -198,7 +212,8 @@ namespace QuantBox
                         break;
                 }
             }
-            catch (Exception exception) {
+            catch (Exception exception)
+            {
                 Console.WriteLine(exception);
             }
         }
@@ -209,18 +224,19 @@ namespace QuantBox
             var subSideMap = new IdArray<SubSide>();
 
             var reports = _reports.FindAll().ToList();
-            foreach (var report in reports) {
+            foreach (var report in reports)
+            {
                 idMap[report.OrderId] = report.ProviderOrderId;
                 subSideMap[report.OrderId] = report.SubSide;
             }
             var orders = _orders.FindAll().ToList();
-            var maxLocalId = string.Empty;
-            foreach (var order in orders) {
-                order.ProviderOrderId = idMap[order.OrderId];
-                SetSubSide(order, subSideMap[order.OrderId]);
-                maxLocalId = DealProcessor.GetOrderId(order);
+            foreach (var order in orders)
+            {
+                if (idMap[order.OrderId] != null) {
+                    order.ProviderOrderId = idMap[order.OrderId];    
+                }
+                //SetSubSide(order, subSideMap[order.OrderId]);
             }
-            Settings.Set(ProviderSettingsType.MaxLocalId, maxLocalId);
             var list = new List<ExecutionMessage>();
             list.AddRange(orders);
             list.AddRange(reports);
@@ -231,7 +247,8 @@ namespace QuantBox
         {
             var trades = new HashSet<string>();
             var result = _reports.Find(Query.GT("transactTime", tradingDay));
-            foreach (var report in result) {
+            foreach (var report in result)
+            {
                 trades.Add($"{report.ExecId}_{report.Side}");
             }
             return trades;
@@ -251,11 +268,11 @@ namespace QuantBox
         internal void LoadStop(Strategy s)
         {
             ((DataEventMapper)_database.Mapper).StopSerializer.Strategy = s;
-            foreach (var stop in _stops.Find(Query.EQ("strategyId", s.Id))) {
+            foreach (var stop in _stops.Find(Query.EQ("strategyId", s.Id)))
+            {
                 s.AddStop(stop);
                 SetStopStrategy(stop);
             }
-
         }
 
         public override void Close()

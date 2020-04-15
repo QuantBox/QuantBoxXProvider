@@ -15,6 +15,10 @@
         /// </summary>
         public const byte PIdO32 = 62;
         /// <summary>
+        /// O32插件
+        /// </summary>
+        public const byte PIdUfx = 62;
+        /// <summary>
         /// 天风行情
         /// </summary>
         public const byte PIdThanfSubscribe = 63;
@@ -72,20 +76,12 @@
         internal const string GlobalExOrders = "@qb_exchange_orders@";
         internal const string GlobalExTrades = "@qb_exchange_trades@";
         internal const string GlobalExTradingDay = "@qb_exchange_tradingday@";
+        internal const string GlobalMarketCloseReminder = "@qb_market_close_reminder@";
 
         public const int MinBarSize = 60;
         public const int HourBarSize = 60 * MinBarSize;
         public const int DayBarSize = 24 * HourBarSize;
         public const int WeekBarSize = DayBarSize * 7;
         public const int MonthBarSize = DayBarSize * 30;
-
-        /// <summary>
-        /// 交易所
-        /// </summary>
-        public const string CZCE = "CZCE";
-        public const string CFFEX = "CFFEX";
-        public const string DCE = "DCE";
-        public const string SHFE = "SHFE";
-        public const string INE = "INE";        
     }
 }

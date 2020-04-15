@@ -11,25 +11,6 @@ namespace QuantBox.XApi
     internal static class CtpConvert
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string GetId(CtpOrder data)
-        {
-            return $"{data.FrontID}:{data.SessionID}:{data.OrderRef}";
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string GetId(CtpInputOrder input, CtpRspUserLogin login)
-        {
-            return $"{login.FrontID}:{login.SessionID}:{input.OrderRef}";
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static (int, int, string) ParseId(string localId)
-        {
-            var items = localId.Split(':');
-            return (int.Parse(items[0]), int.Parse(items[1]), items[2]);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(double value)
         {
             return double.IsNaN(value)
@@ -449,13 +430,14 @@ namespace QuantBox.XApi
             }
         }
 
+        private const string CtpClientId = "CTPSE";
         public static OrderField GetOrder(CtpOrder data)
         {
             if (data == null) {
                 return null;
             }
             var order = new OrderField();
-            order.ID = GetId(data);
+            order.ID = data.OrderRef;
             order.LocalID = data.OrderRef;
             order.OrderID = data.OrderSysID;
             order.InstrumentID = data.InstrumentID;
@@ -472,6 +454,7 @@ namespace QuantBox.XApi
             order.SetText(data.StatusMsg);
             order.Date = GetDate(data.InsertDate);
             order.Time = GetTime(data.InsertTime);
+            order.ReserveChar64 = CtpClientId;
             return order;
         }
 
@@ -481,7 +464,8 @@ namespace QuantBox.XApi
                 return null;
             }
             var trade = new TradeField();
-            trade.ID = data.OrderSysID;
+            trade.ID = data.OrderRef;
+            trade.ClientID = data.OrderSysID;
             trade.InstrumentID = data.InstrumentID;
             trade.ExchangeID = data.ExchangeID;
             trade.AccountID = data.InvestorID;
@@ -494,6 +478,7 @@ namespace QuantBox.XApi
             trade.Commission = 0;//TODO收续费以后要计算出来
             trade.Time = GetTime(data.TradeTime);
             trade.Date = GetDate(data.TradeDate);
+            trade.ReserveChar64 = CtpClientId;
             return trade;
         }
 

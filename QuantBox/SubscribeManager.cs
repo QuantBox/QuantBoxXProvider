@@ -13,7 +13,7 @@ namespace QuantBox
 
         private void DoSubscribe(Instrument inst)
         {
-            _provider.Market.Subscribe(inst);
+            _provider.market.Subscribe(inst);
             _provider.SubscribeDone(inst);
         }
 
@@ -24,8 +24,10 @@ namespace QuantBox
                     _instruments.Clear();
                     break;
                 case EventType.OnConnect:
-                    foreach (var item in _instruments) {
-                        DoSubscribe(item.Value);
+                    if (_provider.market.Connected) {
+                        foreach (var item in _instruments) {
+                            DoSubscribe(item.Value);
+                        }
                     }
                     break;
                 case EventType.OnSubscribe:
@@ -36,10 +38,10 @@ namespace QuantBox
                     _instruments[sub.Instrument.Id] = sub.Instrument;
                     break;
                 case EventType.OnUnsubscribe:
-                    var unsub = (OnUnsubscribe)e;
-                    _instruments.Remove(unsub.Instrument.Id);
+                    var unsubscribe = (OnUnsubscribe)e;
+                    _instruments.Remove(unsubscribe.Instrument.Id);
                     if (_provider.IsConnected) {
-                        _provider.Market.Unsubscribe(unsub.Instrument);
+                        _provider.market.Unsubscribe(unsubscribe.Instrument);
                     }
                     break;
             }

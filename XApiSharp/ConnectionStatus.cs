@@ -60,7 +60,7 @@ namespace QuantBox.XApi
         [Description("已经确认")]
         Confirmed,
         /// <summary>
-        /// 已经确认
+        /// 操作中...
         /// </summary>
         [Description("操作中...")]
         Doing,
@@ -70,9 +70,9 @@ namespace QuantBox.XApi
         [Description("完成")]
         Done,
         /// <summary>
-        /// 未知
+        /// 关闭中...
         /// </summary>
-        [Description("未知")]
-        Unknown,
+        [Description("关闭中...")]
+        Releasing
     }
 }

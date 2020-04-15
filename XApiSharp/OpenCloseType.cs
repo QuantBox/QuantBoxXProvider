@@ -6,5 +6,6 @@
         Open,
         Close,
         CloseToday,
+        LockToday
     };
 }

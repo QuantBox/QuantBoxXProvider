@@ -15,8 +15,10 @@ namespace QuantBox
     {
         public static void WaitAndCancell(this Task task, int ms)
         {
-            if (task.AsyncState is CancellationTokenSource cts) {
-                if (!task.Wait(ms)) {
+            if (task.AsyncState is CancellationTokenSource cts)
+            {
+                if (!task.Wait(ms))
+                {
                     cts.Cancel();
                     task.Wait();
                 }
@@ -31,17 +33,14 @@ namespace QuantBox
         private volatile int _initialized;
         private readonly Framework _framework;
         private readonly Strategy _strategy;
+        private readonly string _instanceName;
         private string _databasePath;
         private ObjectTableWriter _fieldsWriter = null;
         private ObjectTableReader _fieldsReader = null;
 
         private string GetDatabaseName()
         {
-            var name = _strategy.Name;
-            if (string.IsNullOrEmpty(name)) {
-                return _strategy.GetType().Name;
-            }
-            return name;
+            return _instanceName;
         }
 
         private string GetDefaultDatabasePath()
@@ -49,20 +48,21 @@ namespace QuantBox
             return Path.Combine(Installation.DataDir.FullName, GetDatabaseName());
         }
 
-        public StrategyServer(Strategy strategy)
-            : this(strategy.GetFramework(), strategy)
+        public StrategyServer(Strategy strategy, string instanceName = null)
+            : this(strategy.GetFramework(), strategy, instanceName)
         {
         }
 
-        public StrategyServer(Scenario scenario)
-            : this(scenario.Framework, scenario.Strategy)
+        public StrategyServer(Scenario scenario, string instanceName = null)
+            : this(scenario.Framework, scenario.Strategy, instanceName)
         {
         }
 
-        private StrategyServer(Framework framework, Strategy strategy)
+        private StrategyServer(Framework framework, Strategy strategy, string instanceName)
         {
             _framework = framework;
             _strategy = strategy;
+            _instanceName = instanceName ?? (string.IsNullOrEmpty(_strategy.Name) ? _strategy.GetType().Name : _strategy.Name);
             _databasePath = GetDefaultDatabasePath();
         }
 
@@ -107,27 +107,30 @@ namespace QuantBox
 
         public Task Init()
         {
-            if (Interlocked.CompareExchange(ref _initialized, 1, 0) > 0) {
+            if (Interlocked.CompareExchange(ref _initialized, 1, 0) > 0)
+            {
                 return Task.CompletedTask;
             }
             ClosePortfolioServer();
             CloseOrderServer();
             var db = CreateDatabase();
             _framework.PortfolioServer = new DatabasePortfolioServer(_framework, db);
-            _framework.OrderServer = new DatabaseOrderServer(_framework, db);
+            _framework.OrderServer = new DatabaseOrderServer(_framework, db, _instanceName);
             _framework.StrategyManager.Persistence = StrategyPersistence.Full;
             return LoadOrderTrade(_strategy, SetTradingDay);
 
             void ClosePortfolioServer()
             {
-                if (_framework.PortfolioServer is DatabasePortfolioServer server) {
+                if (_framework.PortfolioServer is DatabasePortfolioServer server)
+                {
                     server.Close();
                 }
             }
 
             void CloseOrderServer()
             {
-                if (_framework.OrderServer is DatabaseOrderServer server) {
+                if (_framework.OrderServer is DatabaseOrderServer server)
+                {
                     server.Close();
                 }
             }
@@ -137,7 +140,8 @@ namespace QuantBox
         {
             var server = (DatabaseOrderServer)_framework.OrderServer;
             var date = _framework.StrategyManager.GetExTradingDay();
-            if (date != default && server.Settings.GetAsDateTime(ProviderSettingsType.TradingDay) == default) {
+            if (date != default && server.Settings.GetAsDateTime(ProviderSettingsType.TradingDay) == default)
+            {
                 server.Settings.Set(ProviderSettingsType.TradingDay, date);
             }
         }
@@ -150,10 +154,13 @@ namespace QuantBox
 
             void ScanProvider(Strategy s)
             {
-                foreach (var (_, ep) in s.GetExecutionProviderList()) {
-                    switch (ep) {
+                foreach (var (_, ep) in s.GetExecutionProviderList())
+                {
+                    switch (ep)
+                    {
                         case XProvider p:
-                            if (!list.Contains(p)) {
+                            if (!list.Contains(p))
+                            {
                                 list.Add(p);
                             }
                             break;
@@ -168,7 +175,8 @@ namespace QuantBox
             void ScanStrategy(Strategy s)
             {
                 ScanProvider(s);
-                foreach (var child in s.Strategies) {
+                foreach (var child in s.Strategies)
+                {
                     ScanStrategy(child);
                 }
             }
@@ -191,35 +199,43 @@ namespace QuantBox
                     };
                     spi.StatusChanged += (s, status, field) => {
                         Console.WriteLine(status);
-                        if (field != null && status == ConnectionStatus.Logined) {
+                        if (field != null && status == ConnectionStatus.Logined)
+                        {
                             Console.WriteLine(field.RawErrorID != 0 ? field.RawErrorMsg() : field.DebugInfo());
                         }
 
-                        if (status == ConnectionStatus.Done) {
+                        if (status == ConnectionStatus.Done)
+                        {
                             client.TradingDay = field.TradingDay();
                             client.QueryOrders();
                         }
                     };
                     spi.OrderReceived += (s, order, isLast) => {
-                        if (order != null) {
+                        if (order != null)
+                        {
                             orders.Add(order);
                         }
-                        if (isLast) {
+                        if (isLast)
+                        {
                             client.QueryTrades();
                         }
                     };
                     spi.TradeReceived += (s, trade, isLast) => {
-                        if (trade != null) {
+                        if (trade != null)
+                        {
                             trades.Add(trade);
                         }
-                        if (isLast) {
+                        if (isLast)
+                        {
                             complete.Set();
                         }
                     };
 
                     client.Connect();
-                    while (!ct.IsCancellationRequested) {
-                        if (complete.WaitOne(0)) {
+                    while (!ct.IsCancellationRequested)
+                    {
+                        if (complete.WaitOne(0))
+                        {
                             break;
                         }
                         Skyline.Utility.Sleep(100, ct);
@@ -242,7 +258,8 @@ namespace QuantBox
                 var tasks = GetXProviders(strategy)
                     .Select(n => LoadOrderTrade(n, (CancellationTokenSource)state))
                     .ToArray();
-                foreach (var item in tasks) {
+                foreach (var item in tasks)
+                {
                     item.Start();
                 }
                 Task.WaitAll(tasks);
@@ -255,7 +272,8 @@ namespace QuantBox
         public static void SaveStop(Stop stop)
         {
             var framework = stop.Strategy.GetFramework();
-            if (framework != null && framework.OrderServer is DatabaseOrderServer server) {
+            if (framework != null && framework.OrderServer is DatabaseOrderServer server)
+            {
                 server.SaveStop(stop);
             }
         }
@@ -263,7 +281,8 @@ namespace QuantBox
         public static void RemoveStop(Stop stop)
         {
             var framework = stop.Strategy.GetFramework();
-            if (framework != null && framework.OrderServer is DatabaseOrderServer server) {
+            if (framework != null && framework.OrderServer is DatabaseOrderServer server)
+            {
                 server.RemoveStop(stop);
             }
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using NLog;
 using SmartQuant;
 
@@ -18,12 +19,7 @@ namespace QuantBox
 
         public TickSizeSlippageProvider AddSlippage(Instrument instrument, double slippage)
         {
-            if (slippage <= 0) {
-                DisableSlippage(instrument);
-            }
-            else {
-                InstrumentSlippages[instrument.Id] = slippage;
-            }
+            InstrumentSlippages[instrument.Id] = Math.Max(slippage, 0);
             return this;
         }
 
@@ -36,8 +32,11 @@ namespace QuantBox
         public double GetPrice(ExecutionReport report)
         {
             var slippage = InstrumentSlippages[report.InstrumentId];
-            if (slippage < 0) {
+            if (Math.Abs(slippage) < double.Epsilon) {
                 slippage = Slippage;
+            }
+            else if (slippage < 0){
+                slippage = 0;
             }
             var offset = slippage * report.Instrument.TickSize;
             double price = report.LastPx;

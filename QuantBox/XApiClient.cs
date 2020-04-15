@@ -48,12 +48,6 @@ namespace QuantBox
                 case ConnectionStatus.Done:
                     if (field != null) {
                         TradingDay = field.TradingDay();
-                        if (string.IsNullOrEmpty(field.SessionID)) {
-                            OrderPrefix = string.Empty;
-                        }
-                        else {
-                            OrderPrefix = field.SessionID.EndsWith(":") ? field.SessionID : field.SessionID + ":";
-                        }
                         OrderIdBase = int.Parse(field.Text);
                     }
                     OnConnected();
@@ -83,7 +77,7 @@ namespace QuantBox
         {
             Provider.OnClientDisconnected(this);
         }
-
+        
         protected XApiClient(XProvider provider, ConnectionInfo info, IXSpi spi = null)
         {
             Info = info;
@@ -95,6 +89,8 @@ namespace QuantBox
             if (spi != null) {
                 Api.RegisterSpi(spi);
             }
+
+            Api.LogHappened += OnLogHappened; 
             Api.ErrorHappened += OnErrorHappened;
             Api.StatusChanged += OnStatusChanged;
             Api.InvestorReceived += OnInvestorReceived;
@@ -129,6 +125,11 @@ namespace QuantBox
             Provider.OnProviderError(error);
         }
 
+        private void OnLogHappened(object sender, LogField log)
+        {
+            Provider.OnProviderLog(log);
+        }
+
         public void Connect()
         {
             Api.Connect(Server, User);
@@ -139,11 +140,17 @@ namespace QuantBox
             Api.Disconnect();
         }
 
+        public void QueryInstrument()
+        {
+            if (Connected) {
+                Api.Query(QueryType.ReqQryInstrument, null);
+            }
+        }
+
         public bool Connected => Api.Connected;
 
         public DateTime TradingDay { get; internal set; }
         public int OrderIdBase { get; private set; }
-        public string OrderPrefix { get; private set; }
         public XProvider Provider { get; }
     }
 }

@@ -19,12 +19,12 @@ namespace QuantBox
                 case EventType.OnConnect:
                     _provider.SetStatus(ProviderStatus.Connecting);
                     _connectStart = DateTime.Now;
-                    if (_provider.InTradingSession()) {
+                    if (!_provider.EnableAutoConnect || _provider.InTradingSession()) {
                         ConnectClient();
                     }
                     else {
-                        TradingCalendar.Instance.Init(DateTime.Today);
-                        _provider.Logger.Info("等待交易时段......");
+                        TradingCalendar.Instance.Init(DateTime.Today, host: _provider.DataHost);
+                        _provider.logger.Info("等待交易时段......");
                         _provider.StartTimerTask();
                         _manualDisconnecting = false;
                     }
@@ -49,7 +49,7 @@ namespace QuantBox
                         && !_provider.IsConnected
                         && _connectStart != DateTime.MaxValue
                         && (DateTime.Now - _connectStart).TotalMinutes > _provider.ConnectTimeout) {
-                        _provider.Logger.Info("交易时段内自动重连.");
+                        _provider.logger.Info("交易时段内自动重连.");
                         DisconnectClient();
                         _connectStart = DateTime.Now;
                         ConnectClient();
@@ -57,7 +57,7 @@ namespace QuantBox
                     break;
                 case XEventType.OnAutoDisconnect:
                     if (!_manualDisconnecting) {
-                        _provider.Logger.Info("非交易时段内自动断开.");
+                        _provider.logger.Info("非交易时段内自动断开.");
                         if (_provider.Status == ProviderStatus.Connected) {
                             _provider.SetStatus(ProviderStatus.Connecting);
                         }
@@ -73,17 +73,17 @@ namespace QuantBox
                 return;
             }
             if (_provider.IsDataProvider && _provider.IsExecutionProvider) {
-                if (_provider.Trader?.Connected == true && _provider.Market?.Connected == true) {
+                if (_provider.trader?.Connected == true && _provider.market?.Connected == true) {
                     ConnectDone();
                 }
             }
             else if (_provider.IsDataProvider) {
-                if (_provider.Market.Connected) {
+                if (_provider.market.Connected) {
                     ConnectDone();
                 }
             }
             else if (_provider.IsExecutionProvider) {
-                if (_provider.Trader.Connected) {
+                if (_provider.trader.Connected) {
                     ConnectDone();
                 }
             }
@@ -104,8 +104,8 @@ namespace QuantBox
 
         private void DisconnectClient()
         {
-            _provider.Market?.Disconnect();
-            _provider.Trader?.Disconnect();
+            _provider.market?.Disconnect();
+            _provider.trader?.Disconnect();
             if (_manualDisconnecting) {
                 DisconnectDone();
             }
@@ -123,7 +123,7 @@ namespace QuantBox
             }
             catch (Exception ex) {
                 _provider.OnProviderError(-1, ex.Message);
-                _provider.Logger.Error(ex);
+                _provider.logger.Error(ex);
                 _provider.Disconnect();
             }
         }
@@ -142,7 +142,7 @@ namespace QuantBox
         {
             var connection = GetConnectionInfo(MarketDataClient.ApiType);
             if (connection == null) {
-                _provider.Logger.Error("行情连接信息未设定.");
+                _provider.logger.Error("行情连接信息未设定.");
                 _provider.Disconnect();
                 return;
             }
@@ -150,19 +150,19 @@ namespace QuantBox
                 _provider.Disconnect();
                 return;
             }
-            _provider.Market?.Disconnect();
-            _provider.Market = new MarketDataClient(_provider, connection);
-            _provider.Market.Connect();
+            _provider.market?.Disconnect();
+            _provider.market = new MarketDataClient(_provider, connection);
+            _provider.market.Connect();
         }
 
         private bool CheckConnection(ConnectionInfo conn)
         {
             if (_provider.GetUserInfo(conn.User) == null) {
-                _provider.Logger.Error("连接用户信息未设定.");
+                _provider.logger.Error("连接用户信息未设定.");
                 return false;
             }
             if (_provider.GetServerInfo(conn.Server, conn.UseType) == null) {
-                _provider.Logger.Error("连接服务器信息未设定.");
+                _provider.logger.Error("连接服务器信息未设定.");
                 return false;
             }
             return true;
@@ -172,7 +172,7 @@ namespace QuantBox
         {
             var connection = GetConnectionInfo(TraderClient.ApiType);
             if (connection == null) {
-                _provider.Logger.Error("交易连接信息未设定.");
+                _provider.logger.Error("交易连接信息未设定.");
                 _provider.Disconnect();
                 return;
             }
@@ -180,12 +180,12 @@ namespace QuantBox
                 _provider.Disconnect();
                 return;
             }
-            _provider.Trader?.Disconnect();
-            _provider.Trader = new TraderClient(_provider, connection);
+            _provider.trader?.Disconnect();
+            _provider.trader = new TraderClient(_provider, connection);
             _provider.OnTraderCreated();
-            _provider.Trader.Connect();
+            _provider.trader.Connect();
         }
-        
+
         public ConnectManager(XProvider provider)
         {
             _provider = provider;

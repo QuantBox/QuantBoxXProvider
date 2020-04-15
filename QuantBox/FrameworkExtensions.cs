@@ -187,22 +187,63 @@ namespace QuantBox
             manager.AddProvider(provider);
         }
 
+        public static XProvider GetProvider(this ProviderManager manager, string typeName, byte id, string server, string user)
+        {
+            foreach (var p in manager.Providers) {
+                if (p is XProvider xp && xp.GetType().Name == typeName) {
+                    var (s, u, _) = xp.GetConnectInfo();
+                    if (s == server && u == user) {
+                        return xp;
+                    }
+                }
+            }
+            return (XProvider)manager.GetExecutionProvider(id);
+        }
+
+        /// <summary>
+        /// 获取指定服务器、用户的Ufx插件
+        /// </summary>
+        /// <returns></returns>
+        public static XProvider NewUfx(this ProviderManager manager, string server, string user, string password)
+        {
+            var ufx = GetUfx(manager, server, user);
+            if (ufx.Id == QuantBoxConst.PIdUfx) {
+                ufx = (XProvider)Activator.CreateInstance(ufx.GetType(), ufx.GetFramework());
+                ufx.Name += $"({server}_{user})";
+                manager.AddNew(ufx);
+            }
+            ufx.SetConnectInfo(server, user, password);
+            ufx.ConnectTrader = true;
+            ufx.ConnectMarketData = true;
+            return ufx;
+        }
+
+        public static XProvider GetUfx(this ProviderManager manager, string server, string user)
+        {
+            return GetProvider(manager, "QuantBoxUfx", QuantBoxConst.PIdUfx, server, user);
+        }
+
+        public static XProvider GetUfx(this ProviderManager manager)
+        {
+            return (XProvider)manager.GetExecutionProvider(QuantBoxConst.PIdUfx);
+        }
+
         /// <summary>
         /// 获取指定服务器、用户的CTP插件
         /// </summary>
         /// <returns></returns>
         public static XProvider NewCtp(this ProviderManager manager, string server, string user, string password)
         {
-            var newctp = GetCtp(manager, server, user);
-            if (newctp.Id == QuantBoxConst.PIdCtp) {
-                newctp = (XProvider)Activator.CreateInstance(newctp.GetType(), newctp.GetFramework());
-                newctp.Name += $"({server}_{user})";
-                manager.AddNew(newctp);
+            var ctp = GetCtp(manager, server, user);
+            if (ctp.Id == QuantBoxConst.PIdCtp) {
+                ctp = (XProvider)Activator.CreateInstance(ctp.GetType(), ctp.GetFramework());
+                ctp.Name += $"({server}_{user})";
+                manager.AddNew(ctp);
             }
-            newctp.SetConnectInfo(server, user, password);
-            newctp.ConnectTrader = true;
-            newctp.ConnectMarketData = true;
-            return newctp;
+            ctp.SetConnectInfo(server, user, password);
+            ctp.ConnectTrader = true;
+            ctp.ConnectMarketData = true;
+            return ctp;
         }
 
         /// <summary>
@@ -222,7 +263,7 @@ namespace QuantBox
         /// </summary>
         /// <returns></returns>
         public static (OrderAgent, XProvider) NewCtpAgent(this ProviderManager manager, string server, string user, string password)
-        {            
+        {
             var name = OrderAgent.DefaultName + $"({server}_{user})";
             var agent = GetAgent(manager, name);
             if (agent == null) {
@@ -231,21 +272,14 @@ namespace QuantBox
             }
             var ctp = NewCtp(manager, server, user, password);
             agent.ExecutionProvider = ctp;
+            //agent.BindProviderEvent();
             //agent.DataProvider = ctp;
             return (agent, ctp);
         }
 
         public static XProvider GetCtp(this ProviderManager manager, string server, string user)
         {
-            foreach (var p in manager.Providers) {
-                if (p is XProvider xp && xp.GetType().Name == "QuantBoxCtpse") {
-                    var (s, u, _) = xp.GetConnectInfo();
-                    if (s == server && u == user) {
-                        return xp;
-                    }
-                }
-            }
-            return (XProvider)manager.GetExecutionProvider(QuantBoxConst.PIdCtp);
+            return GetProvider(manager, "QuantBoxCtpse", QuantBoxConst.PIdCtp, server, user);
         }
 
         /// <summary>
@@ -286,7 +320,7 @@ namespace QuantBox
             if (agent == null) {
                 agent = new OrderAgent(ProviderManagerFrameworkField.Getter(manager));
                 manager.AddNew(agent);
-            }            
+            }
             agent.ExecutionProvider = ctp;
             return agent;
         }

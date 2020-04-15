@@ -13,27 +13,31 @@ namespace QuantBox.XApi
 {
     public class CtpTradeClient
     {
-        private const int NetworkReadError = 0x1001;
         private const string ThanfAuthCode = "QL9TP36WN1FJGZ4T";
         private const string OpenQuantAppId = "tfqh_openquant_v1.0";
-        private const string SimNow1 = "180.168.146.187";
-        private const string SimNow2 = "218.202.237.33";
 
         private static readonly Random Rand = new Random((int)DateTime.Now.Ticks);
-        private int _lastDisconnectReason;
         private int _requestId;
+        private int _orderRef;
+
         private CtpQueryManager _queryManager;
         private CtpDealProcessor _processor;
         private StatusPublisher _publisher;
 
-        internal IXSpi Spi;
-        internal CtpTraderApi Api;
-        internal CtpRspUserLogin CtpLoginInfo;
+        internal IXSpi spi;
+        internal CtpTraderApi api;
+        internal CtpRspUserLogin ctpLoginInfo;
 
         internal int GetNextRequestId()
         {
             return Interlocked.Increment(ref _requestId);
         }
+
+        private int GetNextOrderRef()
+        {
+            return Interlocked.Increment(ref _orderRef);
+        }
+
         private static string GetFlowPath(ServerInfoField server, UserInfoField user)
         {
             var path = Path.Combine(Path.GetTempPath(), "XAPI", "T", $"{server.BrokerID}_{user.UserID}_{Rand.Next()}");
@@ -44,7 +48,7 @@ namespace QuantBox.XApi
         }
         private void SendError(ErrorField error)
         {
-            Task.Run(() => Spi.ProcessError(error));
+            Task.Run(() => spi.ProcessError(error));
         }
 
         internal void SendError(CtpRspInfo info, string source)
@@ -63,27 +67,27 @@ namespace QuantBox.XApi
         private void InitHandler()
         {
             // Order
-            Api.RspHandlerList[CtpResponseType.OnRtnOrder] = ProcessDeal;
-            Api.RspHandlerList[CtpResponseType.OnRtnTrade] = ProcessDeal;
-            Api.RspHandlerList[CtpResponseType.OnErrRtnOrderAction] = ProcessDeal;
-            Api.RspHandlerList[CtpResponseType.OnErrRtnOrderInsert] = ProcessDeal;
-            Api.RspHandlerList[CtpResponseType.OnRspOrderAction] = ProcessDeal;
-            Api.RspHandlerList[CtpResponseType.OnRspOrderInsert] = ProcessDeal;
+            api.RspHandlerList[CtpResponseType.OnRtnOrder] = ProcessDeal;
+            api.RspHandlerList[CtpResponseType.OnRtnTrade] = ProcessDeal;
+            api.RspHandlerList[CtpResponseType.OnErrRtnOrderAction] = ProcessDeal;
+            api.RspHandlerList[CtpResponseType.OnErrRtnOrderInsert] = ProcessDeal;
+            api.RspHandlerList[CtpResponseType.OnRspOrderAction] = ProcessDeal;
+            api.RspHandlerList[CtpResponseType.OnRspOrderInsert] = ProcessDeal;
             // Query
-            Api.RspHandlerList[CtpResponseType.OnRspQryOrder] = ProcessQuery;
-            Api.RspHandlerList[CtpResponseType.OnRspQryTrade] = ProcessQuery;
-            Api.RspHandlerList[CtpResponseType.OnRspQryInstrument] = ProcessQuery;
-            Api.RspHandlerList[CtpResponseType.OnRspQryTradingAccount] = ProcessQuery;
-            Api.RspHandlerList[CtpResponseType.OnRspQryInvestorPosition] = ProcessQuery;
-            Api.RspHandlerList[CtpResponseType.OnRtnInstrumentStatus] = OnRtnInstrumentStatus;
-            Api.RspHandlerList[CtpResponseType.OnRspQryDepthMarketData] = OnRspQryDepthMarketData;
+            api.RspHandlerList[CtpResponseType.OnRspQryOrder] = ProcessQuery;
+            api.RspHandlerList[CtpResponseType.OnRspQryTrade] = ProcessQuery;
+            api.RspHandlerList[CtpResponseType.OnRspQryInstrument] = ProcessQuery;
+            api.RspHandlerList[CtpResponseType.OnRspQryTradingAccount] = ProcessQuery;
+            api.RspHandlerList[CtpResponseType.OnRspQryInvestorPosition] = ProcessQuery;
+            api.RspHandlerList[CtpResponseType.OnRtnInstrumentStatus] = OnRtnInstrumentStatus;
+            api.RspHandlerList[CtpResponseType.OnRspQryDepthMarketData] = OnRspQryDepthMarketData;
             // Connection
-            Api.RspHandlerList[CtpResponseType.OnFrontConnected] = OnFrontConnected;
-            Api.RspHandlerList[CtpResponseType.OnFrontDisconnected] = OnFrontDisconnected;
-            Api.RspHandlerList[CtpResponseType.OnRspUserLogin] = OnRspUserLogin;
-            Api.RspHandlerList[CtpResponseType.OnRspAuthenticate] = OnRspAuthenticate;
-            Api.RspHandlerList[CtpResponseType.OnRspSettlementInfoConfirm] = OnRspSettlementInfoConfirm;
-            Api.RspHandlerList[CtpResponseType.OnRspError] = OnRspError;
+            api.RspHandlerList[CtpResponseType.OnFrontConnected] = OnFrontConnected;
+            api.RspHandlerList[CtpResponseType.OnFrontDisconnected] = OnFrontDisconnected;
+            api.RspHandlerList[CtpResponseType.OnRspUserLogin] = OnRspUserLogin;
+            api.RspHandlerList[CtpResponseType.OnRspAuthenticate] = OnRspAuthenticate;
+            api.RspHandlerList[CtpResponseType.OnRspSettlementInfoConfirm] = OnRspSettlementInfoConfirm;
+            api.RspHandlerList[CtpResponseType.OnRspError] = OnRspError;
         }
 
 
@@ -97,7 +101,7 @@ namespace QuantBox.XApi
             confirm.ConfirmDate = DateTime.Now.ToString("yyyyMMdd");
             confirm.ConfirmTime = DateTime.Now.ToString("hhmmss");
             _publisher.Post(ConnectionStatus.Confirming);
-            Api.ReqSettlementInfoConfirm(confirm, GetNextRequestId());
+            api.ReqSettlementInfoConfirm(confirm, GetNextRequestId());
         }
 
         private void DoLogin()
@@ -108,7 +112,7 @@ namespace QuantBox.XApi
             info.UserID = User.UserID;
             info.Password = User.Password;
             _publisher.Post(ConnectionStatus.Logining);
-            Api.ReqUserLogin(info, GetNextRequestId());
+            api.ReqUserLogin(info, GetNextRequestId());
         }
 
         private void DoAuthenticate()
@@ -122,7 +126,7 @@ namespace QuantBox.XApi
             info.AppID = Server.ExtInfoChar128;
 #endif
             _publisher.Post(ConnectionStatus.Authorizing);
-            Api.ReqAuthenticate(info, GetNextRequestId());
+            api.ReqAuthenticate(info, GetNextRequestId());
         }
 
         private void OnRspError(ref CtpResponse rsp)
@@ -133,14 +137,15 @@ namespace QuantBox.XApi
 
         private void OnRspUserLogin(ref CtpResponse rsp)
         {
-            CtpLoginInfo = rsp.Item1.AsRspUserLogin;
-            if (CtpLoginInfo != null && CtpConvert.CheckRspInfo(rsp.Item2)) {
+            ctpLoginInfo = rsp.Item1.AsRspUserLogin;
+            if (ctpLoginInfo != null && CtpConvert.CheckRspInfo(rsp.Item2)) {
                 UserLogin = new RspUserLoginField();
-                UserLogin.TradingDay = CtpConvert.GetDate(CtpLoginInfo.TradingDay);
-                UserLogin.LoginTime = CtpConvert.GetTime(CtpLoginInfo.LoginTime);
-                UserLogin.UserID = CtpLoginInfo.UserID;
-                UserLogin.SessionID = $"{CtpLoginInfo.FrontID}:{CtpLoginInfo.SessionID}";
-                UserLogin.Text = string.IsNullOrEmpty(CtpLoginInfo.MaxOrderRef) ? "1" : CtpLoginInfo.MaxOrderRef;
+                UserLogin.TradingDay = CtpConvert.GetDate(ctpLoginInfo.TradingDay);
+                UserLogin.LoginTime = CtpConvert.GetTime(ctpLoginInfo.LoginTime);
+                UserLogin.UserID = ctpLoginInfo.UserID;
+                UserLogin.SessionID = $"{ctpLoginInfo.FrontID}:{ctpLoginInfo.SessionID}";
+                UserLogin.Text = string.IsNullOrEmpty(ctpLoginInfo.MaxOrderRef) ? "1" : ctpLoginInfo.MaxOrderRef;
+                _orderRef = int.Parse(UserLogin.Text);
                 _publisher.Post(ConnectionStatus.Logined, UserLogin);
                 DoSettlementInfoConfirm();
             }
@@ -152,9 +157,7 @@ namespace QuantBox.XApi
 
         private void OnFrontConnected(ref CtpResponse rsp)
         {
-            if (_lastDisconnectReason != NetworkReadError) {
-                _publisher.Post(ConnectionStatus.Connected);
-            }
+            _publisher.Post(ConnectionStatus.Connected);
 #if CTPSE
             DoAuthenticate();
 #else
@@ -167,13 +170,7 @@ namespace QuantBox.XApi
             Connected = false;
             if (rsp.Item1.AsInt != null) {
                 var reason = rsp.Item1.AsInt.Value;
-                if (reason != _lastDisconnectReason) {
-                    SendError(reason, nameof(OnFrontDisconnected));
-                }
-                _lastDisconnectReason = reason;
-                if (_lastDisconnectReason == NetworkReadError) {
-                    return;
-                }
+                SendError(reason, nameof(OnFrontDisconnected));
             }
             _publisher.Post(ConnectionStatus.Disconnected);
         }
@@ -196,7 +193,6 @@ namespace QuantBox.XApi
             var data = rsp.Item1.AsSettlementInfoConfirm;
             if (data != null && CtpConvert.CheckRspInfo(rsp.Item2)) {
                 Connected = true;
-                _lastDisconnectReason = 0;
                 _publisher.Post(ConnectionStatus.Confirmed);
                 _publisher.Post(ConnectionStatus.Done, UserLogin);
             }
@@ -234,7 +230,7 @@ namespace QuantBox.XApi
         {
             var status = rsp.Item1.AsInstrumentStatus;
             var field = CtpConvert.GetInstrumentStatus(status);
-            Spi.ProcessRtnInstrumentStatus(field);
+            spi.ProcessRtnInstrumentStatus(field);
         }
 
         private void OnRspQryDepthMarketData(ref CtpResponse rsp)
@@ -255,13 +251,13 @@ namespace QuantBox.XApi
 
         public CtpTradeClient(IXSpi spi)
         {
-            Spi = spi;
+            this.spi = spi;
             _publisher = new StatusPublisher(spi);
         }
 
         public void RegisterSpi(IXSpi spi)
         {
-            Spi = spi;
+            this.spi = spi;
             _publisher = new StatusPublisher(spi);
         }
 
@@ -299,7 +295,7 @@ namespace QuantBox.XApi
 
         public void Init(ServerInfoField server, UserInfoField user)
         {
-            if (Api != null) {
+            if (api != null) {
                 return;
             }
             if (!CheckSettings(server, user)) {
@@ -309,28 +305,29 @@ namespace QuantBox.XApi
             _processor = new CtpDealProcessor(this);
             User = user;
             Server = server;
-            Api = new CtpTraderApi(GetFlowPath(server, user));
+            api = new CtpTraderApi(GetFlowPath(server, user));
             InitHandler();
             var items = server.Address.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var item in items) {
-                Api.RegisterFront(item);
+                api.RegisterFront(item);
             }
-            Api.SubscribePrivateTopic(CtpConvert.GetCtpResumeType(server.PrivateTopicResumeType));
-            Api.SubscribePublicTopic(CtpConvert.GetCtpResumeType(server.PublicTopicResumeType));
+            api.SubscribePrivateTopic(CtpConvert.GetCtpResumeType(server.PrivateTopicResumeType));
+            api.SubscribePublicTopic(CtpConvert.GetCtpResumeType(server.PublicTopicResumeType));
             _publisher.Post(ConnectionStatus.Connecting);
-            Api.Init();
+            api.Init();
         }
 
         public void Release()
         {
-            if (Api != null) {
+            if (api != null) {
+                _publisher.Post(ConnectionStatus.Releasing);
                 _queryManager.Close();
                 _queryManager = null;
                 Connected = false;
-                Api.Release();
+                api.Release();
                 _processor.Close();
                 _processor = null;
-                Api = null;
+                api = null;
             }
         }
 
@@ -345,6 +342,10 @@ namespace QuantBox.XApi
         {
             if (!Connected) {
                 return string.Empty;
+            }
+
+            if (string.IsNullOrEmpty(order.LocalID)) {
+                order.LocalID = GetNextOrderRef().ToString();
             }
             _processor.Post(order);
             return order.ID;
