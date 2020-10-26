@@ -8,6 +8,8 @@
 		public const string CZCE = "CZCE";
         /// <summary>中金所</summary>
         public const string CFFEX = "CFFEX";
+        /// <summary>郑商所</summary>
+        public const string DCE = "DCE";
         /// <summary>能源中心</summary>
         public const string INE = "INE";
         /// <summary>上交所</summary>

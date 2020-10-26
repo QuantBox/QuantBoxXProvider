@@ -2,6 +2,8 @@
 using System.Runtime.CompilerServices;
 #if CTP || CTPSE
 using QuantBox.Sfit.Api;
+#elif CTPMINI
+using QuantBox.SfitMini.Api;
 #else
 using QuantBox.Rohon.Api;
 #endif
@@ -10,25 +12,6 @@ namespace QuantBox.XApi
 {
     internal static class CtpConvert
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string GetId(CtpOrder data)
-        {
-            return $"{data.FrontID}:{data.SessionID}:{data.OrderRef}";
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string GetId(CtpInputOrder input, CtpRspUserLogin login)
-        {
-            return $"{login.FrontID}:{login.SessionID}:{input.OrderRef}";
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static (int, int, string) ParseId(string localId)
-        {
-            var items = localId.Split(':');
-            return (int.Parse(items[0]), int.Parse(items[1]), items[2]);
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(double value)
         {
@@ -202,6 +185,8 @@ namespace QuantBox.XApi
             position.Symbol = info.InstrumentID;
             position.AccountID = info.InvestorID;
             position.Position = info.Position;
+            position.OpenCost = info.OpenCost;
+            position.PositionCost = info.PositionCost;
             position.TodayPosition = info.TodayPosition;
             position.HistoryPosition = info.YdPosition;
             position.Side = GetPositionSide(info.PosiDirection);
@@ -399,55 +384,21 @@ namespace QuantBox.XApi
             }
         }
 
-        private static int GetActionDay(int updateTime)
-        {
-            var now = DateTime.Now;
-            var offset = 0;
-            if (updateTime > 230000 && now.Hour < 1) {
-                offset = -1;
-            }
-            else if (updateTime < 10000 && now.Hour == 23) {
-                offset = 1;
-            }
-            now = now.AddDays(offset);
-            return now.Year * 10000 + now.Month * 100 + now.Day;
-        }
-
         public static void SetExchangeTime(CtpDepthMarketData data, DepthMarketDataField market)
         {
             market.TradingDay = GetDate(data.TradingDay);
             market.UpdateTime = GetTime(data.UpdateTime);
             market.UpdateMillisec = data.UpdateMillisec;
-            if (!string.IsNullOrEmpty(data.ActionDay)
-                && data.ActionDay.Length == 8) {
-                market.ActionDay = GetDate(data.ActionDay);
+            if (market.UpdateTime < 60000) {
+                market.ActionDay = market.TradingDay;
             }
             else {
-                market.ActionDay = GetActionDay(market.UpdateTime);
+                var now = DateTime.Today;
+                market.ActionDay = now.Year * 10000 + now.Month * 100 + now.Day;
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetCzceExchangeTime(CtpDepthMarketData data, DepthMarketDataField market)
-        {
-            SetExchangeTime(data, market);
-        }
-
-        public static void SetDceExchangeTime(CtpDepthMarketData data, DepthMarketDataField market)
-        {
-            market.TradingDay = GetDate(data.TradingDay);
-            market.UpdateTime = GetTime(data.UpdateTime);
-            market.UpdateMillisec = data.UpdateMillisec;
-            if (!string.IsNullOrEmpty(data.ActionDay)
-                && data.ActionDay.Length == 8
-                && market.UpdateTime > 60000
-                && market.UpdateTime < 180000) {
-                market.ActionDay = GetDate(data.ActionDay);
-            }
-            else {
-                market.ActionDay = GetActionDay(market.UpdateTime);
-            }
-        }
+        private const string CtpClientId = "CTPSE";
 
         public static OrderField GetOrder(CtpOrder data)
         {
@@ -455,7 +406,7 @@ namespace QuantBox.XApi
                 return null;
             }
             var order = new OrderField();
-            order.ID = GetId(data);
+            order.ID = data.OrderRef;
             order.LocalID = data.OrderRef;
             order.OrderID = data.OrderSysID;
             order.InstrumentID = data.InstrumentID;
@@ -472,6 +423,7 @@ namespace QuantBox.XApi
             order.SetText(data.StatusMsg);
             order.Date = GetDate(data.InsertDate);
             order.Time = GetTime(data.InsertTime);
+            order.ReserveChar64 = CtpClientId;
             return order;
         }
 
@@ -481,7 +433,8 @@ namespace QuantBox.XApi
                 return null;
             }
             var trade = new TradeField();
-            trade.ID = data.OrderSysID;
+            trade.ID = data.OrderRef;
+            trade.ClientID = data.OrderSysID;
             trade.InstrumentID = data.InstrumentID;
             trade.ExchangeID = data.ExchangeID;
             trade.AccountID = data.InvestorID;
@@ -494,6 +447,7 @@ namespace QuantBox.XApi
             trade.Commission = 0;//TODO收续费以后要计算出来
             trade.Time = GetTime(data.TradeTime);
             trade.Date = GetDate(data.TradeDate);
+            trade.ReserveChar64 = CtpClientId;
             return trade;
         }
 

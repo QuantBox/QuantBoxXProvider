@@ -15,6 +15,7 @@ namespace QuantBox
 {
     public static class QBHelper
     {
+        private static readonly object locker = new object();
         public static readonly string BasePath;
 
         static QBHelper()
@@ -45,7 +46,8 @@ namespace QuantBox
         {
 #if NETFRAMEWORK
             var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{C224DA18-4901-433D-BD94-82D28B640B2C}");
-            if (key != null) {
+            if (key != null)
+            {
                 var names = new List<string>(key.GetSubKeyNames());
                 names.Sort();
                 return key.GetValue("InstallLocation").ToString();
@@ -56,23 +58,31 @@ namespace QuantBox
 
         public static void InitNLog()
         {
-            LayoutRenderer.Register("op_logsdir", (logEvent) => Installation.LogsDir.FullName);
-            const string nlogConfig = "NLog.config";
-            var configFile = Path.Combine(BasePath, nlogConfig);
-            if (!File.Exists(configFile)) {
-                configFile = Path.Combine(Installation.ConfigDir.FullName, nlogConfig);
-            }
-            if (File.Exists(configFile)) {
-                LogManager.Configuration = new XmlLoggingConfiguration(configFile, true);
+            lock (locker) {
+                if (LogManager.Configuration != null) {
+                    return;
+                }
+
+                LayoutRenderer.Register("op_logsdir", (logEvent) => Installation.LogsDir.FullName);
+                const string nlogConfig = "NLog.config";
+                var configFile = Path.Combine(BasePath, nlogConfig);
+                if (!File.Exists(configFile)) {
+                    configFile = Path.Combine(Installation.ConfigDir.FullName, nlogConfig);
+                }
+
+                if (File.Exists(configFile)) {
+                    LogManager.Configuration = new XmlLoggingConfiguration(configFile);
+                }
             }
         }
 
         public const string UserDataName = "UserData";
+        public const string UserDataLastName = "LastUserData";
 
-        public static Instrument[] FilterInstrument(InstrumentDefinitionRequest request, IEnumerable<Instrument> insts)
+        public static Instrument[] FilterInstrument(InstrumentDefinitionRequest request, IEnumerable<Instrument> instruments)
         {
             var list = new List<Instrument>();
-            foreach (var inst in insts) {
+            foreach (var inst in instruments) {
                 if (request.FilterType.HasValue && request.FilterType != inst.Type) {
                     continue;
                 }
@@ -102,7 +112,7 @@ namespace QuantBox
             }
             return Path.Combine(dir, $"{name}.json");
         }
-       
+
         public static string GetVersionString()
         {
             return XApiHelper.GetVersionString(typeof(XProvider));
@@ -116,6 +126,10 @@ namespace QuantBox
         public static string MakeAbsolutePath(string path, string basePath = null)
         {
             basePath = basePath ?? BasePath;
+            //if (!basePath.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            //{
+            //    basePath += Path.DirectorySeparatorChar;
+            //}
             if (basePath != null && Uri.TryCreate(new Uri(basePath), path, out var uri)) {
                 return uri.LocalPath.Replace('/', Path.DirectorySeparatorChar);
             }

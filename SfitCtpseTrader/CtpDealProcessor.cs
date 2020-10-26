@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks.Dataflow;
 #if CTP || CTPSE
 using QuantBox.Sfit.Api;
+#elif CTPMINI
+using QuantBox.SfitMini.Api;
 #else
 using QuantBox.Rohon.Api;
 #endif
@@ -58,8 +60,8 @@ namespace QuantBox.XApi
         private readonly CtpTradeClient _client;
         private readonly ActionBlock<OrderEvent> _action;
         private readonly OrderMap _orders;
-        private readonly HashSet<string> _cancelPendings = new HashSet<string>(10);
-        private readonly List<CtpTrade> _tradePendings = new List<CtpTrade>(10);
+        private readonly HashSet<string> _cancelPending = new HashSet<string>();
+        private readonly List<CtpTrade> _tradePending = new List<CtpTrade>();
 
         private void ReportOrder(OrderField order, ExecType execType, OrderStatus newStatus, CtpRspInfo rspInfo)
         {
@@ -77,7 +79,7 @@ namespace QuantBox.XApi
                 report.RawErrorID = rawErrorId;
                 report.SetText(text);
             }
-            _client.Spi.ProcessRtnOrder(report);
+            _client.spi.ProcessRtnOrder(report);
         }
 
         private void OrderAction(OrderEvent e)
@@ -115,11 +117,11 @@ namespace QuantBox.XApi
 
         private void ProcessTradePending()
         {
-            if (_tradePendings.Count == 0) {
+            if (_tradePending.Count == 0) {
                 return;
             }
-            var list = new List<CtpTrade>(_tradePendings);
-            _tradePendings.Clear();
+            var list = new List<CtpTrade>(_tradePending);
+            _tradePending.Clear();
             foreach (var trade in list) {
                 ProcessRtnTrade(trade);
             }
@@ -127,22 +129,24 @@ namespace QuantBox.XApi
 
         private void ProcessRtnTrade(CtpTrade data)
         {
+            _client.spi.ProcessLog(new LogField(LogLevel.Trace, "RtnTrade"));
             if (_orders.TryGetBySysId(data.OrderSysID, out var order)) {
                 var trade = CtpConvert.GetTrade(data);
                 trade.ID = order.ID;
-                _client.Spi.ProcessRtnTrade(trade);
+                _client.spi.ProcessRtnTrade(trade);
             }
             else {
-                _tradePendings.Add(data);
+                _tradePending.Add(data);
             }
         }
 
         private void ProcessRtnOrder(CtpOrder data)
         {
-            var id = CtpConvert.GetId(data);
-            if (!_orders.TryGetById(id, out var order)) {
+            if (!_orders.TryGetByOrderRef(data.OrderRef, out var order)) {
                 return;
             }
+
+            var id = order.ID;
             if (!string.IsNullOrEmpty(data.OrderSysID) && string.IsNullOrEmpty(order.OrderID)) {
                 order.OrderID = data.OrderSysID;
                 order.ExchangeID = data.ExchangeID;
@@ -150,49 +154,47 @@ namespace QuantBox.XApi
                 ProcessTradePending();
             }
             ReportOrder(order, CtpConvert.GetExecType(data), CtpConvert.GetOrderStatus(data), 0, 0, data.StatusMsg);
-            if (_cancelPendings.Contains(id)) {
-                _cancelPendings.Remove(id);
+            if (_cancelPending.Contains(id)) {
+                _cancelPending.Remove(id);
                 ProcessCancelOrder(id);
             }
         }
 
         #region Cancel Reject
-        private void ProcessCancelReject(string localId, CtpRspInfo rspInfo)
+        private void ProcessCancelReject(string orderSysId, CtpRspInfo rspInfo)
         {
-            _orders.TryGetById(localId, out var order);
+            _orders.TryGetBySysId(orderSysId, out var order);
             if (order != null) {
                 ReportOrder(order, ExecType.CancelReject, order.Status, rspInfo);
             }
         }
         private void ProcessCancelReject(CtpOrderAction action, CtpRspInfo rspInfo)
         {
-            ProcessCancelReject(action.OrderRef, rspInfo);
+            ProcessCancelReject(action.OrderSysID, rspInfo);
         }
         private void ProcessCancelReject(CtpInputOrderAction action, CtpRspInfo rspInfo)
         {
-            ProcessCancelReject(action.OrderRef, rspInfo);
+            ProcessCancelReject(action.OrderSysID, rspInfo);
         }
         #endregion
 
         #region Order Reject
-        private void ProcessOrderReject(string id, CtpRspInfo rspInfo)
+        private void ProcessOrderReject(string orderRef, CtpRspInfo rspInfo)
         {
-            _orders.TryGetById(id, out var order);
+            _orders.TryGetByOrderRef(orderRef, out var order);
             if (order != null) {
                 ReportOrder(order, ExecType.Rejected, OrderStatus.Rejected, rspInfo);
             }
         }
         private void ProcessOrderReject(CtpInputOrder input, CtpRspInfo rspInfo)
         {
-            var login = _client.CtpLoginInfo;
-            var id = CtpConvert.GetId(input, login);
-            ProcessOrderReject(id, rspInfo);
+            ProcessOrderReject(input.OrderRef, rspInfo);
         }
         #endregion
 
         private void ProcessCancelOrder(string id)
         {
-            if (_cancelPendings.Contains(id)) {
+            if (_cancelPending.Contains(id)) {
                 return;
             }
 
@@ -201,20 +203,19 @@ namespace QuantBox.XApi
             }
 
             if (string.IsNullOrEmpty(order.OrderID)) {
-                _cancelPendings.Add(id);
+                _cancelPending.Add(id);
                 return;
             }
 
             var action = new CtpInputOrderAction();
-            (action.FrontID, action.SessionID, action.OrderRef) = CtpConvert.ParseId(order.ID);
             action.OrderSysID = order.OrderID;
             action.ExchangeID = order.ExchangeID.ToUpper();
             action.InstrumentID = order.InstrumentID;
             action.ActionFlag = CtpActionFlagType.Delete;
             action.OrderActionRef = _client.GetNextRequestId();
-            action.InvestorID = _client.CtpLoginInfo.UserID;
-            action.BrokerID = _client.CtpLoginInfo.BrokerID;
-            _client.Api.ReqOrderAction(action, _client.GetNextRequestId());
+            action.InvestorID = _client.ctpLoginInfo.UserID;
+            action.BrokerID = _client.ctpLoginInfo.BrokerID;
+            _client.api.ReqOrderAction(action, _client.GetNextRequestId());
         }
 
         private void ProcessCancelOrder(CancelOrderEvent e)
@@ -227,16 +228,23 @@ namespace QuantBox.XApi
             _orders.AddOrder(e.Order);
             if (e.Order.Status == OrderStatus.NotSent) {
                 var data = CtpConvert.GetInputOrder(e.Order);
-                data.InvestorID = _client.CtpLoginInfo.UserID;
-                data.BrokerID = _client.CtpLoginInfo.BrokerID;
-                _client.Api.ReqOrderInsert(data, _client.GetNextRequestId());
+                data.InvestorID = _client.ctpLoginInfo.UserID;
+                data.BrokerID = _client.ctpLoginInfo.BrokerID;
+                data.OrderRef = e.Order.LocalID;
+                var ret = _client.api.ReqOrderInsert(data, _client.GetNextRequestId());
+                if (ret == 0) {
+                    return;
+                }
+                ProcessOrderReject(data, new CtpRspInfo {
+                    ErrorID = -1, ErrorMsg = "连接中断发送失败"
+                });
             }
         }
 
         public CtpDealProcessor(CtpTradeClient client)
         {
             _client = client;
-            _action = new ActionBlock<OrderEvent>((Action<OrderEvent>)OrderAction);
+            _action = new ActionBlock<OrderEvent>(OrderAction, DataflowHelper.SpscBlockOptions);
             _orders = new OrderMap();
         }
 

@@ -8,15 +8,15 @@ namespace QuantBox.XApi
         private readonly IXSpi _spi;
         private readonly ActionBlock<(ConnectionStatus, RspUserLoginField)> _statusAction;
 
-        private void StatusAction(ValueTuple<ConnectionStatus, RspUserLoginField> data)
+        private void StatusAction((ConnectionStatus status, RspUserLoginField login) data)
         {
-            _spi.ProcessConnectionStatus(data.Item1, data.Item2);
+            _spi.ProcessConnectionStatus(data.status, data.login);
         }
 
         public StatusPublisher(IXSpi spi)
         {
             _spi = spi;
-            _statusAction = new ActionBlock<(ConnectionStatus, RspUserLoginField)>((Action<(ConnectionStatus, RspUserLoginField)>)StatusAction);
+            _statusAction = new ActionBlock<(ConnectionStatus, RspUserLoginField)>(StatusAction, DataflowHelper.SpscBlockOptions);
         }
 
         public void Post(ConnectionStatus status, RspUserLoginField field = null)

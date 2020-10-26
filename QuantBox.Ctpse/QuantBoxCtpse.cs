@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Newtonsoft.Json.Linq;
 using QuantBox.XApi;
 using SmartQuant;
@@ -8,6 +9,12 @@ namespace QuantBox
 {
     public class QuantBoxCtpse : XProvider, IInstrumentProvider
     {
+#if !INC_API
+        static QuantBoxCtpse()
+        {
+            AssemblyResolver.AddPath(Path.Combine(Path.GetDirectoryName(Installation.ConfigDir.FullName), "XAPI\\x64\\CTPSE\\"));
+        }
+#endif
         private const string CtpServers = "ctpse_servers";
         private const string CtpSessions = "ctpse_sessions";
         private const string CtpConnections = "ctpse_connections";
@@ -76,7 +83,7 @@ namespace QuantBox
             var defaultSettings = new XProviderSettings {
                 Id = QuantBoxConst.PIdCtp,
                 Name = ProviderName,
-                Url = "www.thanf.com",
+                Url = "www.quntbox.cn",
                 Description = "QuantBox Ctpse 插件",
                 UserProductInfo = "OpenQuant",
                 Connections = new List<ConnectionInfo>(),
@@ -84,7 +91,7 @@ namespace QuantBox
                 Servers = new List<ServerInfo>(),
             };
 
-            var settings = XProviderSettings.Load(QBHelper.GetConfigPath(GetSettingsFileName()));
+            var settings = XProviderSettings.Load(QBHelper.GetConfigPath(base.GetSettingsFileName()));
             if (settings == null) {
                 settings = defaultSettings;
             }
@@ -132,6 +139,19 @@ namespace QuantBox
                 {"Password", "密码"}
             };
         }
+
+#if INC_API
+        protected override XTradingApi CreateXApi(ConnectionInfo info)
+        {
+            if ((info.Type & ApiType.MarketData) == ApiType.MarketData) {
+                return new XTradingApi(new CtpQuote());
+            }
+            else if ((info.Type & ApiType.Trade) == ApiType.Trade) {
+                return new XTradingApi(new CtpTrader());
+            }
+            return base.CreateXApi(info);
+        }
+#endif
 
         public QuantBoxCtpse(Framework framework)
             : base(framework)

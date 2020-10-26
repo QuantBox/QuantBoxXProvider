@@ -7,12 +7,11 @@ namespace QuantBox.XApi
 
     public enum XApiFileType
     {
-        Unknown,
         Native,
         Managed
     }
 
-    public class XTradingApi : XSpi, IDisposable
+    public sealed class XTradingApi : XSpi, IDisposable
     {
         private IXApi _api;
 
@@ -24,15 +23,16 @@ namespace QuantBox.XApi
                 instance = ManagedManager.GetInstance(path);
             }
             else {
-                FileType = XApiFileType.Managed;
-                instance = new Nactive.XApi(path);
+                FileType = XApiFileType.Native;
+                instance = new Native.XApi(path);
             }
             _api = (IXApi)instance;
             _api.RegisterSpi(this);
         }
 
-        public XTradingApi(IXApi api)
+        public XTradingApi(IXApi api, XApiFileType type = XApiFileType.Managed)
         {
+            FileType = type;
             _api = api;
             _api.RegisterSpi(this);
         }
@@ -46,7 +46,6 @@ namespace QuantBox.XApi
         {
             _api?.Release();
             _api = null;
-            GC.SuppressFinalize(this);
         }
 
         #region Connection & Query

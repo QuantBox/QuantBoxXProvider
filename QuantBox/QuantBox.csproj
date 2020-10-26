@@ -86,8 +86,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccountPosition.cs" />
+    <Compile Include="Data.Compression\CompressedBarEventArgs.cs" />
+    <Compile Include="DataflowHelper.cs" />
+    <Compile Include="DualPosition.cs" />
+    <Compile Include="Helper.cs" />
+    <Compile Include="IdGenerator.cs" />
+    <Compile Include="InstTradingRules.cs" />
+    <Compile Include="OrderOffsetFlag.cs" />
     <Compile Include="OrderProxy\EmptyDataProvider.cs" />
     <Compile Include="OrderRegister.cs" />
+    <Compile Include="PositionManager.cs" />
+    <Compile Include="PositionRecord.cs" />
+    <Compile Include="PriceHelper.cs" />
     <Compile Include="QBCommissionProvider.cs" />
     <Compile Include="StatisticsManagerExtensions.cs" />
     <Compile Include="ICustomStatisticsType.cs" />
@@ -101,6 +111,7 @@
     <Compile Include="Data.Compression\TimeBarCompressor.cs" />
     <Compile Include="QBOptimizeBarFilter.cs" />
     <Compile Include="OrderProxy\OrderProcessor.cs" />
+    <Compile Include="TimeRange.cs" />
     <Compile Include="TradesCost.cs" />
     <Compile Include="TradingTimeRangeSelector.cs" />
     <Compile Include="DataManagerExtensions.cs" />
@@ -110,12 +121,7 @@
     <Compile Include="ExecutionCommandSerializer.cs" />
     <Compile Include="ExecutionReportSerializer.cs" />
     <Compile Include="DataEventMapper.cs" />
-    <Compile Include="OrderProxy\DualPosition.cs" />
     <Compile Include="OrderProxy\OrderAgentInfo.cs" />
-    <Compile Include="OrderProxy\OrderFlags.cs" />
-    <Compile Include="OrderProxy\PositionManager.cs" />
-    <Compile Include="OrderProxy\PositionRecord.cs" />
-    <Compile Include="OrderProxy\PriceHelper.cs" />
     <Compile Include="OrderProxy\OrderAgent.cs" />
     <Compile Include="PortfolioSerializer.cs" />
     <Compile Include="QBExecutionSimulator.cs" />

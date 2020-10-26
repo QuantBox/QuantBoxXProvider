@@ -42,6 +42,13 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -65,12 +72,12 @@
     <Compile Include="LogField.cs" />
     <Compile Include="ManagedApiLoader.cs" />
     <Compile Include="ManagedManager.cs" />
-    <Compile Include="Nactive\UnmanagedOrders.cs" />
+    <Compile Include="Native\UnmanagedOrders.cs" />
     <Compile Include="InternalSettlementInfoField.cs" />
-    <Compile Include="Nactive\PInvokeUtility.cs" />
-    <Compile Include="Nactive\ResponseData.cs" />
-    <Compile Include="Nactive\SubscribedList.cs" />
-    <Compile Include="Nactive\UnmanagedPtr.cs" />
+    <Compile Include="Native\PInvokeUtility.cs" />
+    <Compile Include="Native\ResponseData.cs" />
+    <Compile Include="Native\SubscribedList.cs" />
+    <Compile Include="Native\UnmanagedPtr.cs" />
     <Compile Include="DataObjetType.cs" />
     <Compile Include="DepthField.cs" />
     <Compile Include="DepthLevelType.cs" />
@@ -89,7 +96,7 @@
     <Compile Include="InvestorField.cs" />
     <Compile Include="InternalLogField.cs" />
     <Compile Include="LogLevel.cs" />
-    <Compile Include="Nactive\XApi.cs" />
+    <Compile Include="Native\XApi.cs" />
     <Compile Include="OpenCloseType.cs" />
     <Compile Include="OptimizedEnum.cs" />
     <Compile Include="OrderField.cs" />
@@ -111,11 +118,11 @@
     <Compile Include="TimeInForce.cs" />
     <Compile Include="TradeField.cs" />
     <Compile Include="TradingPhaseType.cs" />
-    <Compile Include="Nactive\UnixInvoke.cs" />
-    <Compile Include="Nactive\XApiInvoke.cs" />
+    <Compile Include="Native\UnixInvoke.cs" />
+    <Compile Include="Native\XApiInvoke.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Nactive\WindowsInvoke.cs" />
-    <Compile Include="Nactive\XApiInvokeProxy.cs" />
+    <Compile Include="Native\WindowsInvoke.cs" />
+    <Compile Include="Native\XApiInvokeProxy.cs" />
     <Compile Include="UserInfoField.cs" />
     <Compile Include="DepthMarketDataField.cs" />
     <Compile Include="XSpi.cs" />

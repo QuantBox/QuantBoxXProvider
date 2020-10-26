@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 #if NETFRAMEWORK
@@ -13,14 +12,17 @@ namespace QuantBox
 {
     public static class DataManagerExtensions
     {
-        private static void DownloadDataRequest(Framework framework, HistoricalDataRequest request, Action<HistoricalData> action)
+        private static void DownloadDataRequest(
+            Framework framework, 
+            HistoricalDataRequest request, 
+            Action<HistoricalData> action)
         {
             var wait = new AutoResetEvent(false);
-            var hdata = framework.ProviderManager.GetHistoricalDataProvider(QuantBoxConst.PIdHisData);
-            if (hdata != null) {
+            var hisData = framework.ProviderManager.GetHistoricalDataProvider(QuantBoxConst.PIdHisData);
+            if (hisData != null) {
                 framework.EventManager.Dispatcher.HistoricalData += OnHistoricalData;
                 framework.EventManager.Dispatcher.HistoricalDataEnd += OnHistoricalDataEnd;
-                hdata.Send(request);
+                hisData.Send(request);
                 while (!wait.WaitOne(0)) {
 #if NETFRAMEWORK
                     Application.DoEvents();
@@ -39,7 +41,8 @@ namespace QuantBox
             }
         }
 
-        private static BarSeries DownloadBars(DataManager manager, Instrument inst, long barSize, DateTime dateTime1, DateTime dateTime2)
+        private static BarSeries DownloadBars(
+            DataManager manager, Instrument inst, long barSize, DateTime dateTime1, DateTime dateTime2)
         {
             var bars = new BarSeries();
             var request = new HistoricalDataRequest() {
@@ -160,7 +163,7 @@ namespace QuantBox
             if (hdata != null) {
                 framework.EventManager.Dispatcher.InstrumentDefinition += OnInstrumentDefinition;
                 framework.EventManager.Dispatcher.InstrumentDefinitionEnd += OnInstrumentDefinitionEnd;
-                hdata.Send(new InstrumentDefinitionRequest() {
+                hdata.Send(new InstrumentDefinitionRequest {
                     Id = Guid.NewGuid().ToString("N"),
                     FilterType = filter,
                     FilterExchange = tradingDay.HasValue ? tradingDay.Value.ToString("yyyyMMdd") : string.Empty,
@@ -300,9 +303,10 @@ namespace QuantBox
 
             return result;
 
-            Instrument Find(List<Instrument> insts, string symbol)
+            Instrument Find(List<Instrument> instruments, string symbol)
             {
-                return insts.SingleOrDefault(n => n.Symbol == symbol || n.GetSymbol(QuantBoxConst.PIdHisData) == symbol);
+                return instruments.SingleOrDefault(n => 
+                    n.Symbol == symbol || n.GetSymbol(QuantBoxConst.PIdHisData) == symbol);
             }
         }
 
@@ -390,7 +394,37 @@ namespace QuantBox
             }
         }
 
-        public static void UseBarBacktest(this IDataSimulator simulator, Instrument inst, BarSeries inputBars, params long[] barSizes)
+        
+        public static IDictionary<string, double> GetSettlePrice(this DataManager manager, DateTime date)
+        {
+            var bars = DownloadBars(
+                manager,
+                new Instrument(InstrumentType.Future, "*"),
+                QuantBoxConst.DayBarSize,
+                date,
+                date);
+            return bars.ToDictionary(n => n.GetSymbol(), n => n.GetSettle());
+        }
+
+        private static bool BarInSimulator(IDataSimulator simulator, Instrument inst, long barSize)
+        {
+            foreach (var series in simulator.Series) {
+                if (series.Count == 0) {
+                    continue;
+                }
+
+                if (series[0].TypeId == DataObjectType.Bar) {
+                    var bar = (Bar)series[0];
+                    if (bar.InstrumentId == inst.Id && bar.Size == barSize) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public static void UseBarBacktest(this IDataSimulator simulator, Instrument instrument, BarSeries inputBars, params long[] barSizes)
         {
             var framework = ((DataSimulator)simulator).GetFramework();
             framework.EventManager.Dispatcher.SimulatorStop += DispatcherSimulatorStop;
@@ -400,19 +434,30 @@ namespace QuantBox
                 simulator.DateTime1 = inputBars.First.OpenDateTime;
                 simulator.DateTime2 = inputBars.Last.CloseDateTime;
             }
+
             var list = new List<BarSeries>();
             foreach (var size in barSizes) {
+                if (BarInSimulator(simulator, instrument, size)) {
+                    continue;
+                }
+
                 if (size == inputBars.First.Size) {
                     list.Add(inputBars);
                 }
                 else {
-                    var bars = GetTimeBars(dm, inst, size, simulator.DateTime1, simulator.DateTime2);
+                    var bars = GetTimeBars(dm, instrument, size, simulator.DateTime1, simulator.DateTime2);
                     if (bars.Count == 0) {
-                        bars = inputBars.TimeCompress(inst, size);
+                        bars = inputBars.TimeCompress(instrument, size);
                     }
                     list.Add(bars);
                 }
             }
+
+            if (list.Count == 0) {
+                return;
+            }
+
+            simulator.Series.AddRange(list);
             simulator.SubscribeBar = false;
             simulator.SubscribeBarSlice = false;
             simulator.SubscribeAsk = false;
@@ -420,18 +465,17 @@ namespace QuantBox
             simulator.SubscribeTrade = false;
             simulator.SubscribeQuote = false;
             simulator.SubscribeLevelII = false;
-            simulator.Series.AddRange(list);
         }
 
-        public static void UseBarBacktest(this IDataSimulator simulator, Instrument inst, long inputBarSize, params long[] barSizes)
+        public static void UseBarBacktest(this IDataSimulator simulator, Instrument instrument, long inputBarSize, params long[] barSizes)
         {
             var framework = ((DataSimulator)simulator).GetFramework();
             var dm = framework.DataManager;
-            var inputBars = GetTimeBars(dm, inst, inputBarSize, simulator.DateTime1, simulator.DateTime2);
+            var inputBars = GetTimeBars(dm, instrument, inputBarSize, simulator.DateTime1, simulator.DateTime2);
             if (inputBars.Count == 0) {
                 return;
             }
-            UseBarBacktest(simulator, inst, inputBars, barSizes);
+            UseBarBacktest(simulator, instrument, inputBars, barSizes);
         }
 
         private static void DispatcherSimulatorStop(object sender, EventArgs e)
@@ -440,13 +484,13 @@ namespace QuantBox
             ((EventDispatcher)sender).GetFramework().DataSimulator.Series.Clear();
         }
 
-        internal static long[] GlobalOptimizeBarFilter;
+        internal static long[] globalOptimizeBarFilter;
 
-        public static void UseBarOptimize(this IDataSimulator simulator, Instrument inst, long inputBarSize, params long[] barSizes)
+        public static void UseBarOptimize(this IDataSimulator simulator, Instrument instrument, long inputBarSize, params long[] barSizes)
         {
             var framework = ((DataSimulator)simulator).GetFramework();
             var dm = framework.DataManager;
-            var inputBars = GetTimeBars(dm, inst, inputBarSize, simulator.DateTime1, simulator.DateTime2);
+            var inputBars = GetTimeBars(dm, instrument, inputBarSize, simulator.DateTime1, simulator.DateTime2);
             if (inputBars.Count == 0) {
                 return;
             }
@@ -455,15 +499,14 @@ namespace QuantBox
                 if (size == inputBarSize) {
                     continue;
                 }
-                else {
-                    var bars = GetTimeBars(dm, inst, size, simulator.DateTime1, simulator.DateTime2);
-                    if (bars.Count == 0) {
-                        bars = inputBars.TimeCompress(inst, size);
-                        dm.Save(bars);
-                    }
+
+                var bars = GetTimeBars(dm, instrument, size, simulator.DateTime1, simulator.DateTime2);
+                if (bars.Count == 0) {
+                    bars = inputBars.TimeCompress(instrument, size);
+                    dm.Save(bars);
                 }
             }
-            GlobalOptimizeBarFilter = barSizes;
+            globalOptimizeBarFilter = barSizes;
             framework.EventManager.Filter = new QBOptimizeBarFilter(framework);
             simulator.SubscribeBar = true;
             simulator.SubscribeAsk = false;

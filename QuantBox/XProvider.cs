@@ -1,25 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+#if NETFRAMEWORK
 using System.Drawing.Design;
+#endif
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 using QuantBox.XApi;
 using Skyline;
+using LogLevel = QuantBox.XApi.LogLevel;
 
 namespace QuantBox
 {
     using SmartQuant;
     //using InstrumentType = SmartQuant.InstrumentType;
-
     public partial class XProvider : Provider, IExecutionProvider, IDataProvider
     {
-        private const string MsgProviderNotConnected = @"Provider is not connected.";
+        private const string MsgNotSupportTrading = "此插件没有交易功能.";
+        private const string MsgNotSupportInstrument = "此插件没有合约查询功能";
+        private const string MsgNotConnected = "此插件还没有完成服务器连接.";
         private const int DefaultInstrumentProvider = 60;
 
-        internal bool QryInstrumentCompleted;
+        internal bool qryInstrumentCompleted;
         private readonly List<Instrument> _instruments = new List<Instrument>();
         private int _tradingDataQueryInterval = 60;
         private int _connectTimeout = 2;
@@ -31,37 +35,42 @@ namespace QuantBox
         private ApiType _providerCapacity;
         private EventQueue _accountQueue;
 
-        private readonly DealProcessor _processor;
+        private readonly DealProcessor _dealProcessor;
         private readonly Convertor _convertor;
         private readonly TimedTask _timer;
         private readonly SubscribeManager _subscribeManager;
         private readonly ConnectManager _connectManager;
         private readonly IEventEmitter _emitter;
+        private readonly TickIdGen _idGen = new TickIdGen();
+        private readonly List<ExecutionCommand> _pendingCommands = new List<ExecutionCommand>();
         private ICommissionProvider _commissionProvider;
-        private int _orderId;
-        private string _orderPrefix;
         private Action<ExecutionCommand> _providerSetOrderId;
+        internal const int LocalIdLength = 8;
+        internal int localId;
+        internal Logger logger;
+        internal TraderClient trader;
+        internal MarketDataClient market;
 
-        internal Logger Logger;
-        internal TraderClient Trader;
-        internal MarketDataClient Market;
+        protected internal bool volumeIsAccumulated = true;
+        protected internal bool qryInstrumentUseMarketApi = false;
 
-        protected internal bool VolumeIsAccumulated = true;
-
-        private void SetOrderId(ExecutionCommand msg)
+        private void SetOrderId(ExecutionCommand cmd)
         {
-            var nextId = Interlocked.Increment(ref _orderId).ToString("D8");
-            if (!string.IsNullOrEmpty(_orderPrefix)) {
-                nextId = _orderPrefix + nextId;
+            if (string.IsNullOrEmpty(cmd.ProviderOrderId)) {
+                var nextId = _idGen.Next().ToString();
+                cmd.Order.ClOrderId = nextId;
+                cmd.ClOrderId = nextId;
             }
-            msg.Order.ClOrderId = nextId;
-            msg.ClOrderId = nextId;
+
+            cmd.ProviderOrderId = Interlocked.Increment(ref localId).ToString($"D{LocalIdLength}");
+            cmd.Order.ProviderOrderId = cmd.ProviderOrderId;
+
             var dateTime = DateTime.Now;
-            if (DateTime.Today != Trader.TradingDay) {
-                dateTime = Trader.TradingDay.Add(dateTime.TimeOfDay);
+            if (DateTime.Today != trader.TradingDay) {
+                dateTime = trader.TradingDay.Add(dateTime.TimeOfDay);
             }
-            msg.Order.TransactTime = dateTime;
-            msg.TransactTime = dateTime;
+            cmd.Order.TransactTime = dateTime;
+            cmd.TransactTime = dateTime;
         }
 
         private void CancelInstrumentRequest(InstrumentDefinitionRequest request, string text)
@@ -69,15 +78,16 @@ namespace QuantBox
             EmitInstrumentDefinitionEnd(request.Id, RequestResult.Error, text);
         }
 
-        private void SendInstrumentDefinition(InstrumentDefinitionRequest request, Instrument[] insts)
+        private void SendInstrumentDefinition(InstrumentDefinitionRequest request, Instrument[] instruments)
         {
             try {
-                var data = QBHelper.FilterInstrument(request, insts);
-                var definition = new InstrumentDefinition();
-                definition.Instruments = data;
-                definition.ProviderId = Id;
-                definition.RequestId = request.Id;
-                definition.TotalNum = data.Length;
+                var data = QBHelper.FilterInstrument(request, instruments);
+                var definition = new InstrumentDefinition {
+                    Instruments = data,
+                    ProviderId = Id,
+                    RequestId = request.Id,
+                    TotalNum = data.Length
+                };
                 EmitInstrumentDefinition(definition);
                 EmitInstrumentDefinitionEnd(request.Id, RequestResult.Completed, string.Empty);
             }
@@ -88,7 +98,7 @@ namespace QuantBox
 
         private void InitQuery()
         {
-            QryInstrumentCompleted = false;
+            qryInstrumentCompleted = false;
             _instruments.Clear();
         }
 
@@ -105,12 +115,12 @@ namespace QuantBox
             GetCapacity();
             Settings = LoadSettings();
             LoadSessionTimes();
-            Logger = LogManager.GetLogger(Settings.Name);
+            logger = LogManager.GetLogger(Settings.Name);
             id = Settings.Id;
             name = Settings.Name;
             description = Settings.Description;
             url = Settings.Url;
-            Logger.Info("Provider Initialized.");
+            logger.Info("Provider Initialized.");
         }
 
         private void LoadSessionTimes()
@@ -148,6 +158,45 @@ namespace QuantBox
             }
         }
 
+        private void OnMarketClose(DateTime dateTime, object data)
+        {
+            if (framework.OrderServer is DatabaseOrderServer server) {
+                server.PositionStore.ChangeTradingDay();
+            }
+            if (TradingStatus != InstrumentStatusType.Closed) {
+                TradingStatus = InstrumentStatusType.Closed;
+                EventHappened?.Invoke(this, (XProviderEventType)TradingStatus);
+            }
+            foreach (var provider in framework.ProviderManager.Providers) {
+                if (provider is XProvider) {
+                    CancelUndoneOrder(provider.Id);
+                }
+            }
+            framework.StrategyManager.Global.Remove(QuantBoxConst.GlobalMarketCloseReminder);
+        }
+
+        private static readonly object Locker = new object();
+        private void InitMarketCloseReminder()
+        {
+            if (MarketCloseTime == TimeSpan.Zero) {
+                return;
+            }
+            lock (Locker) {
+                var global = framework.StrategyManager.Global;
+                if (global.ContainsKey(QuantBoxConst.GlobalMarketCloseReminder)) {
+                    return;
+                }
+
+                global.Add(QuantBoxConst.GlobalMarketCloseReminder, string.Empty);
+                var closeDate = trader.TradingDay.Add(MarketCloseTime);
+                if (trader.TradingDay == DateTime.Today && DateTime.Now.TimeOfDay > MarketCloseTime) {
+                    closeDate = TradingCalendar.Instance.GetNextTradingDay(DateTime.Today).Add(MarketCloseTime);
+                }
+
+                framework.Clock.AddReminder(OnMarketClose, closeDate);
+            }
+        }
+
         internal InstrumentManager InstrumentManager => framework.InstrumentManager;
         internal bool IsDataProvider => ConnectMarketData && (_providerCapacity & ApiType.MarketData) == ApiType.MarketData;
         internal bool IsExecutionProvider => ConnectTrader && (_providerCapacity & ApiType.Trade) == ApiType.Trade;
@@ -155,16 +204,33 @@ namespace QuantBox
 
         protected internal bool InTradingSession()
         {
+            var time = DateTime.Now.TimeOfDay;
+
+            if (AutoConnectUseTradingCalendar) {
+                var date = DateTime.Now.Date;
+                var calendar = TradingCalendar.Instance;
+                if (calendar.DayList.HolidayLoaded && !calendar.IsTradingDay(date)) {
+                    if (calendar.IsHoliday(date)) {
+                        return false;
+                    }
+
+                    if (DateTime.Today.DayOfWeek != DayOfWeek.Saturday || time > MarketNightCloseTime) {
+                        return false;
+                    }
+                }
+            }
+
             if (SessionTimes.Count == 0) {
                 return true;
             }
-            var time = DateTime.Now.TimeOfDay;
+
             time = new TimeSpan(time.Hours, time.Minutes, time.Seconds);
             foreach (var range in SessionTimes) {
                 if (time >= range.Begin && time <= range.End) {
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -189,9 +255,9 @@ namespace QuantBox
             return CreateXApi(info.ApiPath);
         }
 
-        protected virtual ServerInfoField GetServerInfo(ServerInfo info)
+        protected virtual ServerInfoField GetServerInfo(ServerInfo server)
         {
-            return info.Get();
+            return server.Get();
         }
 
         protected internal virtual ServerInfoField GetServerInfo(int index, ApiType type)
@@ -217,16 +283,15 @@ namespace QuantBox
 
         protected virtual UserInfoField GetUserInfo(UserInfo user)
         {
-            var info = user.Get();
-            if (!string.IsNullOrEmpty(_currentUserId)) {
-                info.UserID = _currentUserId;
-                info.Password = _currentUserPassword;
-            }
-            return info;
+            return user.Get();
         }
 
         protected internal virtual UserInfoField GetUserInfo(int index)
         {
+            if (!string.IsNullOrEmpty(_currentUserId)) {
+                var user = new UserInfo { UserId = _currentUserId, Password = _currentUserPassword };
+                return GetUserInfo(user);
+            }
             if (index < 0 || index >= Settings.Users.Count) {
                 return null;
             }
@@ -239,7 +304,7 @@ namespace QuantBox
                 Id = 60,
                 Name = "xapi",
                 Description = "XApi Provider",
-                Url = "www.thanf.com",
+                Url = "www.quantbox.com",
                 UserProductInfo = "OpenQuant"
             };
         }
@@ -269,10 +334,10 @@ namespace QuantBox
         protected override void OnConnect()
         {
             Status = ProviderStatus.Connecting;
-            InitAccoutQueue();
+            InitAccountQueue();
             _convertor.Init();
             _emitter.Open();
-            _processor.Open();
+            _dealProcessor.Open();
             _timer.Start();
             _connectManager.Post(new OnConnect());
         }
@@ -305,7 +370,7 @@ namespace QuantBox
 
         #region Message Handlers
 
-        private void InitAccoutQueue()
+        private void InitAccountQueue()
         {
             if (IsExecutionProvider) {
                 _accountQueue = new EventQueue(2, 0, 2, 100, framework.EventBus);
@@ -314,7 +379,7 @@ namespace QuantBox
             }
         }
 
-        private void ClearAccoutQueue()
+        private void ClearAccountQueue()
         {
             if (_accountQueue != null) {
                 _accountQueue.Enqueue(new OnQueueClosed(_accountQueue));
@@ -327,17 +392,37 @@ namespace QuantBox
             _timer.Start();
         }
 
+        private void ProcessPendingCommand()
+        {
+            lock (_pendingCommands) {
+                if (_pendingCommands.Count <= 0) {
+                    return;
+                }
+
+                foreach (var command in _pendingCommands) {
+                    Send(command);
+                }
+                _pendingCommands.Clear();
+            }
+        }
+
         internal void ConnectDone()
         {
             EventHappened?.Invoke(this, XProviderEventType.ConnectDone);
-            if (MarketContinousAfterConnectDone) {
+            ProcessPendingCommand();
+            if (MarketContinuousAfterConnectDone) {
                 TradingStatus = InstrumentStatusType.Continous;
-                EventHappened?.Invoke(this, XProviderEventType.MarketContinous);
+                EventHappened?.Invoke(this, XProviderEventType.MarketContinuous);
             }
             InitQuery();
             if (IsInstrumentProvider) {
-                Logger.Info("开始查询合约......");
-                Trader.QueryInstrument();
+                logger.Info("开始查询合约......");
+                if (!qryInstrumentUseMarketApi) {
+                    trader.QueryInstrument();
+                }
+                else {
+                    market.QueryInstrument();
+                }
             }
             else {
                 StartTimerTask();
@@ -348,12 +433,45 @@ namespace QuantBox
         {
             _subscribeManager.Clear();
             _timer.Close();
-            _processor.Close();
+            _dealProcessor.Close();
             _emitter.Close();
-            ClearAccoutQueue();
-            Market = null;
-            Trader = null;
+            ClearAccountQueue();
+            market = null;
+            trader = null;
             EventHappened?.Invoke(this, XProviderEventType.DisconnectDone);
+        }
+
+        private void ProcessTrace(string message)
+        {
+            if (message == "RtnTrade" && QueryTradingDataAfterTrade) {
+                trader.QueryAccount();
+                trader.QueryPositions();
+            }
+        }
+
+        internal void OnProviderLog(LogField log)
+        {
+            switch (log.Level) {
+                case LogLevel.Trace:
+                    ProcessTrace(log.Message);
+                    logger.Trace(log.Message);
+                    break;
+                case LogLevel.Debug:
+                    logger.Debug(log.Message);
+                    break;
+                case LogLevel.Info:
+                    logger.Info(log.Message);
+                    break;
+                case LogLevel.Warn:
+                    logger.Warn(log.Message);
+                    break;
+                case LogLevel.Error:
+                    logger.Error(log.Message);
+                    break;
+                case LogLevel.Fatal:
+                    logger.Fatal(log.Message);
+                    break;
+            }
         }
 
         internal void OnProviderError(ErrorField error)
@@ -362,27 +480,32 @@ namespace QuantBox
 
             }
             else {
-                Logger.Warn("id: {0}, msg: {1}, source: {2}", error.XErrorId, error.Text, error.Source);
+                logger.Warn("id: {0}, msg: {1}, source: {2}", error.XErrorId, error.Text, error.Source);
                 EmitError(error.XErrorId, error.RawErrorId, $"{error.Source}:{error.Text}");
             }
         }
 
         internal void OnProviderError(int errorId, string errorMsg)
         {
-            Logger.Warn("id: {0}, msg: {1}", errorId, errorMsg);
+            logger.Warn("id: {0}, msg: {1}", errorId, errorMsg);
             EmitError(errorId, errorId, errorMsg);
+        }
+
+        private void MarketDataInit()
+        {
         }
 
         internal void OnClientConnected(XApiClient client)
         {
-            if (client == Market) {
+            if (client == market) {
                 if (!ConnectTrader) {
-                    TradingCalendar.Instance.Init(DateTime.Today);
+                    TradingCalendar.Instance.Init(DateTime.Today, host: DataHost);
                 }
                 _subscribeManager.Resubscribe();
+                MarketDataInit();
             }
 
-            if (client == Trader) {
+            if (client == trader) {
                 TradingInit();
             }
 
@@ -391,7 +514,7 @@ namespace QuantBox
 
         internal void OnClientDisconnected(XApiClient client)
         {
-            if (client == Market) {
+            if (client == market) {
                 _convertor.Reset();
             }
             _connectManager.Post(new OnClientDisconnected());
@@ -408,30 +531,24 @@ namespace QuantBox
 
         private void TradingInit()
         {
-            TradingCalendar.Instance.Init(Trader.TradingDay);
+            TradingCalendar.Instance.Init(trader.TradingDay, host: DataHost);
+            InitMarketCloseReminder();
             var server = GetPersistentServer();
-            _orderId = Trader.OrderIdBase + 1;
-            _orderPrefix = Trader.OrderPrefix;
             if (server != null) {
-                if (server.Settings.GetAsDateTime(ProviderSettingsType.TradingDay) == Trader.TradingDay
-                    && int.TryParse(server.Settings.GetAsString(ProviderSettingsType.MaxLocalId), out var maxLocalId)
-                    && _orderId < maxLocalId) {
-                    _orderId = maxLocalId + 1;
-                }
+                int.TryParse(server.LastProviderId, out localId);
                 _providerSetOrderId = _ => { };
                 server.SetOrderId = SetOrderId;
-                server.Settings.Set(ProviderSettingsType.TradingDay, Trader.TradingDay);
-                _processor.ProcessNoSendOrders();
+                if (server.Settings.GetAsDateTime(ProviderSettingsType.TradingDay) < trader.TradingDay) {
+                    localId = trader.OrderIdBase + 1;
+                }
+                else {
+                    localId = Math.Max(trader.OrderIdBase + 1, localId);
+                }
+                server.Settings.Set(ProviderSettingsType.TradingDay, trader.TradingDay);
             }
             else {
+                localId = trader.OrderIdBase + 1;
                 _providerSetOrderId = SetOrderId;
-            }
-        }
-
-        internal void SetOrderIdBase(int orderId)
-        {
-            if (_orderId < orderId) {
-                _orderId = orderId;
             }
         }
 
@@ -439,13 +556,15 @@ namespace QuantBox
 
         internal void OnMessage(InstrumentStatusField field)
         {
-            if (field.Status != TradingStatus) {
-                TradingStatus = field.Status;
-                if (TradingStatus == InstrumentStatusType.Closed) {
-                    CancelUndoneOrder();
-                }
-                EventHappened?.Invoke(this, (XProviderEventType)field.Status);
+            if (field.Status == TradingStatus) {
+                return;
             }
+
+            TradingStatus = field.Status;
+            if (TradingStatus == InstrumentStatusType.Closed) {
+                //CancelUndoneOrder();
+            }
+            EventHappened?.Invoke(this, (XProviderEventType)field.Status);
         }
 
         internal void OnMessage(ExecutionReport report)
@@ -455,11 +574,11 @@ namespace QuantBox
 
         internal void OnMessage(InstrumentField field, bool completed)
         {
-            if (QryInstrumentCompleted) {
+            if (qryInstrumentCompleted) {
                 return;
             }
             if (field != null) {
-                var inst = _convertor.GetInstument(field);
+                var inst = _convertor.GetInstrument(field);
                 switch (inst.Type) {
                     case InstrumentType.Stock:
                     case InstrumentType.Future:
@@ -472,28 +591,28 @@ namespace QuantBox
             }
             if (completed) {
                 _instruments.Sort((x, y) => string.Compare(x.Symbol, y.Symbol, StringComparison.Ordinal));
-                QryInstrumentCompleted = true;
-                Logger.Info($"合约查询完毕，收到{_instruments.Count}个合约");
-                Logger.Info("开始查询资金和持仓......");
-                Trader.QueryAccount();
-                Trader.QueryPositions();
+                qryInstrumentCompleted = true;
+                logger.Info($"合约查询完毕，收到{_instruments.Count}个合约");
+                logger.Info("开始查询资金和持仓......");
+                trader.QueryAccount();
+                trader.QueryPositions();
                 StartTimerTask();
             }
         }
 
-        internal void OnMessage(PositionField data)
+        internal void OnMessage(PositionField data, bool isLast)
         {
             if (data != null) {
-                _convertor.ProcessPosition(data);
-                Logger.Info(data.DebugInfo());
+                _convertor.ProcessPosition(data, isLast);
+                logger.Info(data.DebugInfo());
             }
         }
 
-        internal void OnMessage(AccountField data)
+        internal void OnMessage(AccountField data, bool isLast)
         {
             if (data != null) {
-                _convertor.ProcessAccount(data);
-                Logger.Info(data.DebugInfo());
+                _convertor.ProcessAccount(data, isLast);
+                logger.Info(data.DebugInfo());
             }
         }
 
@@ -503,53 +622,51 @@ namespace QuantBox
                 _convertor.ProcessMarketData(data);
             }
             catch (Exception e) {
-                Logger.Error(e);
+                logger.Error(e);
                 throw;
             }
         }
 
         internal void OnMessage(TradeField field)
         {
-            _processor.PostTrade(field);
-            if (QueryTradingDataAfterTrade) {
-                Trader.QueryAccount();
-                Trader.QueryPositions();
-            }
+            _dealProcessor.PostTrade(field);
         }
 
         internal void OnMessage(OrderField field)
         {
-            _processor.PostReturnOrder(field);
+            _dealProcessor.PostReturnOrder(field);
         }
 
         internal void OnTraderCreated()
         {
-            var server = GetPersistentServer();
-            if (server != null) {
-                EventHappened?.Invoke(this, XProviderEventType.TraderCreated);
-                var tradingDay = server.Settings.GetAsDateTime(ProviderSettingsType.TradingDay);
-                if (tradingDay == DateTime.Today && DateTime.Now.TimeOfDay > MarketSettlementTime) {
-                    //CancelUndoneOrder();
-                }
-                else {
-                    _processor.LoadUndoneOrders(framework, tradingDay, server.GetTrades(tradingDay));
-                }
-            }
+            //var server = GetPersistentServer();
+            //if (server == null) {
+            //    return;
+            //}
+            EventHappened?.Invoke(this, XProviderEventType.TraderCreated);
+            //var tradingDay = server.Settings.GetAsDateTime(ProviderSettingsType.TradingDay);
+            //if (tradingDay == DateTime.Today && DateTime.Now.TimeOfDay > MarketCloseTime) {
+            //    //CancelUndoneOrder();
+            //}
+            //else {
+            //    //_dealProcessor.ProcessUndone(framework, tradingDay, server.GetTrades(tradingDay));
+            //}
         }
 
-        private void CancelUndoneOrder()
+        private void CancelUndoneOrder(byte providerId)
         {
             foreach (var order in framework.OrderManager.Orders) {
-                if (order.ProviderId == id && !order.IsDone) {
+                if (order.ProviderId == providerId && !order.IsDone) {
                     ProcessExpired(order);
                 }
             }
 
             void ProcessExpired(Order order)
             {
-                var report = new ExecutionReport(order);
-                report.ExecType = SmartQuant.ExecType.ExecExpired;
-                report.OrdStatus = SmartQuant.OrderStatus.Expired;
+                var report = new ExecutionReport(order) {
+                    ExecType = ExecType.ExecExpired,
+                    OrdStatus = OrderStatus.Expired
+                };
                 OnMessage(report);
             }
         }
@@ -559,8 +676,9 @@ namespace QuantBox
 
         internal void SubscribeDone(Instrument inst)
         {
+            logger.Debug($"Provider subscribe {inst.Symbol} tid:{Thread.CurrentThread.ManagedThreadId}");
             if (IsExecutionProvider && SubscribeAndQueryQuote) {
-                Trader.QueryQuote(inst);
+                trader.QueryQuote(inst);
             }
         }
 
@@ -621,7 +739,7 @@ namespace QuantBox
         {
             _connectManager = new ConnectManager(this);
             _subscribeManager = new SubscribeManager(this);
-            _processor = new DealProcessor(this);
+            _dealProcessor = new DealProcessor(this);
             _convertor = new Convertor(this);
             _timer = new TimedTask(this);
 #if DEBUG
@@ -673,17 +791,26 @@ namespace QuantBox
 
         public override void Send(ExecutionCommand command)
         {
-            if (!IsExecutionProvider || !IsConnected) {
-                EmitError(-1, -1, MsgProviderNotConnected);
+            if (!IsExecutionProvider) {
+                EmitError(-1, -1, MsgNotSupportTrading);
                 return;
+            }
+
+            if (!IsConnected) {
+                lock (_pendingCommands) {
+                    if (!IsConnected) {
+                        _pendingCommands.Add(command);
+                        return;
+                    }
+                }
             }
             switch (command.Type) {
                 case ExecutionCommandType.Send:
                     _providerSetOrderId(command);
-                    _processor.PostNewOrder(command.Order);
+                    _dealProcessor.PostNewOrder(command.Order);
                     break;
                 case ExecutionCommandType.Cancel:
-                    _processor.PostCancelOrder(command.Order);
+                    _dealProcessor.PostCancelOrder(command.Order);
                     break;
             }
         }
@@ -708,15 +835,15 @@ namespace QuantBox
         public override void Send(InstrumentDefinitionRequest request)
         {
             if (!IsConnected) {
-                CancelInstrumentRequest(request, MsgProviderNotConnected);
+                CancelInstrumentRequest(request, MsgNotConnected);
                 return;
             }
             if (!IsInstrumentProvider) {
-                CancelInstrumentRequest(request, "没有查询合约的功能");
+                CancelInstrumentRequest(request, MsgNotSupportInstrument);
                 return;
             }
             Task.Run(() => {
-                SendInstrumentDefinition(request, QryInstrumentCompleted ? _instruments.ToArray() : new Instrument[0]);
+                SendInstrumentDefinition(request, qryInstrumentCompleted ? _instruments.ToArray() : new Instrument[0]);
             });
         }
 
@@ -740,35 +867,43 @@ namespace QuantBox
         public string Configuration { get; set; }
 
         [Category(CategorySettings)]
+        [Description("交易日历服务地址")]
+        public string DataHost { get; set; } = "data.quantbox.cn";
+
+        private const string ConnectSettings = "AutoConnect";
+        [Category(ConnectSettings)]
+        [Description("是否启用自动连接")]
+        public bool EnableAutoConnect { get; set; } = true;
+
+        [Category(ConnectSettings)]
         [Description("交易时段列表，当前时间在这些列表中将启用重连机制，不在此列表中将主动断开，列表为空将不处理")]
         public BindingList<TimeRange> SessionTimes { get; set; }
 
-        [Category(CategorySettings)]
+        [Category(ConnectSettings)]
+        [Description("自动连接中是否使用交易日历")]
+        public bool AutoConnectUseTradingCalendar { get; set; } = true;
+
+        [Category(ConnectSettings)]
+        [Description("交易市场夜盘的关闭时间")]
+        public TimeSpan MarketNightCloseTime { get; set; } = new TimeSpan(2, 40, 0);
+
+        [Category(ConnectSettings)]
         [Description("自动重连时的连接超时设置(分钟)")]
         public int ConnectTimeout
         {
             get => _connectTimeout;
-            set {
-                if (value < 2) {
-                    value = 2;
-                }
-                _connectTimeout = value;
-            }
+            set { _connectTimeout = Math.Max(value, 2); }
         }
 
         private const string CategoryTrade = "Settings - Trade";
 
         [Category(CategoryTrade)]
-        [Description("交易市场的关闭结算时间")]
-        public TimeSpan MarketSettlementTime { get; set; } = new TimeSpan(17, 0, 0);
-
-        [Category(CategoryTrade)]
-        [Description("启动行情调试日志")]
-        public bool EnableMarketLog { get; set; } = false;
+        [Description("交易市场的关闭时间，插件在这个时间取消未完成的订单")]
+        public TimeSpan MarketCloseTime { get; set; } = new TimeSpan(16, 0, 0);
 
         [Category(CategoryTrade)]
         [Description("默认的投机保值设置")]
-        public HedgeFlagType DefaultHedgeFlag { get; set; }
+        public HedgeFlagType DefaultHedgeFlag { get; set; } = HedgeFlagType.Speculation;
 
         [Category(CategoryTrade)]
         [Description("成交后查询资金持仓")]
@@ -788,13 +923,6 @@ namespace QuantBox
         }
 
         [Category(CategoryTrade)]
-        [Description("指定使用的合约附加信息")]
-#if NETFRAMEWORK
-        [TypeConverter(typeof(Design.InstrumentProviderConverter))]
-#endif
-        public int InstrumentAltId { get; set; } = DefaultInstrumentProvider;
-
-        [Category(CategoryTrade)]
         [Description("连接行情服务")]
         public bool ConnectMarketData { get; set; } = true;
 
@@ -803,26 +931,42 @@ namespace QuantBox
         public bool ConnectTrader { get; set; } = true;
 
         [Category(CategoryTrade)]
-        [Description("交易连接成功后就可以开始交易")]
-        public bool MarketContinousAfterConnectDone { get; set; } = false;
+        [Description("交易连接成功后就进入连续交易状态")]
+        public bool MarketContinuousAfterConnectDone { get; set; } = false;
 
-        [Category(CategoryTrade)]
+        private const string CategoryMarketData = "Settings - MarketData";
+        [Category(CategoryMarketData)]
+        [Description("启动行情调试日志")]
+        public bool EnableMarketLog { get; set; } = false;
+
+        [Category(CategoryMarketData)]
+        [Description("获取交易所合约代码")]
+#if NETFRAMEWORK
+        [TypeConverter(typeof(Design.InstrumentProviderConverter))]
+#endif
+        public int InstrumentAltId { get; set; } = DefaultInstrumentProvider;
+
+        [Category(CategoryMarketData)]
         [Description("启用夜盘行情时间修正")]
         public bool NightTradingTimeCorrection { get; set; } = false;
 
-        [Category(CategoryTrade)]
+        [Category(CategoryMarketData)]
+        [Description("收到行情后先触发 OnTrade 事件")]
+        public bool RaiseOnTradeFirst { get; set; } = false;
+
+        [Category(CategoryMarketData)]
         [Description("过滤成交量为零的行情")]
         public bool DiscardEmptyTrade { get; set; } = true;
 
-        [Category(CategoryTrade)]
+        [Category(CategoryMarketData)]
         [Description("过滤非交易时间的行情")]
         public bool DiscardOutOfTimeRange { get; set; } = true;
 
-        [Category(CategoryTrade)]
+        [Category(CategoryMarketData)]
         [Description("交易所和本地之间的最大时差,超过这个设定的行情将被过滤(单位: 分钟)")]
         public int MaxTimeDiffExchangeLocal { get; set; } = 60;
 
-        [Category(CategoryTrade)]
+        [Category(CategoryMarketData)]
         [Description("在订阅行情的同时通过交易接口查询行情,解决融航柜台无法报单的问题")]
         public bool SubscribeAndQueryQuote { get; set; } = false;
 

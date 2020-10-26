@@ -13,7 +13,7 @@ namespace QuantBox.OrderProxy
     using TimeInForce = SmartQuant.TimeInForce;
     using ProcessorListNode = System.Collections.Generic.LinkedListNode<OrderProcessor>;
 
-    internal class OrderProcessor
+    internal sealed class OrderProcessor
     {
         private const int TimeOutOfBoundsError = 0;
         private const int PriceOutOfBoundsError = 0;
@@ -25,24 +25,24 @@ namespace QuantBox.OrderProxy
             public double CloseToday;
         }
 
-        protected readonly OrderAgent Agent;
-        protected readonly Order Order;
-        protected readonly PositionManager Manager;
+        private readonly OrderAgent _agent;
+        private readonly Order _order;
         private readonly OrderRecord _record;
+        private readonly DualPosition _position;
         private readonly QuantBoxOrderInfo _info;
         private InstTradingRules _rules;
         private readonly Logger _logger;
         private DepthMarketDataField _marketData = DepthMarketDataField.Empty;
-        internal Order OpenOrder;
-        internal Order CloseOrder;
-        internal Order CloseTodayOrder;
-        internal readonly ProcessorListNode ListNode;
+        internal Order openOrder;
+        internal Order closeOrder;
+        internal Order closeTodayOrder;
+        internal readonly ProcessorListNode listNode;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SetMarketData()
         {
             if (double.IsNaN(_marketData.OpenPrice)) {
-                _marketData = Order.Instrument.GetMarketData();
+                _marketData = _order.Instrument.GetMarketData();
             }
         }
 
@@ -60,19 +60,19 @@ namespace QuantBox.OrderProxy
 
         private Order CreateOrder(double qty, OpenCloseType openClose)
         {
-            var order = Agent.CreateOrder(Order, qty);
+            var order = _agent.CreateOrder(_order, qty);
             order.SetOpenClose(openClose);
             if (openClose == OpenCloseType.Open) {
-                order.TimeInForce = Order.TimeInForce;
+                order.TimeInForce = _order.TimeInForce;
             }
             else {
-                if (OpenOrder == null) {
-                    order.TimeInForce = Order.TimeInForce;
+                if (openOrder == null) {
+                    order.TimeInForce = _order.TimeInForce;
                 }
             }
             var info = OrderExtensions.GetOrderInfo(order);
-            info.Processor = this;
-            info.ParentOrderId = Order.Id;
+            info.processor = this;
+            info.ParentOrderId = _order.Id;
             info.DeviationInfo = _info.DeviationInfo;
             info.DeviationMode = _info.DeviationMode;
             return order;
@@ -86,17 +86,17 @@ namespace QuantBox.OrderProxy
                 var old = OrderExtensions.GetOrderInfo(order);
                 info.DeviationInfo = old.DeviationInfo;
             }
-            if (OpenOrder == order) {
-                ClearOrder(ref OpenOrder);
-                OpenOrder = newOrder;
+            if (openOrder == order) {
+                ClearOrder(ref openOrder);
+                openOrder = newOrder;
             }
-            else if (CloseOrder == order) {
-                ClearOrder(ref CloseOrder);
-                CloseOrder = newOrder;
+            else if (closeOrder == order) {
+                ClearOrder(ref closeOrder);
+                closeOrder = newOrder;
             }
-            else if (CloseTodayOrder == order) {
-                ClearOrder(ref CloseTodayOrder);
-                CloseTodayOrder = newOrder;
+            else if (closeTodayOrder == order) {
+                ClearOrder(ref closeTodayOrder);
+                closeTodayOrder = newOrder;
             }
         }
 
@@ -104,74 +104,72 @@ namespace QuantBox.OrderProxy
         private OpenCloseInfo GetOpenCloseInfo()
         {
             var info = new OpenCloseInfo();
-            var p = Manager.GetPosition(Order.Instrument);
-            var (closeQty, closeTodayQty) = GetCloseItems();
 
-            var oc = Order.GetOpenClose(true);
-            switch (oc) {
+            (double closeQty, double closeTodayQty) = GetCloseQty();
+
+            var openCloseType = _order.GetOpenClose(true);
+            switch (openCloseType) {
                 case OpenCloseType.Undefined:
                     AutoOpenClose(false);
                     break;
                 case OpenCloseType.Open:
-                    info.Open = Order.Qty;
+                    info.Open = _order.Qty;
                     break;
                 case OpenCloseType.Close:
                     AutoOpenClose();
                     break;
                 case OpenCloseType.CloseToday:
-                    info.CloseToday = Math.Min(Order.Qty, closeTodayQty);
+                    if (_rules.StrictCloseToday) {
+                        info.CloseToday = Math.Min(_order.Qty, closeTodayQty);
+                    }
+                    else {
+                        AutoOpenClose();
+                    }
                     break;
-                default:
+                case OpenCloseType.LockToday:
+                    if (closeTodayQty > 0) {
+                        info.Open = _order.Qty;
+                    }
+                    else {
+                        info.Close = Math.Min(_order.Qty, closeQty);
+                        info.Open = Math.Max(0, _order.Qty - closeQty);
+                    }
                     break;
             }
             return info;
 
             #region local
-            (double, double) GetCloseItems()
+            (double close, double closeToday) GetCloseQty()
             {
-                double close, closeToday;
-                if (Order.Side == OrderSide.Buy) {
-                    (closeToday, close) = p.Short.GetCanCloseQty();
+                double closeToday, close;
+                (closeToday, close) = _order.Side == OrderSide.Buy
+                    ? _position.Short.GetCanCloseQty()
+                    : _position.Long.GetCanCloseQty();
+
+                if (!_rules.DisableCloseToday) {
+                    return (close, closeToday);
                 }
-                else {
-                    (closeToday, close) = p.Long.GetCanCloseQty();
-                }
-                if (!_rules.CloseToday) {
-                    close += closeToday;
-                    closeToday = 0;
-                }
+
+                close -= closeToday;
+                closeToday = 0;
                 return (close, closeToday);
             }
             void AutoOpenClose(bool closeOnly = true)
             {
-                var qty = Order.Qty;
-                if (_rules.CloseToday) {
-                    if (_rules.CloseTodayFirst) {
-                        info.CloseToday = Math.Min(qty, closeTodayQty);
-                        qty -= closeTodayQty;
-                        if (qty <= 0) {
-                            return;
-                        }
-                    }
-                    info.Close = Math.Min(qty, closeQty);
-                    qty -= closeQty;
-                    if (qty <= 0) {
+                var qty = _order.Qty;
+                if (_rules.StrictCloseToday) {
+                    closeQty -= closeTodayQty;
+                    info.CloseToday = Math.Min(qty, closeTodayQty);
+                    qty -= info.CloseToday;
+                    if (Math.Abs(qty) < double.Epsilon) {
                         return;
-                    }
-                    if (!_rules.CloseTodayFirst) {
-                        info.CloseToday = Math.Min(qty, closeTodayQty);
-                        qty -= closeTodayQty;
-                        if (qty <= 0) {
-                            return;
-                        }
                     }
                 }
-                else {
-                    info.Close = Math.Min(qty, closeQty);
-                    qty -= closeQty;
-                    if (qty <= 0) {
-                        return;
-                    }
+
+                info.Close = Math.Min(qty, closeQty);
+                qty -= info.Close;
+                if (Math.Abs(qty) < double.Epsilon) {
+                    return;
                 }
                 if (!closeOnly) {
                     info.Open = qty;
@@ -180,180 +178,197 @@ namespace QuantBox.OrderProxy
             #endregion
         }
 
-        private void AutoCloseOpen()
+        private bool SetOpenClose()
         {
             var info = GetOpenCloseInfo();
-            if (info.Open > 0 && OpenOrder == null) {
-                OpenOrder = CreateOrder(info.Open, OpenCloseType.Open);
+            if (info.Open > 0 && openOrder == null) {
+                openOrder = CreateOrder(info.Open, OpenCloseType.Open);
             }
-            if (info.Close > 0 && CloseOrder == null) {
-                CloseOrder = CreateOrder(info.Close, OpenCloseType.Close);
+            if (info.Close > 0 && closeOrder == null) {
+                closeOrder = CreateOrder(info.Close, OpenCloseType.Close);
             }
-            if (info.CloseToday > 0 && CloseTodayOrder == null) {
-                CloseTodayOrder = CreateOrder(info.CloseToday, OpenCloseType.CloseToday);
+            if (info.CloseToday > 0 && closeTodayOrder == null) {
+                closeTodayOrder = CreateOrder(info.CloseToday, OpenCloseType.CloseToday);
             }
-            _logger.Debug($"o:{info.Open},c:{info.Close},ct{info.CloseToday}");
+            _logger.Debug($"o:{info.Open},c:{info.Close},ct:{info.CloseToday}");
+            return !(info.Open + info.Close + info.CloseToday < _order.Qty);
         }
         #endregion
 
-        private void SetOrderPrice(Order order, DeviationInfo info, bool marketToLimit = true)
+        private void SetOrderPrice(Order order, DeviationInfo info)
         {
-            if (marketToLimit) {
-                order.Type = OrderType.Limit;
-            }
             switch (info.PriceAdjustMethod) {
                 case OrderPriceAdjustMethod.UpperLowerLimit:
-                    if (_rules.MarketOrder) {
-                        _logger.Debug($"{Order.Id}, adjust to market");
-                        order.Type = OrderType.Market;
-                        order.Price = 0;
-                    }
-                    else {
-                        _logger.Debug($"{Order.Id}, adjust to lower_upper_limit");
-                        order.Price = GetUpperLowerPrice();
-                    }
+                    order.Price = order.Side == OrderSide.Buy ? GetUpperLimitPrice() : GetLowerLimitPrice();
                     break;
                 case OrderPriceAdjustMethod.MatchPrice:
-                    _logger.Debug($"{Order.Id}, adjust to match");
-                    order.Price = GetMatchPrice();
+                    order.Price = order.Side == OrderSide.Buy
+                        ? order.Instrument.Ask.Price + info.Slippage
+                        : order.Instrument.Bid.Price - info.Slippage;
                     break;
-            }
-
-            double GetUpperLowerPrice()
-            {
-                return order.Side == OrderSide.Buy ? GetUpperLimitPrice() : GetLowerLimitPrice();
-            }
-
-            double GetMatchPrice()
-            {
-                if (order.Side == OrderSide.Buy) {
-                    return order.Instrument.Ask.Price + info.Slippage;
-                }
-                return order.Instrument.Bid.Price - info.Slippage;
             }
         }
 
         private void SendOrder(Order order, bool checkUpperLowerLimit)
         {
-            if (IsNotSent(order)) {
-                if (Order.Type == OrderType.Market) {
+            if (!IsNotSent(order)) {
+                return;
+            }
+
+            if (_order.Type == OrderType.Market) {
+                checkUpperLowerLimit = false;
+                if (!_rules.HasMarketOrder) {
+                    _order.SetOrderType(OrderType.Limit);
+                    SetOrderPrice(order, _info.Market2Limit);
+                }
+            }
+            else {
+                if (_info.DeviationMode != OrderDeviationMode.Disabled && _info.DeviationInfo.TryCount > 0) {
                     checkUpperLowerLimit = false;
-                    if (!_rules.MarketOrder) {
-                        Order.SetOrderType(OrderType.Limit);
-                        SetOrderPrice(order, _info.Market2Limit);
-                    }
+                    SetOrderPrice(order, _info.DeviationInfo);
                 }
-                else {
-                    if (_info.DeviationMode != OrderDeviationMode.Disabled && _info.DeviationInfo.TryCount > 0) {
-                        checkUpperLowerLimit = false;
-                        SetOrderPrice(order, _info.DeviationInfo, false);
-                    }
-                }
-                if (!checkUpperLowerLimit || (order.Price >= GetLowerLimitPrice() && order.Price <= GetUpperLimitPrice())) {
-                    Agent.SendOrder(order);
-                }
-                else {
-                    _logger.Debug($"{Order.Id}, price_out_of_bounds");
-                }
+            }
+            if (!checkUpperLowerLimit || (order.Price >= GetLowerLimitPrice() && order.Price <= GetUpperLimitPrice())) {
+                _agent.SendOrder(order);
+            }
+            else {
+                _logger.Debug($"{_order}, price_out_of_bounds");
             }
         }
 
         private void SendOrder()
         {
-            if (Order.Type == OrderType.Stop || Order.Type == OrderType.StopLimit) {
+            if (_order.Type == OrderType.Stop || _order.Type == OrderType.StopLimit) {
                 return;
             }
             var checkUpperLowerLimit = false;
-            switch (Agent.TradingStatus) {
-                case XProviderEventType.MarketContinous:
+            switch (_agent.TradingStatus) {
+                case XProviderEventType.MarketContinuous:
                     checkUpperLowerLimit = true;
                     break;
+                case XProviderEventType.MarketAuctionOrdering when _order.Type == OrderType.Limit:
+                    break;
                 case XProviderEventType.MarketAuctionOrdering:
-                    if (Order.Type == OrderType.Limit) {
-                        break;
-                    }
                     return;
                 default:
                     return;
             }
 
-            SendOrder(CloseOrder, checkUpperLowerLimit);
-            SendOrder(CloseTodayOrder, checkUpperLowerLimit);
-            if (IsNotSent(OpenOrder)) {
-                if (!Agent.Info.CloseFirstOnReversing
-                    || (IsFilled(CloseOrder) && IsFilled(CloseTodayOrder)))
-                    SendOrder(OpenOrder, checkUpperLowerLimit);
+            SendOrder(closeOrder, checkUpperLowerLimit);
+            SendOrder(closeTodayOrder, checkUpperLowerLimit);
+            if (!_agent.Info.CloseFirstOnReversing || (IsFilled(closeOrder) && IsFilled(closeTodayOrder))) {
+                SendOrder(openOrder, checkUpperLowerLimit);
             }
         }
 
         public OrderProcessor(OrderAgent agent, Order order, Logger logger)
         {
-            Agent = agent;
-            Order = order;
-            Manager = agent.GetPositionManager(order.strategyId);
-            ListNode = agent.AddProcessor(this);
+            _agent = agent;
+            _order = order;
+            _position = agent.GetPosition(order);
             _record = new OrderRecord(order);
             _info = OrderExtensions.GetOrderInfo(order);
             _logger = logger;
+            listNode = agent.AddProcessor(this);
             InitRules();
         }
 
         private void InitRules()
         {
             SetMarketData();
-            _rules = Agent.InstTradeInfoList[Order.Instrument.Id];
-            _info.DeviationMode = GetMode();
-            if (_info.DeviationMode != OrderDeviationMode.Disabled) {
-                _info.Market2Limit.PriceAdjustMethod = GetMarket2LimitMethod();
+            _rules = _agent.instTradeInfoList[_order.Instrument.Id];
+            if ((_order.Type == OrderType.Market || _order.Type == OrderType.Stop) && _rules.HasMarketOrder) {
+                _info.DeviationMode = OrderDeviationMode.Disabled;
+                _info.Market2Limit.PriceAdjustMethod = OrderPriceAdjustMethod.Default;
             }
-
-            OrderPriceAdjustMethod GetMarket2LimitMethod()
-            {
+            else {
                 if (_info.Market2Limit.PriceAdjustMethod == OrderPriceAdjustMethod.Default) {
-                    return Agent.Info.Market2Limit.PriceAdjustMethod;
+                    _info.Market2Limit.PriceAdjustMethod = _agent.Info.Market2Limit.PriceAdjustMethod;
                 }
-                return _info.Market2Limit.PriceAdjustMethod;
-            }
-
-            OrderDeviationMode GetMode()
-            {
-                if ((Order.Type == OrderType.Market || Order.Type == OrderType.Stop) && _rules.MarketOrder) {
-                    return OrderDeviationMode.Disabled;
-                }
-                return _info.DeviationMode;
             }
         }
 
-        public virtual void Do()
+        public void Init()
         {
-            if (Order.Status == OrderStatus.PendingNew) {
-                var report = new ExecutionReport(Order);
-                report.ExecType = ExecType.ExecNew;
-                report.OrdStatus = OrderStatus.New;
-                Agent.EmitExecutionReport(report);
+            if (_order.Status == OrderStatus.PendingNew) {
+                var report = new ExecutionReport(_order) {
+                    ExecType = ExecType.ExecNew,
+                    OrdStatus = OrderStatus.New
+                };
+                _agent.EmitExecutionReport(report);
             }
-            if (Order.Type == OrderType.Market 
-                && double.IsNaN(_marketData.OpenPrice) 
-                && !_rules.MarketOrder) {
-                var report = new ExecutionReport(Order);
-                report.ExecType = ExecType.ExecRejected;
-                report.OrdStatus = OrderStatus.Rejected;
-                report.Text = "没有行情无法将市价转化为限价";
-                Agent.EmitExecutionReport(report);
+            if (!CheckMarketToLimit()) {
+                var report = new ExecutionReport(_order) {
+                    ExecType = ExecType.ExecRejected,
+                    OrdStatus = OrderStatus.Rejected,
+                    Text = "无法将市价转化为限价"
+                };
+                _agent.EmitExecutionReport(report);
                 Clear();
                 return;
             }
-            AutoCloseOpen();
-            SendOrder();
+
+            if (SetOpenClose()) {
+                FrozenPosition();
+                SendOrder();
+            }
+            else {
+                var report = new ExecutionReport(_order) {
+                    ExecType = ExecType.ExecRejected,
+                    OrdStatus = OrderStatus.Rejected,
+                    Text = "平仓仓位不足"
+                };
+                _agent.EmitExecutionReport(report);
+                Clear();
+            }
+        }
+
+        private void UnfrozenPosition()
+        {
+            if (openOrder != null && !openOrder.IsFilled) {
+                _position.OnOrderRejected(openOrder);
+            }
+
+            if (closeOrder != null && !closeOrder.IsFilled) {
+                _position.OnOrderRejected(closeOrder);
+            }
+
+            if (closeTodayOrder != null && !closeTodayOrder.IsFilled) {
+                _position.OnOrderRejected(closeTodayOrder);
+            }
+        }
+
+        private void FrozenPosition()
+        {
+            if (openOrder != null && !openOrder.IsFilled) {
+                _position.FrozenPosition(openOrder);
+            }
+
+            if (closeOrder != null && !closeOrder.IsFilled) {
+                _position.FrozenPosition(closeOrder);
+            }
+
+            if (closeTodayOrder != null && !closeTodayOrder.IsFilled) {
+                _position.FrozenPosition(closeTodayOrder);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool CheckMarketToLimit()
+        {
+            return _order.Type != OrderType.Market 
+                   || _rules.HasMarketOrder 
+                   || (_marketData != null && !double.IsNaN(_marketData.OpenPrice));
         }
 
         private void CancelOrder(ref Order order)
         {
             if (!IsDone(order) && !IsNotSent(order)) {
-                Agent.Cancel(order);
+                _agent.Cancel(order);
             }
             else {
-                if (IsNotSent(OpenOrder)) {
+                if (IsNotSent(order)) {
+                    //_manager.ProcessSend();
                     ClearOrder(ref order);
                 }
             }
@@ -362,20 +377,15 @@ namespace QuantBox.OrderProxy
         public void Cancel()
         {
             _record.Cancelling = true;
-            CancelOrder(ref OpenOrder);
-            CancelOrder(ref CloseOrder);
-            CancelOrder(ref CloseTodayOrder);
+            CancelOrder(ref openOrder);
+            CancelOrder(ref closeOrder);
+            CancelOrder(ref closeTodayOrder);
         }
 
         #region Process ExecutionReport
-        public virtual void OnSendOrder(Order order)
-        {
-            Manager.ProcessSend(order);
-        }
 
-        public virtual void OnExecutionReport(ExecutionReport report)
+        public void OnExecutionReport(ExecutionReport report)
         {
-            Manager.ProcessExecutionReport(report);
             switch (report.ExecType) {
                 case ExecType.ExecNew:
                     OnExecNew(report);
@@ -388,6 +398,7 @@ namespace QuantBox.OrderProxy
                     break;
                 case ExecType.ExecTrade:
                     OnExecTrade(report);
+                    SendOrder();
                     break;
                 case ExecType.ExecCancelled:
                     OnExecCancelled(report);
@@ -396,36 +407,42 @@ namespace QuantBox.OrderProxy
                     return;
             }
 
-            if (AllDone()) {
-                if (report.ExecType != ExecType.ExecTrade) {
-                    Agent.EmitExecutionReport(new ExecutionReport(Order) {
-                        ExecType = report.ExecType,
-                        OrdStatus = GetOrderStatus(),
-                        Text = GetRejectedText()
-                    });
-                }
-                Clear();
-            }
+            Finish();
         }
 
-        private void ClearOrder(ref Order order)
+        private void Finish()
         {
-            if (order != null) {
-                OrderExtensions.GetOrderInfo(order).Processor = null;
-                order = null;
+            if (!AllDone()) {
+                return;
             }
+
+            if (!AllFilled()) {
+                UnfrozenPosition();
+                ReportFailure();
+            }
+
+            Clear();
+        }
+
+        private static void ClearOrder(ref Order order)
+        {
+            if (order == null) {
+                return;
+            }
+            OrderExtensions.GetOrderInfo(order).processor = null;
+            order = null;
         }
 
         private void Clear()
         {
-            OrderExtensions.GetOrderInfo(Order).Processor = null;
-            ClearOrder(ref OpenOrder);
-            ClearOrder(ref CloseOrder);
-            ClearOrder(ref CloseTodayOrder);
-            Agent.RemoveProcessor(this);
+            OrderExtensions.GetOrderInfo(_order).processor = null;
+            ClearOrder(ref openOrder);
+            ClearOrder(ref closeOrder);
+            ClearOrder(ref closeTodayOrder);
+            _agent.RemoveProcessor(this);
         }
 
-        private void OnExecCancelled(ExecutionReport report)
+        private void OnExecCancelled(ExecutionMessage report)
         {
             if (_record.Cancelling) {
                 return;
@@ -436,16 +453,14 @@ namespace QuantBox.OrderProxy
                 case OrderDeviationMode.QuoteAndTrade:
                     RecreateOrder(report.Order, true);
                     break;
-                default:
-                    break;
             }
         }
 
-        private void OnExecNew(ExecutionReport report)
+        private void OnExecNew(ExecutionMessage report)
         {
             switch (_info.DeviationMode) {
                 case OrderDeviationMode.Time:
-                    Agent.AddReminder(_info.DeviationInfo.Threshold, report.Order);
+                    _agent.AddReminder(_info.DeviationInfo.Threshold, report.Order);
                     break;
                 case OrderDeviationMode.Trade:
                     break;
@@ -456,21 +471,18 @@ namespace QuantBox.OrderProxy
 
         private void OnExecTrade(ExecutionReport report)
         {
-            _record.AddFill(report.LastPx, report.LastQty);
-            if (IsNotSent(OpenOrder)) {
-                if ((CloseOrder == null || CloseOrder.IsFilled)
-                    && (CloseTodayOrder == null || CloseTodayOrder.IsFilled)) {
-                    OpenOrder.Send();
-                }
+            if (!report.IsLoaded) {
+                _position.OnOrderFilled(report);
             }
-
-            Agent.EmitExecutionReport(new ExecutionReport(Order) {
+            _record.AddFill(report.LastPx, report.LastQty);
+            _agent.EmitExecutionReport(new ExecutionReport(_order) {
                 ExecType = ExecType.ExecTrade,
                 LastQty = report.LastQty,
                 LastPx = report.LastPx,
                 AvgPx = _record.AvgPx,
                 LeavesQty = _record.LeavesQty,
                 CumQty = _record.CumQty,
+                SubSide = report.SubSide,
                 OrdStatus = GetOrderStatus(),
                 Text = GetRejectedText()
             });
@@ -481,18 +493,17 @@ namespace QuantBox.OrderProxy
             if (_record.Cancelling) {
                 return;
             }
-            var (errorId, _) = report.GetErrorId();
+            (int errorId, _) = report.GetErrorId();
             if (errorId == TimeOutOfBoundsError) {
-                if (Agent.TradingStatus == XProviderEventType.MarketClosed) {
-                    if (Order.TimeInForce == TimeInForce.GTC) {
+                if (_agent.TradingStatus == XProviderEventType.MarketClosed) {
+                    if (_order.TimeInForce == TimeInForce.GTC) {
                         RecreateOrder(report.Order);
                     }
                     return;
                 }
                 RecreateOrder(report.Order);
-                return;
             }
-            else if (errorId == PriceOutOfBoundsError && Order.TimeInForce == TimeInForce.GTC) {
+            else if (errorId == PriceOutOfBoundsError && _order.TimeInForce == TimeInForce.GTC) {
                 RecreateOrder(report.Order);
             }
         }
@@ -502,21 +513,21 @@ namespace QuantBox.OrderProxy
             if (_record.Cancelling) {
                 return;
             }
-            if (Order.TimeInForce == TimeInForce.GTC) {
+            if (_order.TimeInForce == TimeInForce.GTC) {
                 RecreateOrder(report.Order);
             }
         }
 
         private string GetRejectedText()
         {
-            if (IsRejected(OpenOrder)) {
-                return OpenOrder.Text;
+            if (IsRejected(openOrder)) {
+                return openOrder.Text;
             }
-            if (IsRejected(CloseOrder)) {
-                return OpenOrder.Text;
+            if (IsRejected(closeOrder)) {
+                return closeOrder.Text;
             }
-            if (IsRejected(CloseTodayOrder)) {
-                return OpenOrder.Text;
+            if (IsRejected(closeTodayOrder)) {
+                return closeTodayOrder.Text;
             }
             return string.Empty;
         }
@@ -525,25 +536,20 @@ namespace QuantBox.OrderProxy
         {
             if (AllDone()) {
                 if (AllFilled()) {
-                    if (_record.LeavesQty == 0) {
-                        return OrderStatus.Filled;
-                    }
-                    else {
-                        return OrderStatus.Rejected;
-                    }
+                    return OrderStatus.Filled;
                 }
-                if (AnyCancenlled()) {
-                    if (Order.TimeInForce != TimeInForce.GTC || _record.Cancelling) {
+                if (AnyCancelled()) {
+                    if (_order.TimeInForce != TimeInForce.GTC || _record.Cancelling) {
                         return OrderStatus.Cancelled;
                     }
                 }
                 if (AnyRejected()) {
-                    if (Order.TimeInForce != TimeInForce.GTC || _record.Cancelling) {
+                    if (_order.TimeInForce != TimeInForce.GTC || _record.Cancelling) {
                         return OrderStatus.Rejected;
                     }
                 }
                 if (AnyExpired()) {
-                    if (Order.TimeInForce != TimeInForce.GTC || _record.Cancelling) {
+                    if (_order.TimeInForce != TimeInForce.GTC || _record.Cancelling) {
                         return OrderStatus.Expired;
                     }
                 }
@@ -555,44 +561,47 @@ namespace QuantBox.OrderProxy
 
         #region Order Status Check
         private static bool IsNotSent(Order order) => order?.IsNotSent == true;
-        private static bool IsCancenlled(Order order) => order?.IsCancelled == true;
+        private static bool IsCancelled(Order order) => order?.IsCancelled == true;
         private static bool IsRejected(Order order) => order?.IsRejected == true;
         private static bool IsExpired(Order order) => order?.IsExpired == true;
         private static bool IsFilled(Order order) => order == null || order.IsFilled;
         private static bool IsDone(Order order) => order == null || order.IsDone;
 
-        private bool AllDone() => IsDone(OpenOrder) && IsDone(CloseOrder) && IsDone(CloseTodayOrder);
-        private bool AllFilled() => IsFilled(OpenOrder) && IsFilled(CloseOrder) && IsFilled(CloseTodayOrder);
-        private bool AnyCancenlled() => IsCancenlled(OpenOrder) || IsCancenlled(CloseOrder) || IsCancenlled(CloseTodayOrder);
-        private bool AnyRejected() => IsRejected(OpenOrder) || IsRejected(CloseOrder) || IsRejected(CloseTodayOrder);
-        private bool AnyExpired() => IsExpired(OpenOrder) || IsExpired(CloseOrder) || IsExpired(CloseTodayOrder);
+        private bool AllDone() => IsDone(openOrder) && IsDone(closeOrder) && IsDone(closeTodayOrder);
+        private bool AllFilled() => IsFilled(openOrder) && IsFilled(closeOrder) && IsFilled(closeTodayOrder);
+        private bool AnyCancelled() => IsCancelled(openOrder) || IsCancelled(closeOrder) || IsCancelled(closeTodayOrder);
+        private bool AnyRejected() => IsRejected(openOrder) || IsRejected(closeOrder) || IsRejected(closeTodayOrder);
+        private bool AnyExpired() => IsExpired(openOrder) || IsExpired(closeOrder) || IsExpired(closeTodayOrder);
         #endregion
 
         #region Deviation
-        public virtual void OnTrade(Instrument inst, Trade trade)
+        public void OnTrade(Trade trade)
         {
-            if (Order.Type == OrderType.Stop || Order.Type == OrderType.StopLimit) {
-                if ((Order.Side == OrderSide.Buy && trade.Price >= Order.StopPx)
-                    || (Order.Side == OrderSide.Sell && trade.Price <= Order.StopPx)) {
-                    _logger.Debug($"{Order.Id} stop active");
-                    Order.SetOrderType(Order.Type == OrderType.Stop ? OrderType.Market : OrderType.Limit);
+            if (_order.Type == OrderType.Stop || _order.Type == OrderType.StopLimit) {
+                if ((_order.Side == OrderSide.Buy && trade.Price >= _order.StopPx)
+                    || (_order.Side == OrderSide.Sell && trade.Price <= _order.StopPx)) {
+                    _logger.Debug($"{_order.Id} stop active");
+                    _order.SetOrderType(_order.Type == OrderType.Stop ? OrderType.Market : OrderType.Limit);
                     SendOrder();
                 }
             }
             else {
-                if (_info.DeviationMode == OrderDeviationMode.QuoteAndTrade || _info.DeviationMode == OrderDeviationMode.Trade) {
-                    CheckPriceDeviation(OpenOrder);
-                    CheckPriceDeviation(CloseOrder);
-                    CheckPriceDeviation(CloseTodayOrder);
+                if (_info.DeviationMode != OrderDeviationMode.QuoteAndTrade &&
+                    _info.DeviationMode != OrderDeviationMode.Trade) {
+                    return;
                 }
+
+                CheckPriceDeviation(openOrder);
+                CheckPriceDeviation(closeOrder);
+                CheckPriceDeviation(closeTodayOrder);
             }
         }
 
         private void CheckPriceDeviation(Order order)
         {
-            var price = Order.Instrument.Trade.Price;
-            var ask = Order.Instrument.Ask.Price;
-            var bid = Order.Instrument.Bid.Price;
+            var price = _order.Instrument.Trade.Price;
+            var ask = _order.Instrument.Ask.Price;
+            var bid = _order.Instrument.Bid.Price;
 
             if (IsDone(order) || IsNotSent(order)) {
                 return;
@@ -612,8 +621,8 @@ namespace QuantBox.OrderProxy
             void Do()
             {
                 if (CheckTryCount(info)) {
-                    _logger.Debug($"{Order.Id}, price deviation {info.DeviationInfo.TryCount}.");
-                    Agent.Cancel(order);
+                    _logger.Debug($"{_order.Id}, price deviation {info.DeviationInfo.TryCount}.");
+                    _agent.Cancel(order);
                 }
                 else {
                     DoFailed(order);
@@ -621,7 +630,7 @@ namespace QuantBox.OrderProxy
             }
         }
 
-        private bool CheckTryCount(QuantBoxOrderInfo info)
+        private static bool CheckTryCount(QuantBoxOrderInfo info)
         {
             ++info.DeviationInfo.TryCount;
             return info.DeviationInfo.MaxTry == 0 || info.DeviationInfo.TryCount <= info.DeviationInfo.MaxTry;
@@ -629,20 +638,20 @@ namespace QuantBox.OrderProxy
 
         private void DoFailed(Order order)
         {
-            _logger.Debug($"{Order.Id}, deviation adjust failed.");
+            _logger.Debug($"{_order.Id}, deviation adjust failed.");
             _info.DeviationMode = OrderDeviationMode.Disabled;
             if (_info.FailedMethod == OrderAdjustFailedMethod.Cancel) {
                 _record.Cancelling = true;
-                Agent.Cancel(order);
+                _agent.Cancel(order);
             }
         }
 
-        public virtual void OnReminder(DateTime dateTime, Order order)
+        public void OnReminder(DateTime dateTime, Order order)
         {
             var info = OrderExtensions.GetOrderInfo(order);
             if (CheckTryCount(info)) {
-                _logger.Debug($"{Order.Id}, time deviation {info.DeviationInfo.TryCount}.");
-                Agent.Cancel(order);
+                _logger.Debug($"{_order.Id}, time deviation {info.DeviationInfo.TryCount}.");
+                _agent.Cancel(order);
             }
             else {
                 DoFailed(order);
@@ -650,7 +659,7 @@ namespace QuantBox.OrderProxy
         }
         #endregion
 
-        public void OnMarketContinous()
+        public void OnMarketContentious()
         {
             SendOrder();
         }
@@ -662,6 +671,62 @@ namespace QuantBox.OrderProxy
 
         internal void OnMarketClosed()
         {
+        }
+
+        public void Resume()
+        {
+            void LoadReport(Order order)
+            {
+                if (order == null) {
+                    return;
+                }
+
+                foreach (var report in order.Reports) {
+                    if (report.ExecType != ExecType.ExecTrade ||
+                        _order.Reports.Exists(n => n.ExecId == report.ExecId)) {
+                        continue;
+                    }
+                    OnExecTrade(report);
+                }
+            }
+
+            if (openOrder == null && closeOrder == null && closeTodayOrder == null) {
+                Clear();
+                _agent.EmitExecutionReport(new ExecutionReport(_order) {
+                    ExecType = ExecType.ExecCancelled,
+                    Text = "系统意外退出"
+                });
+            }
+            else {
+                LoadReport(openOrder);
+                LoadReport(closeOrder);
+                LoadReport(closeTodayOrder);
+                FrozenPosition();
+                Finish();
+            }
+        }
+
+        private void ReportFailure()
+        {
+            var status = GetOrderStatus();
+            ExecType exec;
+            switch (status) {
+                case OrderStatus.Cancelled:
+                    exec = ExecType.ExecCancelled;
+                    break;
+                case OrderStatus.Expired:
+                    exec = ExecType.ExecExpired;
+                    break;
+                default:
+                    exec = ExecType.ExecRejected;
+                    break;
+            }
+
+            _agent.EmitExecutionReport(new ExecutionReport(_order) {
+                ExecType = exec,
+                OrdStatus = status,
+                Text = GetRejectedText()
+            });
         }
     }
 }

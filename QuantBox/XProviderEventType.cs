@@ -8,7 +8,7 @@
         DisconnectDone,
         MarketBeforeTrading = 48,
         MarketNoTrading = 49,
-        MarketContinous = 50,
+        MarketContinuous = 50,
         MarketAuctionOrdering = 51,
         MarketAuctionBalance = 52,
         MarketAuctionMatch = 53,

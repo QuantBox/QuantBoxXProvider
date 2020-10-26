@@ -1,9 +1,9 @@
 ﻿using System;
 using SmartQuant;
 
-namespace QuantBox.OrderProxy
+namespace QuantBox
 {
-    internal class PriceHelper
+    public class PriceHelper
     {
         public double UpperLimitPrice { get; private set; }
         public double LowerLimitPrice { get; private set; }

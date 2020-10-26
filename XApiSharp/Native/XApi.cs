@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace QuantBox.XApi.Nactive
+namespace QuantBox.XApi.Native
 {
     internal class XApi : IXApi, IDisposable
     {

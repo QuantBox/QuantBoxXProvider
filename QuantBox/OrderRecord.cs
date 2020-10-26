@@ -8,8 +8,8 @@ namespace QuantBox
         {
             Order = order;
             LeavesQty = (int)order.Qty;
-            CumQty = 0;
-            AvgPx = 0;
+            CumQty = order.CumQty;
+            AvgPx = order.AvgPx;
         }
 
         public readonly Order Order;

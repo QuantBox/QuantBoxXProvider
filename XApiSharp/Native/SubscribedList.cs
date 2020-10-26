@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace QuantBox.XApi.Nactive
+namespace QuantBox.XApi.Native
 {
     internal class SubscribedList : IEnumerable<Tuple<string, string>>
     {

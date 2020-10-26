@@ -6,10 +6,53 @@ using QuantBox.XApi;
 using Skyline;
 using SmartQuant;
 using SmartQuant.Strategy_;
+using ExecType = SmartQuant.ExecType;
+using OrderSide = SmartQuant.OrderSide;
+using OrderStatus = SmartQuant.OrderStatus;
+using OrderType = SmartQuant.OrderType;
 using PositionSide = SmartQuant.PositionSide;
 
 namespace QuantBox
 {
+    public class OrderList
+    {
+        public Strategy Strategy { get; }
+        public readonly List<Order> Orders;
+
+        public OrderList(Strategy strategy)
+        {
+            Strategy = strategy;
+            Orders = new List<Order>();
+        }
+
+        public void Add(Order order)
+        {
+            Orders.Add(order);
+        }
+
+        public void Send()
+        {
+            foreach (var order in Orders) {
+                if (order.IsNotSent) {
+                    continue;
+                }
+                Strategy.Send(order);
+            }
+        }
+
+        public void Cancel()
+        {
+            foreach (var order in Orders) {
+                Strategy.Cancel(order);
+            }
+        }
+
+        public bool IsDone => Orders.TrueForAll(n => n.IsDone);
+        public bool IsFilled => Orders.TrueForAll(n => n.IsFilled);
+        public bool IsCancelled => Orders.TrueForAll(n => n.IsCancelled);
+        public bool IsNotSent => Orders.TrueForAll(n => n.IsNotSent);
+    }
+
     public static class StrategyExtensions
     {
         private static readonly MethodInfo StrategyOnStopStatusChangedMethod;
@@ -17,18 +60,18 @@ namespace QuantBox
         private static readonly FastFieldInfo<Strategy, SmartQuant.IdArray<Strategy>> StrategyByIdField;
         private static readonly FastFieldInfo<Strategy, IExecutionProvider> ExecutionProviderField;
         private static readonly FastFieldInfo<Strategy, IDataProvider> DataProviderField;
-        private static readonly FastFieldInfo<StrategyManager_, SmartQuant.IdArray<Strategy_>> Strategies_Field1;
-        private static readonly FastFieldInfo<StrategyManager_, SmartQuant.IdArray<Strategy_>> Strategies_Field2;
+        private static readonly FastFieldInfo<StrategyManager_, SmartQuant.IdArray<Strategy_>> StrategiesField1;
+        private static readonly FastFieldInfo<StrategyManager_, SmartQuant.IdArray<Strategy_>> StrategiesField2;
 
         static StrategyExtensions()
         {
             foreach (var field in typeof(StrategyManager_).GetFields(BindingFlags.Instance | BindingFlags.NonPublic)) {
                 if (field.FieldType == typeof(SmartQuant.IdArray<Strategy_>)) {
-                    if (Strategies_Field1 == null) {
-                        Strategies_Field1 = new FastFieldInfo<StrategyManager_, SmartQuant.IdArray<Strategy_>>(field);
+                    if (StrategiesField1 == null) {
+                        StrategiesField1 = new FastFieldInfo<StrategyManager_, SmartQuant.IdArray<Strategy_>>(field);
                     }
                     else {
-                        Strategies_Field2 = new FastFieldInfo<StrategyManager_, SmartQuant.IdArray<Strategy_>>(field);
+                        StrategiesField2 = new FastFieldInfo<StrategyManager_, SmartQuant.IdArray<Strategy_>>(field);
                     }
                 }
             }
@@ -160,13 +203,29 @@ namespace QuantBox
             }
         }
 
+        public static DualPosition GetPosition(this Strategy strategy, Instrument instrument)
+        {
+            if (strategy.OrderManager.Server is DatabaseOrderServer server) {
+                return server.PositionStore.GetPosition(strategy.Id, instrument.Id);
+            }
+            return null;
+        }
+
+        public static DualPosition GetPosition(this InstrumentStrategy strategy)
+        {
+            if (strategy.OrderManager.Server is DatabaseOrderServer server) {
+                return server.PositionStore.GetPosition(strategy.Id, strategy.Instrument.Id);
+            }
+            return null;
+        }
+
         public static Strategy_ FindStrategy(this StrategyManager_ manager, int id)
         {
-            var s = Strategies_Field1.Getter(manager)[id];
+            var s = StrategiesField1.Getter(manager)[id];
             if (s != null && s.Id == id) {
                 return s;
             }
-            s = Strategies_Field2.Getter(manager)[id];
+            s = StrategiesField2.Getter(manager)[id];
             if (s != null && s.Id == id) {
                 return s;
             }
@@ -175,7 +234,7 @@ namespace QuantBox
 
         public static IExecutionProvider GetExecutionProvider(this Strategy strategy, Instrument inst = null)
         {
-            if (inst != null && inst.ExecutionProvider != null) {
+            if (inst?.ExecutionProvider != null) {
                 return inst.ExecutionProvider;
             }
 
@@ -188,7 +247,7 @@ namespace QuantBox
 
         public static IDataProvider GetDataProvider(this Strategy strategy, Instrument inst = null)
         {
-            if (inst != null && inst.DataProvider != null) {
+            if (inst?.DataProvider != null) {
                 return inst.DataProvider;
             }
 
@@ -209,60 +268,6 @@ namespace QuantBox
             else {
                 yield return (null, GetExecutionProvider(s));
             }
-        }
-
-        internal static void RemoveExOrders(this StrategyManager manager, byte providerId)
-        {
-            var key = $"{QuantBoxConst.GlobalExOrders}_{providerId}";
-            manager.Global.Remove(key);
-        }
-
-        internal static List<OrderField> GetExOrders(this StrategyManager manager, byte providerId)
-        {
-            var key = $"{QuantBoxConst.GlobalExOrders}_{providerId}";
-            if (manager.Global.ContainsKey(key)) {
-                return (List<OrderField>)manager.Global[key];
-            }
-            return new List<OrderField>();
-        }
-
-        internal static void SetExOrders(this StrategyManager manager, List<OrderField> orders, byte providerId)
-        {
-            manager.Global.Add($"{QuantBoxConst.GlobalExOrders}_{providerId}", orders);
-        }
-
-        internal static void RemoveExTrades(this StrategyManager manager, byte providerId)
-        {
-            var key = $"{QuantBoxConst.GlobalExTrades}_{providerId}";
-            manager.Global.Remove(key);
-        }
-
-        internal static List<TradeField> GetExTrades(this StrategyManager manager, byte providerId)
-        {
-            var key = $"{QuantBoxConst.GlobalExTrades}_{providerId}";
-            if (manager.Global.ContainsKey(key)) {
-                return (List<TradeField>)manager.Global[key];
-            }
-            return new List<TradeField>();
-        }
-
-        internal static void SetExTrades(this StrategyManager manager, List<TradeField> trades, byte providerId)
-        {
-            manager.Global.Add($"{QuantBoxConst.GlobalExTrades}_{providerId}", trades);
-        }
-
-        internal static DateTime GetExTradingDay(this StrategyManager manager)
-        {
-            if (manager.Global.ContainsKey(QuantBoxConst.GlobalExTradingDay)) {
-                return (DateTime)manager.Global[QuantBoxConst.GlobalExTradingDay];
-            }
-
-            return default(DateTime);
-        }
-
-        internal static void SetExTradingDay(this StrategyManager manager, DateTime tradingDay)
-        {
-            manager.Global.Add(QuantBoxConst.GlobalExTradingDay, tradingDay);
         }
 
         public static bool AddMarketCloseReminder(this Strategy strategy, object state = null)
@@ -367,17 +372,218 @@ namespace QuantBox
         public static void SendFill(this Strategy strategy, Order order)
         {
             var report = new ExecutionReport(order);
-            report.ExecType = SmartQuant.ExecType.ExecTrade;
+            report.ExecType = ExecType.ExecTrade;
             report.DateTime = DateTime.Now;
-            report.OrdStatus = SmartQuant.OrderStatus.Filled;
+            report.OrdStatus = OrderStatus.Filled;
             report.CumQty = order.Qty;
             report.LeavesQty = 0;
-            report.LastPx = order.Type == SmartQuant.OrderType.Limit ? order.Price : order.Instrument.Trade?.Price ?? 0;
+            report.LastPx = order.Type == OrderType.Limit ? order.Price : order.Instrument.Trade?.Price ?? 0;
             report.LastQty = order.Qty;
             var queue = new EventQueue(size: 10);
             queue.Enqueue(report);
             queue.Enqueue(new OnQueueClosed(queue));
             strategy.GetFramework().EventBus.ExecutionPipe.Add(queue);
+        }
+
+        public static OrderList GetOpenOrders(this Strategy strategy)
+        {
+            var list = new OrderList(strategy);
+            foreach (var order in strategy.OrderManager.Orders)
+            {
+                if (order.strategyId != strategy.Id || order.IsDone) {
+                    continue;
+                }
+                list.Add(order);
+            }
+
+            return list;
+        }
+
+        private static double GetOrderPrice(Instrument instrument, OrderSide side, OrderPriceAdjustMethod method)
+        {
+            var rules = instrument.GetTradingRules();
+            double price;
+            if (rules.HasMarketOrder) {
+                price = Double.NaN;
+            }
+            else {
+                if (side == OrderSide.Buy) {
+                    price = method == OrderPriceAdjustMethod.MatchPrice ? instrument.Ask.Price : instrument.GetUpperLimitPrice();
+                }
+                else {
+                    price = method == OrderPriceAdjustMethod.MatchPrice ? instrument.Bid.Price : instrument.GetLowerLimitPrice();
+                }
+            }
+
+            return price;
+        }
+
+        public static Order OpenLong(this Strategy strategy, Instrument instrument, double qty, double price)
+        {
+            var order = Double.IsNaN(price)
+                ? strategy.BuyOrder(instrument, qty).Open()
+                : strategy.BuyLimitOrder(instrument, qty, price).Open();
+            strategy.Send(order);
+            return order;
+        }
+
+        public static Order OpenLong(this InstrumentStrategy strategy, double qty, double price)
+        {
+            return OpenLong(strategy, strategy.Instrument, qty, price);
+        }
+
+        public static Order OpenLong(this Strategy strategy, Instrument instrument, double qty,
+            OrderPriceAdjustMethod method = OrderPriceAdjustMethod.MatchPrice)
+        {
+            double price = GetOrderPrice(instrument, OrderSide.Buy, method);
+            return OpenLong(strategy, instrument, qty, price);
+        }
+
+        public static Order OpenLong(this InstrumentStrategy strategy, double qty, OrderPriceAdjustMethod method = OrderPriceAdjustMethod.MatchPrice)
+        {
+            return OpenLong(strategy, strategy.Instrument, qty, method);
+        }
+
+        public static Order OpenShort(this Strategy strategy, Instrument instrument, double qty, double price)
+        {
+            var order = Double.IsNaN(price)
+                ? strategy.SellOrder(instrument, qty).Open()
+                : strategy.SellLimitOrder(instrument, qty, price).Open();
+            //strategy.Send(order);
+            return order;
+        }
+
+        public static Order OpenShort(this InstrumentStrategy strategy, double qty, double price)
+        {
+            return OpenShort(strategy, strategy.Instrument, qty, price);
+        }
+
+        public static Order OpenShort(this Strategy strategy, Instrument instrument, double qty,
+            OrderPriceAdjustMethod method = OrderPriceAdjustMethod.MatchPrice)
+        {
+            double price = GetOrderPrice(instrument, OrderSide.Sell, method);
+            return OpenShort(strategy, instrument, qty, price);
+        }
+
+        public static Order OpenShort(this InstrumentStrategy strategy, double qty, OrderPriceAdjustMethod method = OrderPriceAdjustMethod.MatchPrice)
+        {
+            return OpenShort(strategy, strategy.Instrument, qty, method);
+        }
+
+        private static (double close, double closeToday) GetCloseInfo(Strategy strategy, Instrument instrument, OrderSide side, double qty = Double.MaxValue)
+        {
+            var position = strategy.GetPosition(instrument);
+            var rules = instrument.GetTradingRules();
+            (double closeQty, double closeTodayQty) = GetCloseQty();
+            double closeToday;
+            double close;
+            if (rules.StrictCloseToday) {
+                closeQty -= closeTodayQty;
+                closeToday = Math.Min(qty, closeTodayQty);
+                qty -= closeToday;
+                if (Math.Abs(qty) < Double.Epsilon) {
+                    return (close, closeToday);
+                }
+            }
+
+            close = Math.Min(qty, closeQty);
+            return (close, closeToday);
+            #region local
+            (double close, double closeToday) GetCloseQty()
+            {
+                (closeToday, close) = side == OrderSide.Buy
+                    ? position.Short.GetCanCloseQty()
+                    : position.Long.GetCanCloseQty();
+
+                if (!rules.DisableCloseToday) {
+                    return (close, closeToday);
+                }
+
+                close -= closeToday;
+                closeToday = 0;
+                return (close, closeToday);
+            }
+            #endregion
+        }
+
+        public static OrderList CloseLong(this InstrumentStrategy strategy, double qty,
+            OrderPriceAdjustMethod method = OrderPriceAdjustMethod.MatchPrice)
+        {
+            return CloseLong(strategy, strategy.Instrument, qty, method);
+        }
+
+        public static OrderList CloseLong(this Strategy strategy, Instrument instrument, double qty,
+            OrderPriceAdjustMethod method = OrderPriceAdjustMethod.MatchPrice)
+        {
+            return CloseLong(strategy, instrument, qty, GetOrderPrice(instrument, OrderSide.Sell, method));
+        }
+
+        public static OrderList CloseLong(this InstrumentStrategy strategy, double qty, double price)
+        {
+            return CloseLong(strategy, strategy.Instrument, qty, price);
+        }
+
+        public static OrderList CloseLong(this Strategy strategy, Instrument instrument, double qty, double price)
+        {
+            var list = new OrderList(strategy);
+            (double close, double closeToday) = GetCloseInfo(strategy, instrument, OrderSide.Sell, qty);
+            if (closeToday > 0) {
+                list.Add(CreateOrder(closeToday).CloseToday());
+            }
+
+            if (close > 0) {
+                list.Add(CreateOrder(close).Close());
+            }
+
+            return list;
+
+            Order CreateOrder(double size)
+            {
+                return Double.IsNaN(price)
+                    ? strategy.SellOrder(instrument, size)
+                    : strategy.SellLimitOrder(instrument, size, price);
+
+            }
+        }
+
+        public static OrderList CloseShort(this InstrumentStrategy strategy, double qty,
+            OrderPriceAdjustMethod method = OrderPriceAdjustMethod.MatchPrice)
+        {
+            return CloseShort(strategy, strategy.Instrument, qty, method);
+        }
+
+        public static OrderList CloseShort(this Strategy strategy, Instrument instrument, double qty,
+            OrderPriceAdjustMethod method = OrderPriceAdjustMethod.MatchPrice)
+        {
+            return CloseShort(strategy, instrument, qty, GetOrderPrice(instrument, OrderSide.Buy, method));
+        }
+
+        public static OrderList CloseShort(this InstrumentStrategy strategy, double qty, double price)
+        {
+            return CloseShort(strategy, strategy.Instrument, qty, price);
+        }
+
+        public static OrderList CloseShort(this Strategy strategy, Instrument instrument, double qty, double price)
+        {
+            var list = new OrderList(strategy);
+            (double close, double closeToday) = GetCloseInfo(strategy, instrument, OrderSide.Buy, qty);
+            if (closeToday > 0) {
+                list.Add(CreateOrder(closeToday).CloseToday());
+            }
+
+            if (close > 0) {
+                list.Add(CreateOrder(close).Close());
+            }
+
+            return list;
+
+            Order CreateOrder(double size)
+            {
+                return Double.IsNaN(price)
+                    ? strategy.BuyOrder(instrument, size)
+                    : strategy.BuyLimitOrder(instrument, size, price);
+
+            }
         }
     }
 }

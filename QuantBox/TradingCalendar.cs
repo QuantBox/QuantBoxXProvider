@@ -34,14 +34,18 @@ namespace QuantBox
         public void Init(DateTime tradingDay, bool updateCalendar = true, string host = "data.quantbox.cn")
         {
             lock (this) {
-                if (TradingDay != tradingDay) {
-                    TradingDay = tradingDay;
-                    Load();
-                    if (updateCalendar || (!DayList.HolidayLoaded || DayList.BeginDate.Year != CalendarBegin.Year)) {
-                        UpdateDataFromRemote(host);
-                        Load();
-                    }
+                if (TradingDay == tradingDay) {
+                    return;
                 }
+
+                TradingDay = tradingDay;
+                Load();
+                if (!updateCalendar && DayList.HolidayLoaded && DayList.BeginDate.Year == CalendarBegin.Year) {
+                    return;
+                }
+
+                UpdateDataFromRemote(host);
+                Load();
             }
         }
 
@@ -68,13 +72,20 @@ namespace QuantBox
                         wc.Dispose();
                     }
 
-                    if (File.Exists(tempFile) && new FileInfo(tempFile).Length > 0) {
-                        GlobalWait.Run(LockPort, () => File.Copy(tempFile, GetTimeRangeDataFile(), true), 1000);
+                    if (File.Exists(tempFile)) {
+                        try {
+                            new TradingCalendar().LoadTimeRange(tempFile);
+                            GlobalWait.Run(LockPort, () => File.Copy(tempFile, GetTimeRangeDataFile(), true), 1000);
+                        }
+                        catch (Exception) {
+                            // ignored
+                        }
+
                         File.Delete(tempFile);
                     }
                 }
                 catch (Exception e) {
-                    Logger.Warn($@"Update time range from remote: [{e}]");
+                    Logger.Warn($@"Update time range from remote:{remoteTimeRangeFile}[{e}]");
                 }
             }
             const string remoteCalendarUrl = "http://{2}/trading_dates?start_date={0}0101&end_date={1}1231";
@@ -89,13 +100,20 @@ namespace QuantBox
                         wc.Dispose();
                     }
 
-                    if (File.Exists(tempFile) && new FileInfo(tempFile).Length > 0) {
-                        GlobalWait.Run(LockPort, () => File.Copy(tempFile, GetCalendarDataFile(), true), 1000);
+                    if (File.Exists(tempFile)) {
+                        try {
+                            new TradingCalendar().LoadCalendar(tempFile);
+                            GlobalWait.Run(LockPort, () => File.Copy(tempFile, GetCalendarDataFile(), true), 1000);
+                        }
+                        catch (Exception) {
+                            // ignored
+                        }
+
                         File.Delete(tempFile);
                     }
                 }
                 catch (Exception e) {
-                    Logger.Warn($@"Update calendar from remote: [{e}]");
+                    Logger.Warn($"Update calendar from remote:{remoteCalendarUrl}[{e}]");
                 }
             }
         }
@@ -105,41 +123,48 @@ namespace QuantBox
             DayList = new TradingDayList(CalendarBegin, CalendarEnd);
         }
 
-        private void LoadTimeRange()
+        private void LoadTimeRange(string file = null)
         {
+            file = file ?? GetTimeRangeDataFile();
+            if (!File.Exists(file)) {
+                return;
+            }
+            var content = QBHelper.ReadOnlyAllText(file);
             try {
-                var file = GetTimeRangeDataFile();
-                if (File.Exists(file)) {
-                    var manager = new TradingTimeManager();
-                    manager.Load(JsonConvert.DeserializeObject<string[][]>(QBHelper.ReadOnlyAllText(file)));
-                    TimeManager = manager;
-                }
+                var manager = new TradingTimeManager();
+                manager.Load(JsonConvert.DeserializeObject<string[][]>(content));
+                TimeManager = manager;
             }
             catch (Exception e) {
-                Logger.Warn($@"LoadTimeRange [{e}]");
+                Logger.Warn($"LoadTimeRange [{e.Message}]");
             }
         }
 
-        private void LoadCalendar()
+        private void LoadCalendar(string file = null)
         {
+            file = file ?? GetCalendarDataFile();
+            if (!File.Exists(file)) {
+                return;
+            }
+
+            var content = QBHelper.ReadOnlyAllText(file);
+
             try {
-                var file = GetCalendarDataFile();
-                if (File.Exists(file)) {
-                    var list = JToken.Parse(QBHelper.ReadOnlyAllText(file));
-                    var firstDate = ParseDateTime(list.First);
-                    var days = new TradingDayList(firstDate.AddDays(-firstDate.DayOfYear + 1), CalendarEnd);
-                    var current = list.First;
-                    while (current != null) {
-                        var date = ParseDateTime(current);
-                        days[date] = true;
-                        current = current.Next;
-                    }
-                    days.SetHoliday();
-                    DayList = days;
+                var list = JToken.Parse(content);
+                var firstDate = ParseDateTime(list.First);
+                var days = new TradingDayList(firstDate.AddDays(-firstDate.DayOfYear + 1), CalendarEnd);
+                var current = list.First;
+                while (current != null) {
+                    var date = ParseDateTime(current);
+                    days[date] = true;
+                    current = current.Next;
                 }
+
+                days.SetHoliday();
+                DayList = days;
             }
             catch (Exception e) {
-                Logger.Warn($@"LoadCalendar [{e}]");
+                Logger.Warn($"LoadCalendar content:[{content}] error:[{e.Message}]");
             }
 
             DateTime ParseDateTime(JToken current)

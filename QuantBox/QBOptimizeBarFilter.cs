@@ -10,7 +10,7 @@ namespace QuantBox
         public QBOptimizeBarFilter(Framework framework)
             : base(framework)
         {
-            _barSizes = DataManagerExtensions.GlobalOptimizeBarFilter;
+            _barSizes = DataManagerExtensions.globalOptimizeBarFilter;
             if (_barSizes != null && _barSizes.Length == 1) {
                 _size = _barSizes[0];
             }

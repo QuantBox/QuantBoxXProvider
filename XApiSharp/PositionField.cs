@@ -22,7 +22,7 @@ namespace QuantBox.XApi
         public HedgeFlagType HedgeFlag;
         public int Date;
         public double PositionCost;
-
+        public double OpenCost;
         public double Position;
         public double TodayPosition;
         public double HistoryPosition;

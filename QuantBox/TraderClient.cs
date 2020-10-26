@@ -14,46 +14,39 @@ namespace QuantBox
 
         public string CancelOrder(string orderId)
         {
-            return Api.CancelOrder(orderId);
+            return api.CancelOrder(orderId);
         }
 
         public string SendOrder(OrderField order)
         {
-            return Api.SendOrder(order);
-        }
-
-        public void QueryInstrument()
-        {
-            if (Connected) {
-                Api.Query(QueryType.ReqQryInstrument, null);
-            }
+            return api.SendOrder(order);
         }
 
         public void QueryAccount()
         {
             if (Connected) {
-                Api.Query(QueryType.ReqQryTradingAccount, null);
+                api.Query(QueryType.ReqQryTradingAccount, null);
             }
         }
 
         public void QueryPositions()
         {
             if (Connected) {
-                Api.Query(QueryType.ReqQryInvestorPosition, null);
+                api.Query(QueryType.ReqQryInvestorPosition, null);
             }
         }
 
         public void QueryOrders()
         {
             if (Connected) {
-                Api.Query(QueryType.ReqQryOrder, null);
+                api.Query(QueryType.ReqQryOrder, null);
             }
         }
 
         public void QueryTrades()
         {
             if (Connected) {
-                Api.Query(QueryType.ReqQryTrade, null);
+                api.Query(QueryType.ReqQryTrade, null);
             }
         }
 
@@ -61,7 +54,7 @@ namespace QuantBox
         {
             if (Connected) {
                 var (symbol, exchange) = Provider.GetSymbolInfo(inst);
-                Api.Query(QueryType.ReqQryQuote, new ReqQueryField {
+                api.Query(QueryType.ReqQryQuote, new ReqQueryField {
                     ExchangeID = exchange,
                     InstrumentID = symbol,
                     Symbol = symbol

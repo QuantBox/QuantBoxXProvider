@@ -15,6 +15,10 @@
         /// </summary>
         public const byte PIdO32 = 62;
         /// <summary>
+        /// O32插件
+        /// </summary>
+        public const byte PIdUfx = 62;
+        /// <summary>
         /// 天风行情
         /// </summary>
         public const byte PIdThanfSubscribe = 63;
@@ -59,33 +63,35 @@
         /// </summary>
         public const byte PIdOptionSimData = 75;
 
+        /// <summary>
+        /// Ctpmini插件
+        /// </summary>
+        public const byte PIdCtpmini = 76;
+
         public const int ReportErrorOffset = 0;
         public const int OrderInfoOffset = 0;
         public const int StopIdOffset = 0;
         public const int InstrumentMarketDataOffset = 0;
         public const int InstrumentTimeManagerOffset = 1;
+        public const int InstrumentTradingRulesOffset = 2;
         public const int TradeMarketDataOffset = 0;
         public const int TradeOpenInterestOffset = 1;
         public const int TradeTurnoverOffset = 2;
         public const int TradeClosePriceOffset = 3;
         public const int BarTurnoverOffset = 0;
+        public const int BarSettleOffset = 1;
+        public const int BarPreSettleOffset = 2;
+        public const int BarPreCloseOffset = 3;
+        public const int BarSymbolOffset = 4;
         internal const string GlobalExOrders = "@qb_exchange_orders@";
         internal const string GlobalExTrades = "@qb_exchange_trades@";
-        internal const string GlobalExTradingDay = "@qb_exchange_tradingday@";
+        internal const string GlobalExTradingDay = "@qb_exchange_trading_day@";
+        internal const string GlobalMarketCloseReminder = "@qb_market_close_reminder@";
 
         public const int MinBarSize = 60;
         public const int HourBarSize = 60 * MinBarSize;
         public const int DayBarSize = 24 * HourBarSize;
         public const int WeekBarSize = DayBarSize * 7;
         public const int MonthBarSize = DayBarSize * 30;
-
-        /// <summary>
-        /// 交易所
-        /// </summary>
-        public const string CZCE = "CZCE";
-        public const string CFFEX = "CFFEX";
-        public const string DCE = "DCE";
-        public const string SHFE = "SHFE";
-        public const string INE = "INE";        
     }
 }

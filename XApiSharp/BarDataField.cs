@@ -17,12 +17,18 @@ namespace QuantBox.XApi
         public int OpenInterest;
         public string Symbol;
         public long BarSize;
+        public double Settle;
+        public double PreSettle;
+        public double PreClose;
 
         public BarDataField()
         {
         }
 
-        public BarDataField(DateTime openDateTime, DateTime closeDateTime, string symbol, long barSize, double open, double close, double high, double low, double turnover, int openInterest)
+        public BarDataField(
+            DateTime openDateTime, DateTime closeDateTime, string symbol, long barSize, 
+            double open, double close, double high, double low, 
+            double turnover, int openInterest)
         {
             OpenDateTime = openDateTime;
             CloseDateTime = closeDateTime;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace QuantBox.XApi.Nactive
+namespace QuantBox.XApi.Native
 {
     internal struct UnmanagedOrders : IDisposable
     {

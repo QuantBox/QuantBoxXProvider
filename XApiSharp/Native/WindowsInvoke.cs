@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace QuantBox.XApi.Nactive
+namespace QuantBox.XApi.Native
 {
     internal class WindowsInvoke : XApiInvoke
     {

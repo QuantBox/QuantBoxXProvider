@@ -237,7 +237,7 @@ namespace QuantBox
         {
             _reminder = new ReminderData();
             _queues = new Dictionary<Framework, EventQueue>();
-            _actionBlock = new ActionBlock<DataObject>(Process);
+            _actionBlock = new ActionBlock<DataObject>(Process, DataflowHelper.SpscBlockOptions);
             _priceBookList = new Dictionary<string, PriceBook>();
             _pendingList = new List<Order>();
             _frameworks = new List<Framework>();

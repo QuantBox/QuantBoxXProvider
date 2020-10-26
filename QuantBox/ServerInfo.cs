@@ -44,18 +44,20 @@ namespace QuantBox
         [DataMember]
         public int TopicId { get; set; }
 
+        [Category("流重传方式")] 
+        [DataMember] 
+        public ResumeType MarketDataTopicResumeType { get; set; } = ResumeType.Resume;
+        
         [Category("流重传方式")]
         [DataMember]
-        public ResumeType MarketDataTopicResumeType { get; set; }
+        public ResumeType PrivateTopicResumeType { get; set; } = ResumeType.Resume;
+
         [Category("流重传方式")]
         [DataMember]
-        public ResumeType PrivateTopicResumeType { get; set; }
+        public ResumeType PublicTopicResumeType { get; set; } = ResumeType.Resume;
         [Category("流重传方式")]
         [DataMember]
-        public ResumeType PublicTopicResumeType { get; set; }
-        [Category("流重传方式")]
-        [DataMember]
-        public ResumeType UserTopicResumeType { get; set; }
+        public ResumeType UserTopicResumeType { get; set; } = ResumeType.Resume;
 
         [Category("服务端信息")]
         [DataMember]

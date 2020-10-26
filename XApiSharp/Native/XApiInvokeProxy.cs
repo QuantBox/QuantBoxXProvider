@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace QuantBox.XApi.Nactive
+namespace QuantBox.XApi.Native
 {
     internal class XApiInvokeProxy : IDisposable
     {

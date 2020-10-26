@@ -1,11 +1,11 @@
-﻿namespace QuantBox.OrderProxy
+﻿namespace QuantBox
 {
-    public struct OrderFlags
+    public readonly struct OrderOffsetFlag
     {
         public readonly bool IsOpen;
         public readonly bool IsCloseToday;
 
-        public OrderFlags(bool isOpen, bool isToday)
+        public OrderOffsetFlag(bool isOpen, bool isToday)
         {
             IsOpen = isOpen;
             IsCloseToday = isToday;

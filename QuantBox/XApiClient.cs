@@ -6,15 +6,15 @@ namespace QuantBox
 {
     public abstract class XApiClient
     {
-        protected readonly ConnectionInfo Info;
-        protected readonly XTradingApi Api;
-        protected readonly UserInfoField User;
-        protected readonly ServerInfoField Server;
-        protected readonly Logger Logger;
+        protected readonly ConnectionInfo info;
+        protected readonly XTradingApi api;
+        protected readonly UserInfoField user;
+        protected readonly ServerInfoField server;
+        protected readonly Logger logger;
 
         private void OnInvestorReceived(object sender, InvestorField investor, bool isLast)
         {
-            Logger.Info(investor.Name() + " " + investor.IdentifiedCardNo);
+            logger.Info(investor.Name() + " " + investor.IdentifiedCardNo);
         }
 
         protected virtual void OnMarketDataReceived(object sender, DepthMarketDataField field)
@@ -24,12 +24,12 @@ namespace QuantBox
 
         protected virtual void OnRspQryPositions(object sender, PositionField position, bool isLast)
         {
-            Provider.OnMessage(position);
+            Provider.OnMessage(position, isLast);
         }
 
         protected virtual void OnRspQryAccount(object sender, AccountField account, bool isLast)
         {
-            Provider.OnMessage(account);
+            Provider.OnMessage(account, isLast);
         }
 
         protected virtual void OnInstrumentReceived(object sender, InstrumentField instrument, bool isLast)
@@ -39,21 +39,15 @@ namespace QuantBox
 
         protected virtual void OnStatusChanged(object sender, ConnectionStatus status, RspUserLoginField field)
         {
-            Logger.Info(status);
+            logger.Info(status);
             if (field != null && status == ConnectionStatus.Logined) {
-                Logger.Info(field.RawErrorID != 0 ? field.RawErrorMsg() : field.DebugInfo());
+                logger.Info(field.RawErrorID != 0 ? field.RawErrorMsg() : field.DebugInfo());
             }
 
             switch (status) {
                 case ConnectionStatus.Done:
                     if (field != null) {
                         TradingDay = field.TradingDay();
-                        if (string.IsNullOrEmpty(field.SessionID)) {
-                            OrderPrefix = string.Empty;
-                        }
-                        else {
-                            OrderPrefix = field.SessionID.EndsWith(":") ? field.SessionID : field.SessionID + ":";
-                        }
                         OrderIdBase = int.Parse(field.Text);
                     }
                     OnConnected();
@@ -83,30 +77,32 @@ namespace QuantBox
         {
             Provider.OnClientDisconnected(this);
         }
-
+        
         protected XApiClient(XProvider provider, ConnectionInfo info, IXSpi spi = null)
         {
-            Info = info;
+            this.info = info;
             Provider = provider;
-            User = provider.GetUserInfo(info.User);
-            Server = provider.GetServerInfo(info.Server, info.UseType);
-            Logger = LogManager.GetLogger($"{provider.Name}.{info.LogPrefix}.{User.UserID}");
-            Api = provider.CreateXApi(info);
+            user = provider.GetUserInfo(info.User);
+            server = provider.GetServerInfo(info.Server, info.UseType);
+            logger = LogManager.GetLogger($"{provider.Name}.{info.LogPrefix}.{user.UserID}");
+            api = provider.CreateXApi(info);
             if (spi != null) {
-                Api.RegisterSpi(spi);
+                api.RegisterSpi(spi);
             }
-            Api.ErrorHappened += OnErrorHappened;
-            Api.StatusChanged += OnStatusChanged;
-            Api.InvestorReceived += OnInvestorReceived;
-            Api.AccountReceived += OnRspQryAccount;
-            Api.PositionReceived += OnRspQryPositions;
-            Api.OrderReturn += OnRtnOrder;
-            Api.TradeReturn += OnRtnTrade;
-            Api.InstrumentReceived += OnInstrumentReceived;
-            Api.MarketDataReceived += OnMarketDataReceived;
-            Api.OrderReceived += OnOrderReceived;
-            Api.TradeReceived += OnTradeReceived;
-            Api.InstrumentStatusChanged += OnInstrumentStatusChanged;
+
+            api.LogHappened += OnLogHappened; 
+            api.ErrorHappened += OnErrorHappened;
+            api.StatusChanged += OnStatusChanged;
+            api.InvestorReceived += OnInvestorReceived;
+            api.AccountReceived += OnRspQryAccount;
+            api.PositionReceived += OnRspQryPositions;
+            api.OrderReturn += OnRtnOrder;
+            api.TradeReturn += OnRtnTrade;
+            api.InstrumentReceived += OnInstrumentReceived;
+            api.MarketDataReceived += OnMarketDataReceived;
+            api.OrderReceived += OnOrderReceived;
+            api.TradeReceived += OnTradeReceived;
+            api.InstrumentStatusChanged += OnInstrumentStatusChanged;
         }
 
         private void OnInstrumentStatusChanged(object sender, InstrumentStatusField status)
@@ -129,21 +125,32 @@ namespace QuantBox
             Provider.OnProviderError(error);
         }
 
+        private void OnLogHappened(object sender, LogField log)
+        {
+            Provider.OnProviderLog(log);
+        }
+
         public void Connect()
         {
-            Api.Connect(Server, User);
+            api.Connect(server, user);
         }
 
         public void Disconnect()
         {
-            Api.Disconnect();
+            api.Disconnect();
         }
 
-        public bool Connected => Api.Connected;
+        public void QueryInstrument()
+        {
+            if (Connected) {
+                api.Query(QueryType.ReqQryInstrument, null);
+            }
+        }
+
+        public bool Connected => api.Connected;
 
         public DateTime TradingDay { get; internal set; }
         public int OrderIdBase { get; private set; }
-        public string OrderPrefix { get; private set; }
         public XProvider Provider { get; }
     }
 }

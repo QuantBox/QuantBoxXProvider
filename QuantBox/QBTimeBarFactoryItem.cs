@@ -18,6 +18,7 @@ namespace QuantBox
         private Framework _framework;
         private bool _delayedBarOpen;
         private double _turnover;
+        private double _openInt;
 
         public override BarFactoryItem Clone()
         {
@@ -116,6 +117,7 @@ namespace QuantBox
 
             bar.DateTime = FixCloseDateTime(_closeDateTime, false);
             bar.SetTurnover(_turnover);
+            bar.OpenInt = (long)_openInt;
             //if (_framework.Mode == FrameworkMode.Realtime) {
 
             //}
@@ -198,6 +200,7 @@ namespace QuantBox
                 }
                 base.OnData(trade);
                 _turnover += trade.GetTurnover();
+                _openInt = trade.GetOpenInterest();
 
                 if (_framework.Mode == FrameworkMode.Simulation) {
                     return;

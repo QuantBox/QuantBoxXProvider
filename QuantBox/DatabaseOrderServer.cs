@@ -1,4 +1,5 @@
-﻿
+﻿using System.Runtime.CompilerServices;
+
 namespace QuantBox
 {
     using System;
@@ -9,8 +10,141 @@ namespace QuantBox
 
     internal enum ProviderSettingsType
     {
-        TradingDay = 1,
-        MaxLocalId = 2
+        TradingDay = 1
+    }
+
+    public class PositionStore
+    {
+        private readonly Framework _framework;
+        private readonly IdArray<PositionManager> _positionManagers = new IdArray<PositionManager>(200);
+
+        public PositionStore(Framework framework)
+        {
+            _framework = framework;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public DualPosition GetPosition(int strategyId, int instrumentId, bool createNew = true)
+        {
+            return GetPositionManager(strategyId, createNew)?.GetPosition(
+                _framework.InstrumentManager.GetById(instrumentId), createNew);
+        }
+
+        public PositionManager GetPositionManager(int strategyId, bool createNew = true)
+        {
+            var manager = _positionManagers[strategyId];
+            if (manager != null) {
+                return manager;
+            }
+
+            if (createNew) {
+                var strategy = _framework.StrategyManager.FindStrategy(strategyId);
+                if (strategy == null) {
+                    //OrderAgent Strategy
+                    manager = new PositionManager(GetLastMarketCloseTime());
+                    _positionManagers[strategyId] = manager;
+                    return manager;
+                }
+                return GetPositionManager(strategy);
+            }
+
+            return null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public DualPosition GetPosition(Order order)
+        {
+            return GetPositionManager(order.strategyId).GetPosition(order.Instrument);
+        }
+
+        public PositionManager GetPositionManager(Strategy strategy)
+        {
+            var manager = _positionManagers[strategy.Id];
+            if (manager != null) {
+                return manager;
+            }
+
+            if (strategy is InstrumentStrategy iss && iss.IsInstance) {
+                manager = GetPositionManager(iss.Parent.Id);
+            }
+            else {
+                manager = new PositionManager(GetLastMarketCloseTime());
+            }
+            _positionManagers[strategy.Id] = manager;
+            return manager;
+        }
+
+        public void Load(IList<ExecutionCommand> cmdList, IdArray<List<ExecutionReport>> recordMap)
+        {
+            var marketCloseTime = GetLastMarketCloseTime();
+            var tradingDay = DateTime.MinValue;
+
+            foreach (var cmd in cmdList) {
+                if (cmd.Type != ExecutionCommandType.Send) {
+                    continue;
+                }
+                var order = new Order(cmd) {
+                    Instrument = _framework.InstrumentManager.GetById(cmd.InstrumentId)
+                };
+                if (tradingDay == DateTime.MinValue) {
+                    tradingDay = order.TransactTime.Date;
+                }
+                var manager = GetPositionManager(order.strategyId);
+                var position = GetPosition(order);
+                if (tradingDay < order.TransactTime.Date) {
+                    manager.ChangeTradingDay();
+                }
+
+                position.FrozenPosition(order);
+                var reports = recordMap[order.Id];
+                if (reports != null) {
+                    foreach (var report in reports) {
+                        report.Order = order;
+                        position.ProcessExecutionReport(report);
+                    }
+                }
+            }
+
+            if (cmdList.Last().TransactTime < marketCloseTime) {
+                for (int i = 0; i < _positionManagers.Size; i++) {
+                    _positionManagers[i]?.ChangeTradingDay();
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void UpdatePosition(ExecutionCommand cmd)
+        {
+            GetPosition(cmd.StrategyId, cmd.InstrumentId).FrozenPosition(cmd.Order);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void UpdatePosition(ExecutionReport report)
+        {
+            GetPosition(report.StrategyId, report.InstrumentId, false)?.ProcessExecutionReport(report);
+        }
+
+        public static TimeSpan MarketCloseTime { get; set; } = new TimeSpan(15, 30, 0);
+        private static DateTime GetLastMarketCloseTime()
+        {
+            if (DateTime.Now.TimeOfDay > MarketCloseTime) {
+                return DateTime.Today.Add(MarketCloseTime);
+            }
+
+            var date = DateTime.Today.AddDays(-1);
+            while (date.DayOfWeek != DayOfWeek.Saturday) {
+                date = date.AddDays(-1);
+            }
+
+            return date.Add(MarketCloseTime);
+        }
+
+        public void ChangeTradingDay()
+        {
+            for (int i = 0; i < _positionManagers.Size; i++) {
+                _positionManagers[i]?.ChangeTradingDay();
+            }
+        }
     }
 
     internal class DatabaseOrderServer : OrderServer
@@ -49,7 +183,7 @@ namespace QuantBox
             public byte[] GetAsBinary(ProviderSettingsType type)
             {
                 var data = _collection.FindById((int)type);
-                return data != null ? data["value"].AsBinary : default(byte[]);
+                return data != null ? data["value"].AsBinary : default;
             }
             public void Set(ProviderSettingsType type, DateTime value)
             {
@@ -62,7 +196,7 @@ namespace QuantBox
             public DateTime GetAsDateTime(ProviderSettingsType type)
             {
                 var data = _collection.FindById((int)type);
-                return data != null ? data["value"].AsDateTime : default(DateTime);
+                return data != null ? data["value"].AsDateTime : default;
             }
             public void Set(ProviderSettingsType type, decimal value)
             {
@@ -75,7 +209,7 @@ namespace QuantBox
             public decimal GetAsDecimal(ProviderSettingsType type)
             {
                 var data = _collection.FindById((int)type);
-                return data != null ? data["value"].AsDecimal : default(decimal);
+                return data != null ? data["value"].AsDecimal : default;
             }
             public void Set(ProviderSettingsType type, double value)
             {
@@ -88,7 +222,7 @@ namespace QuantBox
             public double GetAsDouble(ProviderSettingsType type)
             {
                 var data = _collection.FindById((int)type);
-                return data != null ? data["value"].AsDouble : default(double);
+                return data != null ? data["value"].AsDouble : default;
             }
             public void Set(ProviderSettingsType type, Guid value)
             {
@@ -101,7 +235,7 @@ namespace QuantBox
             public Guid GetAsGuid(ProviderSettingsType type)
             {
                 var data = _collection.FindById((int)type);
-                return data != null ? data["value"].AsGuid : default(Guid);
+                return data != null ? data["value"].AsGuid : default;
             }
             public void Set(ProviderSettingsType type, int value)
             {
@@ -114,7 +248,7 @@ namespace QuantBox
             public int GetAsInt32(ProviderSettingsType type)
             {
                 var data = _collection.FindById((int)type);
-                return data != null ? data["value"].AsInt32 : default(int);
+                return data != null ? data["value"].AsInt32 : default;
             }
             public void Set(ProviderSettingsType type, long value)
             {
@@ -124,11 +258,13 @@ namespace QuantBox
                 };
                 _collection.Upsert(doc);
             }
+
             public long GetAsInt64(ProviderSettingsType type)
             {
                 var data = _collection.FindById((int)type);
-                return data != null ? data["value"].AsInt64 : default(long);
+                return data != null ? data["value"].AsInt64 : 0L;
             }
+
             public void Set(ProviderSettingsType type, string value)
             {
                 var doc = new BsonDocument {
@@ -137,10 +273,11 @@ namespace QuantBox
                 };
                 _collection.Upsert(doc);
             }
+
             public string GetAsString(ProviderSettingsType type)
             {
                 var data = _collection.FindById((int)type);
-                return data != null ? data["value"].AsString : default(string);
+                return data?["value"].AsString;
             }
 
         }
@@ -148,53 +285,69 @@ namespace QuantBox
 
         private readonly Framework _framework;
         private readonly LiteDatabase _database;
+        private readonly string _instanceName;
+        private readonly TickIdGen _idGen = new TickIdGen();
         private readonly ILiteCollection<ExecutionCommand> _orders;
         private readonly ILiteCollection<ExecutionReport> _reports;
         private readonly ILiteCollection<Stop> _stops;
+        private readonly PositionStore _store;
 
         public Action<ExecutionCommand> SetOrderId = _ => { };
+        public string LastProviderId { get; private set; } = "0";
 
-        private readonly Skyline.IdArray<StopStrategy> _stopStrategys = new Skyline.IdArray<StopStrategy>(100);
-
-        private void SetSubSide(ExecutionCommand cmd, SubSide subSide)
-        {
-            ExecutionCommandSerializer.subSide.Setter(cmd, subSide);
-        }
+        private readonly Skyline.IdArray<StopStrategy> _stopStrategist = new Skyline.IdArray<StopStrategy>(100);
 
         private void SetStopStrategy(Stop stop)
         {
-            if (!(stop.Strategy is StopStrategy)) {
-                var ss = _stopStrategys[stop.Strategy.Id];
-                if (ss == null) {
-                    ss = new StopStrategy(_framework, stop.Strategy, string.Empty);
-                    _stopStrategys[stop.Strategy.Id] = ss;
-                }
-                stop.SetStrategy(ss);
+            if (stop.Strategy is StopStrategy) {
+                return;
             }
+
+            var ss = _stopStrategist[stop.Strategy.Id];
+            if (ss == null) {
+                ss = new StopStrategy(_framework, stop.Strategy, string.Empty);
+                _stopStrategist[stop.Strategy.Id] = ss;
+            }
+            stop.SetStrategy(ss);
         }
 
-        public DatabaseOrderServer(Framework framework, LiteDatabase database) : base(framework)
+        public DatabaseOrderServer(
+            Framework framework,
+            LiteDatabase database,
+            string instanceName) : base(framework)
         {
             _framework = framework;
             _database = database;
+            _instanceName = instanceName;
             _orders = _database.GetCollection<ExecutionCommand>("orders");
             _reports = _database.GetCollection<ExecutionReport>("reports");
             _stops = _database.GetCollection<Stop>("stops");
             Settings = new SettingsManager(_database.GetCollection<BsonDocument>("settings"));
+            _store = new PositionStore(_framework);
         }
 
         public SettingsManager Settings { get; }
+
+        public PositionStore PositionStore => _store;
 
         public override void Save(ExecutionMessage message, int id = -1)
         {
             try {
                 switch (message.TypeId) {
                     case DataObjectType.ExecutionCommand:
-                        SetOrderId((ExecutionCommand)message);
-                        _orders.Insert((ExecutionCommand)message);
+                        var nextId = _idGen.Next().ToString();
+                        message.Order.ClOrderId = nextId;
+                        message.ClOrderId = nextId;
+                        message.ProviderOrderId = nextId;
+                        var cmd = (ExecutionCommand)message;
+                        SetOrderId(cmd);
+                        _orders.Insert(cmd);
+                        PositionStore.UpdatePosition(cmd);
                         break;
                     case DataObjectType.ExecutionReport:
-                        _reports.Insert((ExecutionReport)message);
+                        var report = (ExecutionReport)message;
+                        _reports.Insert(report);
+                        PositionStore.UpdatePosition(report);
                         break;
                 }
             }
@@ -205,22 +358,28 @@ namespace QuantBox
 
         public override List<ExecutionMessage> Load(string series = null)
         {
-            var idMap = new IdArray<string>();
-            var subSideMap = new IdArray<SubSide>();
-
+            //var subSideMap = new IdArray<SubSide>();
+            var recordMap = new IdArray<List<ExecutionReport>>();
             var reports = _reports.FindAll().ToList();
             foreach (var report in reports) {
-                idMap[report.OrderId] = report.ProviderOrderId;
-                subSideMap[report.OrderId] = report.SubSide;
+                var temp = recordMap[report.OrderId];
+                if (temp == null) {
+                    temp = new List<ExecutionReport>();
+                    recordMap[report.OrderId] = temp;
+                }
+                temp.Add(report);
+                //subSideMap[report.OrderId] = report.SubSide;
             }
             var orders = _orders.FindAll().ToList();
-            var maxLocalId = string.Empty;
             foreach (var order in orders) {
-                order.ProviderOrderId = idMap[order.OrderId];
-                SetSubSide(order, subSideMap[order.OrderId]);
-                maxLocalId = DealProcessor.GetOrderId(order);
+                LastProviderId = order.ProviderOrderId;
+                if (recordMap[order.OrderId] != null) {
+                    order.ProviderOrderId = recordMap[order.OrderId][0].ProviderOrderId;
+                }
+                //SetSubSide(order, subSideMap[order.OrderId]);
             }
-            Settings.Set(ProviderSettingsType.MaxLocalId, maxLocalId);
+
+            PositionStore.Load(orders, recordMap);
             var list = new List<ExecutionMessage>();
             list.AddRange(orders);
             list.AddRange(reports);
@@ -255,7 +414,6 @@ namespace QuantBox
                 s.AddStop(stop);
                 SetStopStrategy(stop);
             }
-
         }
 
         public override void Close()

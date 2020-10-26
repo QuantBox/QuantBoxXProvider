@@ -9,11 +9,6 @@ namespace QuantBox.XApi
     {
         private CtpTradeClient _client;
 
-        static CtpTrader()
-        {
-            AssemblyResolver.AddPath(Path.GetDirectoryName(typeof(CtpTrader).Assembly.Location));
-        }
-
         public void RegisterSpi(IXSpi spi)
         {
             if (_client != null) {
@@ -87,6 +82,8 @@ namespace QuantBox.XApi
         public ApiType ApiTypes => ApiType.Trade | ApiType.Instrument | ApiType.Query;
 #if CTP || CTPSE
         public string ApiName => "CTP";
+#elif CTPMINI
+        public string ApiName => "CTPMINI";
 #else
         public string ApiName => "Rohon";
 #endif

@@ -3,23 +3,6 @@ using SmartQuant;
 
 namespace QuantBox.Data.Compression
 {
-    internal class CompressedBarEventArgs : EventArgs
-    {
-        public Bar Bar
-        {
-            get;
-            private set;
-        }
-
-        public CompressedBarEventArgs(Bar bar)
-        {
-            Bar = bar;
-        }
-    }
-}
-
-namespace QuantBox.Data.Compression
-{
     internal abstract class BarCompressor
     {
         protected readonly Instrument inst;

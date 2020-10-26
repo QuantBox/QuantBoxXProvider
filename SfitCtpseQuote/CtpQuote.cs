@@ -6,12 +6,7 @@ namespace QuantBox.XApi
     public class CtpQuote : IXApi
     {
         private CtpMdClient _client;
-
-        static CtpQuote()
-        {
-            AssemblyResolver.AddPath(Path.GetDirectoryName(typeof(CtpQuote).Assembly.Location));
-        }
-
+        
         public void RegisterSpi(IXSpi spi)
         {
             if (_client != null) {
@@ -65,6 +60,8 @@ namespace QuantBox.XApi
         public ApiType ApiTypes => ApiType.MarketData;
 #if CTP || CTPSE
         public string ApiName => "CTP";
+#elif CTPMINI
+        public string ApiName => "CTPMINI";
 #else
         public string ApiName => "Rohon";
 #endif

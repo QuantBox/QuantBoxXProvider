@@ -45,21 +45,21 @@ namespace QuantBox
             Init(symbols.Select(n => framework.InstrumentManager[n]).ToArray());
         }
 
-        public TickFilter(Framework framework, params Instrument[] insts) : base(framework)
+        public TickFilter(Framework framework, params Instrument[] instruments) : base(framework)
         {
-            Init(insts);
+            Init(instruments);
         }
 
-        public TickFilter(Framework framework, InstrumentList insts)
+        public TickFilter(Framework framework, InstrumentList instruments)
             : base(framework)
         {
-            Init(insts.ToArray());
+            Init(instruments.ToArray());
         }
 
-        private void Init(Instrument[] insts)
+        private void Init(Instrument[] instruments)
         {
             DiscardEmpty().DiscardAuction(false);
-            foreach (var inst in insts) {
+            foreach (var inst in instruments) {
                 if (inst != null) {
                     _selectorList[inst.Id] = new TimeRangeSelector(inst);
                 }

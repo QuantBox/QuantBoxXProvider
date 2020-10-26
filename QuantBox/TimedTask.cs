@@ -25,11 +25,11 @@ namespace QuantBox
                 return;
             }
             try {
+                AutoConnect();
                 if (!TradingCalendar.Instance.IsTradingDay(DateTime.Today)) {
                     return;
                 }
                 DataQuery();
-                AutoConnect();
             }
             finally {
                 Interlocked.Exchange(ref _inTimer, 0);
@@ -38,7 +38,7 @@ namespace QuantBox
 
         private void AutoConnect()
         {
-            if (_provider.SessionTimes.Count == 0) {
+            if (!_provider.EnableAutoConnect) {
                 return;
             }
 
@@ -58,15 +58,15 @@ namespace QuantBox
         {
             if (!_provider.IsConnected
                 || !_provider.IsExecutionProvider
-                || (_provider.IsInstrumentProvider && !_provider.QryInstrumentCompleted)
+                || (_provider.IsInstrumentProvider && !_provider.qryInstrumentCompleted)
                 || _provider.QueryTradingDataAfterTrade) {
                 return;
             }
 
             if ((DateTime.Now - _lastTime).TotalSeconds > _provider.TradingDataQueryInterval) {
                 _lastTime = DateTime.Now;
-                _provider.Trader.QueryPositions();
-                _provider.Trader.QueryAccount();
+                _provider.trader.QueryPositions();
+                _provider.trader.QueryAccount();
             }
         }
 

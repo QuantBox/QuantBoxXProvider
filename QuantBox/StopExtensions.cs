@@ -14,13 +14,13 @@ namespace QuantBox
 
         static StopExtensions()
         {
-            var creationTimeFeild = typeof(Stop).GetField("creationTime", BindingFlags.Instance | BindingFlags.NonPublic);
-            if (creationTimeFeild != null) {
-                CreationTimeField = new FastFieldInfo<Stop, DateTime>(creationTimeFeild);
+            var creationTimeField = typeof(Stop).GetField("creationTime", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (creationTimeField != null) {
+                CreationTimeField = new FastFieldInfo<Stop, DateTime>(creationTimeField);
             }
-            var strategyFeild = typeof(Stop).GetField("strategy", BindingFlags.Instance | BindingFlags.NonPublic);
-            if (strategyFeild != null) {
-                StrategyField = new FastFieldInfo<Stop, Strategy>(strategyFeild);
+            var strategyField = typeof(Stop).GetField("strategy", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (strategyField != null) {
+                StrategyField = new FastFieldInfo<Stop, Strategy>(strategyField);
             }
             var qtyField = typeof(Stop).GetField("qty", BindingFlags.Instance | BindingFlags.NonPublic);
             if (qtyField != null) {

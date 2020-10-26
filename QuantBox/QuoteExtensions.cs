@@ -8,13 +8,32 @@ namespace QuantBox
 {
     public static class QuoteExtensions
     {
+        #region Instrument
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static InstTradingRules GetTradingRules(this Instrument inst)
+        {
+            return (InstTradingRules)inst.Fields[QuantBoxConst.InstrumentTradingRulesOffset];
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTradingRules(this Instrument inst, InstTradingRules field)
+        {
+            inst.Fields[QuantBoxConst.InstrumentTradingRulesOffset] = field;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static DepthMarketDataField GetMarketData(this Instrument inst)
         {
             return (DepthMarketDataField)inst.Fields[QuantBoxConst.InstrumentMarketDataOffset];
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetMarketData(this Instrument inst, DepthMarketDataField field)
+        {
+            inst.Fields[QuantBoxConst.InstrumentMarketDataOffset] = field;
+        }
 
-        #region Instrument
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TradingTimeRange GetTimeRange(this Instrument inst)
         {
@@ -26,13 +45,7 @@ namespace QuantBox
         {
             inst.Fields[QuantBoxConst.InstrumentTimeManagerOffset] = manager;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetMarketData(this Instrument inst, DepthMarketDataField field)
-        {
-            inst.Fields[QuantBoxConst.InstrumentMarketDataOffset] = field;
-        }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double GetUpperLimitPrice(this Instrument inst)
         {
@@ -139,6 +152,62 @@ namespace QuantBox
         {
             var barItem = new QBTimeBarFactoryItem(inst, barSize);
             factory.Add(barItem);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetSymbol(this Bar bar, string symbol)
+        {
+            bar.Fields[QuantBoxConst.BarSymbolOffset] = symbol;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string GetSymbol(this Bar bar)
+        {
+            return bar.Fields[QuantBoxConst.BarSymbolOffset] == null
+                ? string.Empty
+                : bar.Fields.GetString(QuantBoxConst.BarSymbolOffset);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetSettle(this Bar bar, double settle)
+        {
+            bar.Fields[QuantBoxConst.BarSettleOffset] = settle;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double GetSettle(this Bar bar)
+        {
+            return bar.Fields[QuantBoxConst.BarSettleOffset] == null
+                ? 0
+                : bar.Fields.GetDouble(QuantBoxConst.BarSettleOffset);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetPreSettle(this Bar bar, double preSettle)
+        {
+            bar.Fields[QuantBoxConst.BarPreSettleOffset] = preSettle;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double GetPreSettle(this Bar bar)
+        {
+            return bar.Fields[QuantBoxConst.BarPreSettleOffset] == null
+                ? 0
+                : bar.Fields.GetDouble(QuantBoxConst.BarPreSettleOffset);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetPreClose(this Bar bar, double preClose)
+        {
+            bar.Fields[QuantBoxConst.BarPreCloseOffset] = preClose;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double GetPreClose(this Bar bar)
+        {
+            return bar.Fields[QuantBoxConst.BarPreCloseOffset] == null
+                ? 0
+                : bar.Fields.GetDouble(QuantBoxConst.BarPreCloseOffset);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -350,30 +419,26 @@ namespace QuantBox
                 return new BarSeries();
             }
             var selector = new TimeRangeSelector(inst);
-            var emitOnClose = true;
-            var bar = series[0];
-            if (bar.Size >= QuantBoxConst.DayBarSize) {
-                emitOnClose = false;
-            }
+            bool emitOnClose = !(series[0].Size >= QuantBoxConst.DayBarSize);
 
             var bars = new BarSeries();
             Bar last = null;
             var index = 0;
-            for (int i = 0; i < series.Count; i++) {
-                var range = selector.Get(series[i].DateTime.Date);
+            foreach (var bar in series)
+            {
+                var range = selector.Get(bar.DateTime.Date);
                 if (index == 0) {
-                    last = series[i];
+                    last = bar;
                     last.Size *= count;
                 }
                 else {
-                    QBHelper.MergeBar(last, series[i]);
+                    QBHelper.MergeBar(last, bar);
                 }
                 ++index;
-                if (index == count || (emitOnClose && series[i].CloseDateTime.TimeOfDay == range.CloseTime)) {
+                if (index == count || (emitOnClose && bar.CloseDateTime.TimeOfDay == range.CloseTime)) {
                     bars.Add(last);
                     last = null;
                     index = 0;
-                    continue;
                 }
             }
             return bars;

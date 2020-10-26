@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 #if CTP || CTPSE
 using QuantBox.Sfit.Api;
+#elif CTPMINI
+using QuantBox.SfitMini.Api;
 #else
 using QuantBox.Rohon.Api;
 #endif
@@ -14,11 +17,11 @@ namespace QuantBox.XApi
     public class CtpMdClient
     {
         private static readonly Random Rand = new Random((int)DateTime.Now.Ticks);
-
         private readonly IXSpi _spi;
         private CtpMdApi _api;
         private int _requestId;
         private readonly HashSet<string> _instruments = new HashSet<string>();
+        private string[] _instrumentsView;
         private readonly StatusPublisher _publisher;
 
         private int GetNextRequestId()
@@ -55,25 +58,25 @@ namespace QuantBox.XApi
             _api.OnRspError += OnRspError;
             _api.OnRspUserLogin += OnRspUserLogin;
             _api.OnRtnDepthMarketData += OnRtnDepthMarketData;
+            _api.OnRspSubMarketData += OnRspSubMarketData;
+        }
+
+        private void OnRspSubMarketData(object sender, CtpSpecificInstrument response, CtpRspInfo info, int requestId, bool last)
+        {
+            if (response == null) {
+                return;
+            }
+            _spi.ProcessLog(new LogField(LogLevel.Debug, $"Ctpse subscribe {response.InstrumentID}"));
         }
 
         private void OnRtnDepthMarketData(object sender, CtpDepthMarketData data)
         {
+            //Thread.Sleep(5000);
             var market = new DepthMarketDataField();
             market.InstrumentID = data.InstrumentID;
             market.ExchangeID = data.ExchangeID;
-            market.Exchange = CtpConvert.GetExchangeType(data.ExchangeID);
-            switch (market.Exchange) {
-                case ExchangeType.CZCE:
-                    CtpConvert.SetCzceExchangeTime(data, market);
-                    break;
-                case ExchangeType.DCE:
-                    CtpConvert.SetDceExchangeTime(data, market);
-                    break;
-                default:
-                    CtpConvert.SetExchangeTime(data, market);
-                    break;
-            }
+            //market.Exchange = CtpConvert.GetExchangeType(data.ExchangeID);
+            CtpConvert.SetExchangeTime(data, market);
 
             market.LastPrice = CtpConvert.IsInvalid(data.LastPrice) ? 0 : data.LastPrice;
             market.Volume = data.Volume;
@@ -98,7 +101,7 @@ namespace QuantBox.XApi
             }
             else {
                 market.ClosePrice = data.ClosePrice;
-                ///market.TradingPhase = TradingPhaseType.Closed;
+                //market.TradingPhase = TradingPhaseType.Closed;
             }
             market.SettlementPrice = CtpConvert.IsInvalid(data.SettlementPrice) ? 0 : data.SettlementPrice;
             market.UpperLimitPrice = data.UpperLimitPrice;
@@ -160,6 +163,10 @@ namespace QuantBox.XApi
         private void OnRspUserLogin(object sender, CtpRspUserLogin response, CtpRspInfo rspInfo, int requestId, bool isLast)
         {
             if (response != null && CtpConvert.CheckRspInfo(rspInfo)) {
+                if (Connected) {
+                    Resubscribe();
+                    return;
+                }
                 Connected = true;
                 UserLogin = new RspUserLoginField();
                 var now = DateTime.Now;
@@ -178,28 +185,38 @@ namespace QuantBox.XApi
 
         private void OnFrontDisconnected(object sender, int reason)
         {
-            Connected = false;
-            _instruments.Clear();
-            SendError(reason, nameof(OnFrontDisconnected));
-            _publisher.Post(ConnectionStatus.Disconnected);
+            if (reason != 0) {
+                SendError(reason, $"{Server.Address}");
+            }
         }
 
         private void OnFrontConnected(object sender)
         {
-            _publisher.Post(ConnectionStatus.Connected);
+            _spi.ProcessLog(new LogField(LogLevel.Debug, $"Ctpse market({Server.Address}) connected"));
+            if (!Connected) {
+                _publisher.Post(ConnectionStatus.Connected);
+                _publisher.Post(ConnectionStatus.Logining);
+            }
+
             var info = new CtpReqUserLogin();
             info.BrokerID = Server.BrokerID;
             info.UserProductInfo = Server.UserProductInfo;
             info.UserID = User.UserID;
             info.Password = User.Password;
-            _publisher.Post(ConnectionStatus.Logining);
             _api.ReqUserLogin(info, GetNextRequestId());
+        }
+
+        private void Resubscribe()
+        {
+            _spi.ProcessLog(new LogField(LogLevel.Debug, $"Ctpse market({Server.Address}) resubscribe count: {_instrumentsView.Length}"));
+            _api.SubscribeMarketData(_instrumentsView, _instrumentsView.Length);
         }
 
         public CtpMdClient(IXSpi spi)
         {
             _spi = spi;
             _publisher = new StatusPublisher(spi);
+            _instrumentsView = _instruments.ToArray();
         }
 
         public bool Connected { get; private set; }
@@ -210,9 +227,12 @@ namespace QuantBox.XApi
         public void Release()
         {
             if (_api != null) {
+                _publisher.Post(ConnectionStatus.Releasing);
                 Connected = false;
                 _api.Release();
                 _api = null;
+                _instruments.Clear();
+                _publisher.Post(ConnectionStatus.Disconnected);
             }
         }
 
@@ -238,6 +258,7 @@ namespace QuantBox.XApi
         {
             if (Connected && !_instruments.Contains(instrument)) {
                 _instruments.Add(instrument);
+                _instrumentsView = _instruments.ToArray();
                 _api.SubscribeMarketData(new[] { instrument }, 1);
             }
         }
@@ -246,6 +267,7 @@ namespace QuantBox.XApi
         {
             if (Connected && _instruments.Contains(instrument)) {
                 _instruments.Remove(instrument);
+                _instrumentsView = _instruments.ToArray();
                 _api.UnSubscribeMarketData(new[] { instrument }, 1);
             }
         }
