@@ -55,6 +55,10 @@
     <Compile Include="QuantBoxCtpse.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\QuantBox\QuantBox.csproj">
       <Project>{5feb5600-7c98-4a76-a885-c21e6a99223e}</Project>
       <Name>QuantBox</Name>
@@ -63,10 +67,6 @@
       <Project>{ba6da3bd-c80f-49f5-953f-34e12967d166}</Project>
       <Name>XApiSharp</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
