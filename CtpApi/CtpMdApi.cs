@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace QuantBox.Sfit.Api
+namespace QuantBox.Sfit.Api 
 {
     public class CtpMdApi : CtpMdSpi, ICtpRequestHandler
     {

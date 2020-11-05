@@ -1,9 +1,3 @@
-﻿/*
- * User: hetao
- * Date: 2014/5/23 星期五
- * Time: 17:01
- * 
- */
 using System;
 
 namespace QuantBox.Sfit.Api
@@ -104,10 +98,24 @@ namespace QuantBox.Sfit.Api
 		public const int COMBOPTIONS_SUPPORT_IOC_ONLY = 88;
 		public const int OPEN_FILE_FAILED = 89;
 		public const int NEED_RETRY = 90;
-		//<!--灾备系统错误代码 -->
+		public const int EXCHANGE_RTNERROR = 91;
+		public const int QUOTE_DERIVEDORDER_ACTIONERROR = 92;
+		public const int INSTRUMENTMAP_NOT_FOUND = 93;
+		public const int CANCEL_OF_EFP_DERIVED_ORDER_NOT_ALLOWED = 94;
 		public const int NO_TRADING_RIGHT_IN_SEPC_DR = 101;
 		public const int NO_DR_NO = 102;
-		//<!--转帐系统错误代码 -->
+		public const int BATCHACTION_NOSUPPORT = 103;
+		public const int POSI_LIMIT = 106;
+		public const int OUT_OF_TIMEINTERVAL = 113;
+		public const int OUT_OF_PRICEINTERVAL = 114;
+		public const int ORDER_FREQ_LIMIT = 116;
+		public const int WEAK_PASSWORD = 131;
+		public const int EXEC_FORBIDDEN_TIME = 139;
+		public const int FIRST_LOGIN = 140;
+		public const int PWD_OUT_OF_DATE = 141;
+		public const int PWD_MUST_DIFF = 142;
+		public const int IP_FORBIDDEN = 143;
+		public const int IP_BLACK = 144;
 		public const int SEND_INSTITUTION_CODE_ERROR = 1000;
 		public const int NO_GET_PLATFORM_SN = 1001;
 		public const int ILLEGAL_TRANSFER_BANK = 1002;
@@ -147,8 +155,10 @@ namespace QuantBox.Sfit.Api
 		public const int INVALID_MAC = 1036;
 		public const int NOT_SUPPORT_SECAGENT_BY_BANK = 1037;
 		public const int PINKEY_SYNCING = 1038;
-		public const int SECAGENT_OPEN_ACCOUNT_BY_CCB = 1039;		
-		//<!-- add for transfer begin -->
+		public const int SECAGENT_QUERY_BY_CCB = 1039;
+		public const int BANKACCOUNT_NOT_EMPTY = 1040;
+		public const int INVALID_RESERVE_OPEN_ACCOUNT = 1041;
+		public const int OPEN_ACCOUNT_NOT_DEFAULT_ACCOUNT = 1042;
 		public const int NO_VALID_BANKOFFER_AVAILABLE = 2000;
 		public const int PASSWORD_MISMATCH = 2001;
 		public const int DUPLATION_BANK_SERIAL = 2004;
@@ -162,9 +172,9 @@ namespace QuantBox.Sfit.Api
 		public const int NOT_ALLOW_REPEAL_BYMANUAL = 2013;
 		public const int AMOUNT_OUTOFTHEWAY = 2014;
 		public const int EXCHANGERATE_NOT_FOUND = 2015;
+		public const int RESERVE_OPEN_ACCOUNT_NOT_FUND = 2016;
+		public const int DUPLICATE_RESERVE_OPEN_ACCOUNT_NOT_FUND = 2017;
 		public const int WAITING_OFFER_RSP = 999999;
-		//<!-- add for transfer end -->
-		//<!--换汇系统错误代码 bgn-->
 		public const int FBE_NO_GET_PLATFORM_SN = 3001;
 		public const int FBE_ILLEGAL_TRANSFER_BANK = 3002;
 		public const int FBE_PROCESSING = 3005;
@@ -185,6 +195,13 @@ namespace QuantBox.Sfit.Api
 		public const int FBE_WRONG_BANK_ACCOUNT = 3036;
 		public const int FBE_BANK_ACCOUNT_NO_FUNDS = 3037;
 		public const int FBE_DUP_CERT_NO = 3038;
-		//<!--换汇系统错误代码 end-->
+		public const int API_UNSUPPORTED_VERSION = 3039;
+		public const int API_INVALID_KEY = 3040;
+		public const int OPTION_SELF_CLOSE_NOT_OPTION = 3041;
+		public const int OPTION_SELF_CLOSE_DUPLICATE_REF = 3042;
+		public const int OPTION_SELF_CLOSE_BAD_FIELD = 3043;
+		public const int OPTION_SELF_CLOSE_REC_NOT_FOUND = 3044;
+		public const int OPTION_SELF_CLOSE_STATUS_ERR = 3045;
+		public const int OPTION_SELF_CLOSE_DOUBLE_SET_ERR = 3046;
 	}
 }

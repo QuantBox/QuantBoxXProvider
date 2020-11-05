@@ -105,7 +105,8 @@ namespace QuantBox.Sfit.Api
 
         public static TimeSpan GetSpan(string time)
         {
-            StrTimeMap.TryGetValue(time, out var span);
+            TimeSpan span;
+            StrTimeMap.TryGetValue(time, out span);
             return span;
         }
 
@@ -121,7 +122,8 @@ namespace QuantBox.Sfit.Api
         public static DateTime GetDate(string date)
         {
             if (date.Length == 8) {
-                if (StrDateMap.TryGetValue(date, out var d)) {
+                DateTime d;
+                if (StrDateMap.TryGetValue(date, out d)) {
                     return d;
                 }
                 var yyyy = int.Parse(date.Substring(0, 4));

@@ -999,14 +999,6 @@ public static class CtpHedgeFlagType
     ///做市商
     ///</summary>
     public const byte MarketMaker = (byte)'5';
-    ///<summary>
-    ///第一腿投机第二腿套保 大商所专用
-    ///</summary>
-    public const byte SpecHedge = (byte)'6';
-    ///<summary>
-    ///第一腿套保第二腿投机  大商所专用
-    ///</summary>
-    public const byte HedgeSpec = (byte)'7';
 };
 
 ///<summary>
@@ -1212,13 +1204,9 @@ public static class CtpOrderTypeType
     ///</summary>
     public const byte Swap = (byte)'5';
     ///<summary>
-    ///大宗交易成交衍生
+    ///期转现衍生
     ///</summary>
-    public const byte DeriveFromBlockTrade = (byte)'6';
-    ///<summary>
-    ///期转现成交衍生
-    ///</summary>
-    public const byte DeriveFromEFPTrade = (byte)'7';
+    public const byte DeriveFromEFP = (byte)'6';
 };
 
 ///<summary>
@@ -1420,10 +1408,6 @@ public static class CtpTradeTypeType
     ///组合衍生成交
     ///</summary>
     public const byte CombinationDerived = (byte)'4';
-    ///<summary>
-    ///大宗交易成交
-    ///</summary>
-    public const byte BlockTrade = (byte)'5';
 };
 
 ///<summary>
@@ -1443,10 +1427,6 @@ public static class CtpPriceSourceType
     ///卖委托价
     ///</summary>
     public const byte Sell = (byte)'2';
-    ///<summary>
-    ///场外成交价
-    ///</summary>
-    public const byte OTC = (byte)'3';
 };
 
 ///<summary>
@@ -5493,11 +5473,6 @@ public static class CtpCombinationTypeType
 };
 
 ///<summary>
-///TFtdcDceCombinationTypeType是一个组合类型类型
-///</summary>
-/// TThostFtdcDceCombinationTypeType 未被使用
-
-///<summary>
 ///TFtdcOptionRoyaltyPriceTypeType是一个期权权利金价格类型类型
 ///</summary>
 public static class CtpOptionRoyaltyPriceTypeType
@@ -8468,11 +8443,6 @@ public class CtpInvestorPosition
     [DataMember(Order = 46)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
     public string InvestUnitID;
-    ///<summary>
-    ///大商所持仓成本差值，只有大商所使用
-    ///</summary>
-    [DataMember(Order = 47)]
-    public double PositionCostOffset;
 
     public static byte[] GetData(CtpInvestorPosition obj)
     {
@@ -8524,7 +8494,6 @@ public class CtpInvestorPosition
             writer.Write(obj.ExchangeID);
             writer.Write(obj.YdStrikeFrozen);
             writer.Write(obj.InvestUnitID);
-            writer.Write(obj.PositionCostOffset);
             return stream.ToArray();
         }
     }
@@ -13250,11 +13219,6 @@ public class CtpSyncingInvestorPosition
     [DataMember(Order = 46)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
     public string InvestUnitID;
-    ///<summary>
-    ///大商所持仓成本差值，只有大商所使用
-    ///</summary>
-    [DataMember(Order = 47)]
-    public double PositionCostOffset;
 
     public static byte[] GetData(CtpSyncingInvestorPosition obj)
     {
@@ -13306,7 +13270,6 @@ public class CtpSyncingInvestorPosition
             writer.Write(obj.ExchangeID);
             writer.Write(obj.YdStrikeFrozen);
             writer.Write(obj.InvestUnitID);
-            writer.Write(obj.PositionCostOffset);
             return stream.ToArray();
         }
     }
@@ -23766,14 +23729,9 @@ public class CtpInvestorPositionDetail
     [DataMember(Order = 26)]
     public double CloseAmount;
     ///<summary>
-    ///按照时间顺序平仓的笔数,大商所专用
-    ///</summary>
-    [DataMember(Order = 27)]
-    public int TimeFirstVolume;
-    ///<summary>
     ///投资单元代码
     ///</summary>
-    [DataMember(Order = 28)]
+    [DataMember(Order = 27)]
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
     public string InvestUnitID;
 
@@ -23807,7 +23765,6 @@ public class CtpInvestorPositionDetail
             writer.Write(obj.SettlementPrice);
             writer.Write(obj.CloseVolume);
             writer.Write(obj.CloseAmount);
-            writer.Write(obj.TimeFirstVolume);
             writer.Write(obj.InvestUnitID);
             return stream.ToArray();
         }

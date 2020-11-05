@@ -5,72 +5,72 @@ namespace QuantBox.Sfit.Api
 {
     public static class CtpMdNative
     {
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall,
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Create")]
         public static extern IntPtr Create(string path);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall,
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Init")]
         public static extern void Init(IntPtr instance);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall,
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Release")]
         public static extern void Release(IntPtr instance);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall,
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Join")]
         public static extern int Join(IntPtr instance);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall,
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_GetTradingDay")]
         public static extern string GetTradingDay(IntPtr instance);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall,
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_RegisterFront")]
         public static extern void RegisterFront(IntPtr instance, string frontAddress);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_RegisterNameServer")]
         public static extern void RegisterNameServer(IntPtr instance, string nsAddress);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_RegisterFensUserInfo")]
         public static extern void RegisterFensUserInfo(IntPtr instance, CtpFensUserInfo fensUserInfo);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_SubscribeMarketData")]
         public static extern int SubscribeMarketData(IntPtr instance,string[] instrumentID,int count);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_UnSubscribeMarketData")]
         public static extern int UnSubscribeMarketData(IntPtr instance,string[] instrumentID,int count);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_SubscribeForQuoteRsp")]
         public static extern int SubscribeForQuoteRsp(IntPtr instance,string[] instrumentID,int count);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_UnSubscribeForQuoteRsp")]
         public static extern int UnSubscribeForQuoteRsp(IntPtr instance,string[] instrumentID,int count);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_ReqUserLogin")]
         public static extern int ReqUserLogin(IntPtr instance,CtpReqUserLogin reqUserLoginField,int requestId);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_ReqUserLogout")]
@@ -78,7 +78,7 @@ namespace QuantBox.Sfit.Api
   
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void OnFrontConnected();
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Set_OnFrontConnected")]
@@ -86,7 +86,7 @@ namespace QuantBox.Sfit.Api
         
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void OnFrontDisconnected(int reason);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Set_OnFrontDisconnected")]
@@ -94,7 +94,7 @@ namespace QuantBox.Sfit.Api
         
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void OnHeartBeatWarning(int timeLapse);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Set_OnHeartBeatWarning")]
@@ -102,7 +102,7 @@ namespace QuantBox.Sfit.Api
         
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void OnRspUserLogin(CtpRspUserLogin rspUserLogin,CtpRspInfo rspInfo,int requestId,bool isLast);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Set_OnRspUserLogin")]
@@ -110,7 +110,7 @@ namespace QuantBox.Sfit.Api
         
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void OnRspUserLogout(CtpUserLogout userLogout,CtpRspInfo rspInfo,int requestId,bool isLast);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Set_OnRspUserLogout")]
@@ -118,7 +118,7 @@ namespace QuantBox.Sfit.Api
         
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void OnRspError(CtpRspInfo rspInfo,int requestId,bool isLast);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Set_OnRspError")]
@@ -126,7 +126,7 @@ namespace QuantBox.Sfit.Api
         
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void OnRspSubMarketData(CtpSpecificInstrument specificInstrument,CtpRspInfo rspInfo,int requestId,bool isLast);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Set_OnRspSubMarketData")]
@@ -134,7 +134,7 @@ namespace QuantBox.Sfit.Api
         
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void OnRspUnSubMarketData(CtpSpecificInstrument specificInstrument,CtpRspInfo rspInfo,int requestId,bool isLast);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Set_OnRspUnSubMarketData")]
@@ -142,7 +142,7 @@ namespace QuantBox.Sfit.Api
         
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void OnRspSubForQuoteRsp(CtpSpecificInstrument specificInstrument,CtpRspInfo rspInfo,int requestId,bool isLast);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Set_OnRspSubForQuoteRsp")]
@@ -150,7 +150,7 @@ namespace QuantBox.Sfit.Api
         
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void OnRspUnSubForQuoteRsp(CtpSpecificInstrument specificInstrument,CtpRspInfo rspInfo,int requestId,bool isLast);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Set_OnRspUnSubForQuoteRsp")]
@@ -158,7 +158,7 @@ namespace QuantBox.Sfit.Api
         
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void OnRtnDepthMarketData(CtpDepthMarketData depthMarketData);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Set_OnRtnDepthMarketData")]
@@ -166,7 +166,7 @@ namespace QuantBox.Sfit.Api
         
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void OnRtnForQuoteRsp(CtpForQuoteRsp forQuoteRsp);
-        [DllImport("sfit_ctp_x64.dll",
+        [DllImport("sfit_ctpse_x64",
             CallingConvention = CallingConvention.StdCall, 
             CharSet = CharSet.Ansi,
             EntryPoint = "Md_Set_OnRtnForQuoteRsp")]

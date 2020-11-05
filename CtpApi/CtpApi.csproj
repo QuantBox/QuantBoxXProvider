@@ -81,7 +81,6 @@
     <Compile Include="CtpSpi.cs" />
     <Compile Include="CtpStartInfo.cs" />
     <Compile Include="CtpDataType.cs" />
-    <Compile Include="CtpApiProxy.cs" />
     <Compile Include="CtpTraderApi.cs" />
     <Compile Include="CtpTraderNative.cs" />
     <Compile Include="ICtpRequestHandler.cs" />

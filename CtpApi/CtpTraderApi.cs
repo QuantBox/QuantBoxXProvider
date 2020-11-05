@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace QuantBox.Sfit.Api
+namespace QuantBox.Sfit.Api 
 {
     public class CtpTraderApi : CtpTraderSpi, ICtpRequestHandler
     {
@@ -18,12 +18,12 @@ namespace QuantBox.Sfit.Api
                 _handerList[i] = NullRequestHandler;
             }
             _handerList[CtpRequestType.ReqAuthenticate] = DoReqAuthenticate;
+            _handerList[CtpRequestType.RegisterUserSystemInfo] = DoRegisterUserSystemInfo;
+            _handerList[CtpRequestType.SubmitUserSystemInfo] = DoSubmitUserSystemInfo;
             _handerList[CtpRequestType.ReqUserLogin] = DoReqUserLogin;
             _handerList[CtpRequestType.ReqUserLogout] = DoReqUserLogout;
             _handerList[CtpRequestType.ReqUserPasswordUpdate] = DoReqUserPasswordUpdate;
             _handerList[CtpRequestType.ReqTradingAccountPasswordUpdate] = DoReqTradingAccountPasswordUpdate;
-            _handerList[CtpRequestType.ReqUserLogin2] = DoReqUserLogin2;
-            _handerList[CtpRequestType.ReqUserPasswordUpdate2] = DoReqUserPasswordUpdate2;
             _handerList[CtpRequestType.ReqUserAuthMethod] = DoReqUserAuthMethod;
             _handerList[CtpRequestType.ReqGenUserCaptcha] = DoReqGenUserCaptcha;
             _handerList[CtpRequestType.ReqGenUserText] = DoReqGenUserText;
@@ -1879,6 +1879,18 @@ ProcessResponse(ref rsp);
 return CtpTraderNative.ReqAuthenticate(_instance, data, req.RequestID);
         }
         
+        private int DoRegisterUserSystemInfo(ref CtpRequest req)
+        {
+            var data = req.Args.AsUserSystemInfo;
+return CtpTraderNative.RegisterUserSystemInfo(_instance, data);
+        }
+        
+        private int DoSubmitUserSystemInfo(ref CtpRequest req)
+        {
+            var data = req.Args.AsUserSystemInfo;
+return CtpTraderNative.SubmitUserSystemInfo(_instance, data);
+        }
+        
         private int DoReqUserLogin(ref CtpRequest req)
         {
             var data = req.Args.AsReqUserLogin;
@@ -1901,18 +1913,6 @@ return CtpTraderNative.ReqUserPasswordUpdate(_instance, data, req.RequestID);
         {
             var data = req.Args.AsTradingAccountPasswordUpdate;
 return CtpTraderNative.ReqTradingAccountPasswordUpdate(_instance, data, req.RequestID);
-        }
-        
-        private int DoReqUserLogin2(ref CtpRequest req)
-        {
-            var data = req.Args.AsReqUserLogin;
-return CtpTraderNative.ReqUserLogin2(_instance, data, req.RequestID);
-        }
-        
-        private int DoReqUserPasswordUpdate2(ref CtpRequest req)
-        {
-            var data = req.Args.AsUserPasswordUpdate;
-return CtpTraderNative.ReqUserPasswordUpdate2(_instance, data, req.RequestID);
         }
         
         private int DoReqUserAuthMethod(ref CtpRequest req)
@@ -2480,6 +2480,20 @@ public int ReqAuthenticate(CtpReqAuthenticate reqAuthenticateField,int requestId
             return CtpTraderNative.ReqAuthenticate(_instance, reqAuthenticateField, requestId);
         }
 
+        ///注册用户终端信息，用于中继服务器多连接模式
+///需要在终端认证成功后，用户登录前调用该接口
+public int RegisterUserSystemInfo(CtpUserSystemInfo userSystemInfo)
+        {
+            return CtpTraderNative.RegisterUserSystemInfo(_instance, userSystemInfo);
+        }
+
+        ///上报用户终端信息，用于中继服务器操作员登录模式
+///操作员登录后，可以多次调用该接口上报客户信息
+public int SubmitUserSystemInfo(CtpUserSystemInfo userSystemInfo)
+        {
+            return CtpTraderNative.SubmitUserSystemInfo(_instance, userSystemInfo);
+        }
+
         ///用户登录请求
 public int ReqUserLogin(CtpReqUserLogin reqUserLoginField,int requestId)
         {
@@ -2502,18 +2516,6 @@ public int ReqUserPasswordUpdate(CtpUserPasswordUpdate userPasswordUpdate,int re
 public int ReqTradingAccountPasswordUpdate(CtpTradingAccountPasswordUpdate tradingAccountPasswordUpdate,int requestId)
         {
             return CtpTraderNative.ReqTradingAccountPasswordUpdate(_instance, tradingAccountPasswordUpdate, requestId);
-        }
-
-        ///登录请求2
-public int ReqUserLogin2(CtpReqUserLogin reqUserLogin,int requestId)
-        {
-            return CtpTraderNative.ReqUserLogin2(_instance, reqUserLogin, requestId);
-        }
-
-        ///用户口令更新请求2
-public int ReqUserPasswordUpdate2(CtpUserPasswordUpdate userPasswordUpdate,int requestId)
-        {
-            return CtpTraderNative.ReqUserPasswordUpdate2(_instance, userPasswordUpdate, requestId);
         }
 
         ///查询用户当前支持的认证模式
