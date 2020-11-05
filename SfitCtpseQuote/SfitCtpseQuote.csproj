@@ -50,6 +50,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\QuantBox\DataflowHelper.cs">
+      <Link>DataflowHelper.cs</Link>
+    </Compile>
     <Compile Include="..\SfitCtpseTrader\CtpConvert.cs">
       <Link>CtpConvert.cs</Link>
     </Compile>
